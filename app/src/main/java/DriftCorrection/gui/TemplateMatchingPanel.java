@@ -174,7 +174,8 @@ public class TemplateMatchingPanel extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent evt) {
 			JFileChooser fileChooser = new JFileChooser();
-			fileChooser.setSelectedFile(new File("Z:\\hongwei\\converter_test_movies\\drift_correction\\"));
+//			fileChooser.setSelectedFile(new File("Z:\\hongwei\\converter_test_movies\\drift_correction\\"));
+			fileChooser.setSelectedFile(new File("/gpfs0/scratch/utkur/"));
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			fileChooser.setMultiSelectionEnabled(false);
 			fileChooser.setDragEnabled(false);

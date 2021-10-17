@@ -82,7 +82,8 @@ public class IOPanel extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent evt) {
 //			fileChooser.setSelectedFile(new File("Z:\\hongwei\\converter_test_movies\\drift_correction\\"));
-			fileChooser.setSelectedFile(new File("G:\\DriftCorrection\\app\\src\\test\\resources\\"));
+//			fileChooser.setSelectedFile(new File("G:\\DriftCorrection\\app\\src\\test\\resources\\"));
+			fileChooser.setSelectedFile(new File("/gpfs0/scratch/utkur/"));
 			fileChooser.setMultiSelectionEnabled(false);
 			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			fileChooser.setDragEnabled(false);

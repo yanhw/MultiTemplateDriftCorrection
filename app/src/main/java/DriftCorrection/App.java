@@ -14,7 +14,7 @@ import java.util.logging.*;
 
 import DriftCorrection.gui.MainFrame;
 import DriftCorrection.process.Controller;
-import static DriftCorrection.utils.Constants.CBIS_ROOT_DIR;
+import static DriftCorrection.utils.Constants.CBIS_HOME_DIR;
 import static DriftCorrection.utils.Constants.VERSION;
 import static DriftCorrection.utils.Constants.VERSION_CHECK_FILE;
 
@@ -45,11 +45,10 @@ public class App {
 			e.printStackTrace();  
 		}  
 		
-		if (currDir.substring(0, 14).equals(CBIS_ROOT_DIR)) {
+		if (currDir.substring(0, 10).equals(CBIS_HOME_DIR.substring(0, 10))) {
 			String latestVersion = readLatestVersion();
 			if (isOutdated(VERSION, latestVersion)) {
-				logger.severe("current version is too old, please get newer version from scratch/utkur/hongwei/DriftCorrection/ for "
-						+ "important updates.");
+				logger.severe("current version is too old, please get newer version from home/hongwei/codes/DriftCorrection/");
 				System.exit(0);
 			}
 		}
@@ -79,8 +78,8 @@ public class App {
 	}
 	
     private boolean isOutdated(String current, String latest) {
-    	StringTokenizer currentTokenizer = new StringTokenizer(current);
-    	StringTokenizer latestTokenizer = new StringTokenizer(latest);
+    	StringTokenizer currentTokenizer = new StringTokenizer(current, ".");
+    	StringTokenizer latestTokenizer = new StringTokenizer(latest, ".");
     	String curr = currentTokenizer.nextToken();
     	String late = latestTokenizer.nextToken();
     	if (Integer.parseInt(curr) < Integer.parseInt(late)) {
