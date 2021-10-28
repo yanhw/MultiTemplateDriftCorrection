@@ -4,6 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -81,9 +84,14 @@ public class IOPanel extends JPanel {
 	private class InputBtnListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent evt) {
-//			fileChooser.setSelectedFile(new File("Z:\\hongwei\\converter_test_movies\\drift_correction\\"));
-//			fileChooser.setSelectedFile(new File("G:\\DriftCorrection\\app\\src\\test\\resources\\"));
-			fileChooser.setSelectedFile(new File("/gpfs0/scratch/utkur/"));
+			// TODO: temp solution, need to change before formal version
+			Path path = Paths.get("G:\\DriftCorrection\\app\\src\\test\\resources\\");
+			if (Files.exists(path)) {
+				fileChooser.setSelectedFile(new File("G:\\DriftCorrection\\app\\src\\test\\resources\\"));
+			}
+			else {
+				fileChooser.setSelectedFile(new File("/gpfs0/scratch/utkur/"));
+			}
 			fileChooser.setMultiSelectionEnabled(false);
 			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			fileChooser.setDragEnabled(false);

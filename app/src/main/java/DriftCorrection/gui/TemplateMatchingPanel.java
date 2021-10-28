@@ -4,6 +4,9 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -174,8 +177,14 @@ public class TemplateMatchingPanel extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent evt) {
 			JFileChooser fileChooser = new JFileChooser();
-//			fileChooser.setSelectedFile(new File("Z:\\hongwei\\converter_test_movies\\drift_correction\\"));
-			fileChooser.setSelectedFile(new File("/gpfs0/scratch/utkur/"));
+			// TODO: temp solution, need to change before formal version
+			Path path = Paths.get("G:\\DriftCorrection\\app\\src\\test\\resources\\");
+			if (Files.exists(path)) {
+				fileChooser.setSelectedFile(new File("G:\\DriftCorrection\\app\\src\\test\\resources\\"));
+			}
+			else {
+				fileChooser.setSelectedFile(new File("/gpfs0/scratch/utkur/"));
+			}
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			fileChooser.setMultiSelectionEnabled(false);
 			fileChooser.setDragEnabled(false);
