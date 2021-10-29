@@ -28,7 +28,7 @@ public class TemplateMatchingManager {
 	private static final int RIGHT = 3;
 	
 	private FileHandler fh;
-	private Boolean interruptionFlag;
+	private Flag interruptionFlag;
 	
 	private List<Path> fileList;
 	private List<MovieSegment> movieSegments;
@@ -54,8 +54,8 @@ public class TemplateMatchingManager {
 		gaussianFilter.setFileHandler(fh);
 	}
 
-	public void setInterruptionFlag(Boolean flag) {
-		interruptionFlag = flag;
+	public void setInterruptionFlag(Flag interrupt) {
+		interruptionFlag = interrupt;
 	}
 	
 	public void setTableModel(DefaultTableModel model) {
@@ -328,6 +328,12 @@ public class TemplateMatchingManager {
 					logger.info("process interrupted");
 					e.printStackTrace();
 				}
+			}
+			if (interruptionFlag.get()) {
+				progress = 100;
+				pool.shutdown();
+				logger.info("process interrupted");
+				return;
 			}
 			float xDiff = 0, yDiff = 0;
 			for (int j = 0; j < numActiveThread; j++) {

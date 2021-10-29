@@ -49,9 +49,9 @@ public class Movie {
 		driftCorrection.setFileHandler(fh);
 	}
 	
-	public void setInterruptionFlag(Boolean flag) {
-		templateMatching.setInterruptionFlag(flag);
-		driftCorrection.setInterruptionFlag(flag);
+	public void setInterruptionFlag(Flag interrupt) {
+		templateMatching.setInterruptionFlag(interrupt);
+		driftCorrection.setInterruptionFlag(interrupt);
 	}
 	
 	public void setTemplateTableModel(DefaultTableModel model) {

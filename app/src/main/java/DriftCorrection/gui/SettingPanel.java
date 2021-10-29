@@ -131,7 +131,15 @@ public class SettingPanel  extends JPanel {
 	protected void setDriftTableVisible(int frameNumber) {
 		driftEditingPanel.setDriftTableVisible(frameNumber);
 	}
-
+	
+	protected void toggleTemplateMatchingBtn(boolean flag) {
+		templateMatchingPanel.setRunBtnText(flag);
+	}
+	
+	public void toggleDriftCorrectionBtn(boolean flag) {
+		driftCorrectionPanel.toggleDriftCorrectionBtn(flag);
+	}
+	
 	private class BtnListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent evt) {

@@ -10,13 +10,15 @@ import DriftCorrection.step.*;
 public class TemplateMatchingProcess extends Process {
 	private static final Logger logger = Logger.getLogger(TemplateMatchingProcess.class.getName());
 	private boolean blur;
-	private boolean interruptionFlag;
+	private Flag interruptionFlag;
 	private FileHandler fh;
 //	private step.TemplateMatching templateMatchingStep;
 	private DriftCorrection.step.TemplateMatching templateMatchingStep;
 	
-	public TemplateMatchingProcess(boolean blur, Boolean flag) {
-		super(flag);
+	public TemplateMatchingProcess(boolean blur, Flag interruptionFlag2) {
+		super(interruptionFlag2);
+		this.interruptionFlag = interruptionFlag2;
+//		System.out.println(interruptionFlag.get());
 		this.blur = blur;
 		mySteps = new LinkedList<ProcessStep>();
 		outputStepIndex = new LinkedList<Integer>();

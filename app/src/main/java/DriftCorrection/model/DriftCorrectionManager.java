@@ -23,7 +23,7 @@ public class DriftCorrectionManager {
 	private static final String padString = "000000";		// saved image file names are padded to 6 digits
 	
 	private FileHandler fh;
-	private Boolean interruptionFlag;
+	private Flag interruptionFlag;
 	
 	private List<Path> fileList;
 	private List<String> saveFileList;
@@ -48,8 +48,8 @@ public class DriftCorrectionManager {
 		this.fh = fh;
 	}
 	
-	public void setInterruptionFlag(Boolean flag) {
-		interruptionFlag = flag;
+	public void setInterruptionFlag(Flag interrupt) {
+		interruptionFlag = interrupt;
 	}
 	
 	protected void init(List<Path> fileList) {
@@ -120,7 +120,7 @@ public class DriftCorrectionManager {
 		int numThread = computeThreadSize();
 		
 		// create process pool
-		Process process = new DriftCorrectionProcess();
+		Process process = new DriftCorrectionProcess(interruptionFlag);
 		process.setFileHandler(fh);
 		List<Process> processPool = new ArrayList<Process>(numThread);
 		for (int i = 0; i < numThread; i++) {
@@ -188,14 +188,16 @@ public class DriftCorrectionManager {
 		
 		// clean up and update attributes
 		pool.shutdown();
-		prevLeft = left;
-		prevRight = right;
-		prevTop = top;
-		prevBottom = bottom;
-		prevXDrift = xDrift;
-		prevYDrift = yDrift;
 		progress = 100;
-		logger.info("drift correction master thread finished");
+		if (!interruptionFlag.get()) {
+			prevLeft = left;
+			prevRight = right;
+			prevTop = top;
+			prevBottom = bottom;
+			prevXDrift = xDrift;
+			prevYDrift = yDrift;
+			logger.info("drift correction master thread finished");
+		}
 		return;
 	}
 	

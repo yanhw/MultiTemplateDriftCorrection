@@ -34,6 +34,14 @@ public class DriftCorrectionPanel extends JPanel {
 		logger.addHandler(fh);
 	}
 	
+	protected void toggleDriftCorrectionBtn(boolean flag) {
+		if (flag) {
+			runBtn.setText("RUN DRIFT CORRECTION");
+		} else {
+			runBtn.setText("CANCEL DRIFT CORRECTION");
+		}
+	}
+	
 	private class RunBtnListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent evt) {

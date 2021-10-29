@@ -15,14 +15,14 @@ public abstract class Process {
 //	private LinkedList<ProcessStep> outputSteps;
 	protected LinkedList<Integer> outputStepIndex;
 	private static final Logger logger = Logger.getLogger(Process.class.getName());
-	private Boolean interruptionFlag;
+	private Flag interruptionFlag;
 	
-	public Process() {
-		interruptionFlag = false;
-	}
+//	public Process() {
+//		interruptionFlag = false;
+//	}
 	
-	public Process(Boolean interruptionFlag) {
-		this.interruptionFlag = interruptionFlag;
+	public Process(Flag interruptionFlag2) {
+		this.interruptionFlag = interruptionFlag2;
 	}
 	
 	public void setFileHandler(FileHandler fh) {
@@ -43,7 +43,8 @@ public abstract class Process {
 		logger.fine("worker thread started");
 		ImageData myData = new ImageData(inputFileName);
 		for (ProcessStep myProcess: mySteps) {
-			if (interruptionFlag==true) {
+//			System.out.println(interruptionFlag.get());
+			if (interruptionFlag.get()) {
 				logger.info("process is interrupted");
 				break;
 			}
@@ -52,7 +53,9 @@ public abstract class Process {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {}
 		}
-		logger.fine("worker thread finished");
+		if (!interruptionFlag.get()) {
+			logger.fine("worker thread finished");
+		}
 	}
 	
 	public abstract Process copy();

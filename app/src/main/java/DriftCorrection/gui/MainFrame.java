@@ -75,6 +75,11 @@ public class MainFrame  extends JFrame{
 		settingPanel.setOutputFile(folderName);
 	}
 	
+	//////////// template matching
+	public void toggleTemplateMatchingBtn(boolean flag) {
+		settingPanel.toggleTemplateMatchingBtn(flag);
+	}
+	
 	/////////// drift editing
 	public void updateDriftSectionTable() {
 		settingPanel.updateDriftSectionTable();
@@ -84,7 +89,11 @@ public class MainFrame  extends JFrame{
 	public void setDriftTableVisible(int frameNumber) {
 		settingPanel.setDriftTableVisible(frameNumber);
 	}
-
+	
+	////////// drift correction
+	public void toggleDriftCorrectionBtn(boolean flag) {
+		settingPanel.toggleDriftCorrectionBtn(flag);
+	}
 	
 	/////////// raw Image
 	public void setRawImages(List<Path> fileList) {

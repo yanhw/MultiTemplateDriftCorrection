@@ -13,6 +13,7 @@ import javax.swing.table.DefaultTableModel;
 import DriftCorrection.gui.DriftEditingPanel.DriftModel;
 import DriftCorrection.gui.DriftEditingPanel.DriftSectionModel;
 import DriftCorrection.gui.MainFrame;
+import DriftCorrection.model.Flag;
 import DriftCorrection.model.Movie;
 import DriftCorrection.model.ReadOnlyMovie;
 
@@ -44,7 +45,7 @@ public class Controller {
 	private boolean isBusy = false;					// sync lock
 	private SwingWorker<Void, Integer> stoppableWorker;
 	
-	private Boolean interrupt = false;
+	private Flag interrupt = new Flag();
 	
 	private Movie myMovie;
 
@@ -267,9 +268,10 @@ public class Controller {
 
 	public void runTemplateMatching(boolean blur) {
 		if (isBusy) {
+			cancelTemplateMatching();
 			return;
 		}
-		interrupt = false;
+		interrupt.set(false);
 		myView.updateStatus("validating input, please wait...");
 		if (!myMovie.templageMatchingPreRunValidation()) {
 			myView.updateStatus("template validation failed, check input!");
@@ -279,6 +281,7 @@ public class Controller {
 		// TODO this release mechanism is bad, need to change
 		// TODO handle interruption
 		block("starting template matching...");
+		myView.toggleTemplateMatchingBtn(false);
 		stoppableWorker = new SwingWorker<Void, Integer>() {
 			
 			@Override
@@ -299,6 +302,7 @@ public class Controller {
 //				System.out.println(progress);
 				while (progress != 100) {
 					try {
+//						System.out.println(interrupt);
 						Thread.sleep(500);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
@@ -320,16 +324,29 @@ public class Controller {
 			
 			@Override
 			public void done() {
-				logger.info("finished");
-				myView.setProgress(100);
-				afterTemplateMatching();
+				if (!interrupt.get()) {
+					logger.info("finished");
+					myView.setProgress(100);
+					myView.toggleTemplateMatchingBtn(true);
+					afterTemplateMatching();
+				}
+				else {
+					myView.setProgress(100);
+					myView.toggleTemplateMatchingBtn(true);
+					release();
+				}
 //				release();
 			}
 		};
 
 		stoppableWorker.execute();
 	}
-
+	
+	private void cancelTemplateMatching() {
+		interrupt.set(true);
+		logger.info("template matching cancelled");
+		myView.setProgress(100);
+	}
 
 	private void afterTemplateMatching() {
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
@@ -486,9 +503,10 @@ public class Controller {
 	
 	public void runDriftCorrection() {
 		if (isBusy) {
-//			cancelDriftCorrection();
+			cancelDriftCorrection();
 			return;
 		}
+		interrupt.set(false);
 		myView.updateStatus("validating input, please wait...");
 		if (!myMovie.driftCorrectionPreRunValidation()) {
 			myView.updateStatus("drift correction failed, check input!");
@@ -498,12 +516,13 @@ public class Controller {
 		// TODO this release mechanism is bad, need to change
 		// TODO handle interruption
 		block("starting drift correction...");
+		myView.toggleDriftCorrectionBtn(false);
 		SwingWorker<Void, Integer> stoppableWorker = new SwingWorker<Void, Integer>() {
 			@Override
 			public Void doInBackground() {
 				publish(0);
 				
-				// TODO: this thread is bad, need to find more straigh forward way to update progress
+				// TODO: this thread is bad, need to find more straight forward way to update progress
 				Thread temp = new Thread() {
 				    public void run() {
 				    	myMovie.runDriftCorrection();
@@ -535,10 +554,14 @@ public class Controller {
 			
 			@Override
 			public void done() {
-				logger.info("finished");
+				if (!interrupt.get()) {
+					logger.info("finished");
+					myView.setCorrectedImages(myMovie.getSaveFiles());
+				}
 				myView.setProgress(100);
-				myView.setCorrectedImages(myMovie.getSaveFiles());
+				myView.toggleDriftCorrectionBtn(true);
 				release();
+
 			}
 		};
 		stoppableWorker.execute();

@@ -11,9 +11,12 @@ public class DriftCorrectionProcess extends Process {
 	private static final Logger logger = Logger.getLogger(DriftCorrectionProcess.class.getName());
 	private DriftCorrection.step.DriftCorrectionStep driftCorrection;
 	private SaveImage saveImage;
+	private Flag interruptionFlag;
 	private FileHandler fh;
 	
-	public DriftCorrectionProcess() {
+	public DriftCorrectionProcess(Flag interruptionFlag2) {
+		super(interruptionFlag2);
+		this.interruptionFlag = interruptionFlag2;
 		mySteps = new LinkedList<ProcessStep>();
 		outputStepIndex = new LinkedList<Integer>();
 		mySteps.add(new DriftCorrection.step.ImageReader("png"));
@@ -35,7 +38,7 @@ public class DriftCorrectionProcess extends Process {
 
 	@Override
 	public Process copy() {
-		DriftCorrectionProcess newProcess = new DriftCorrectionProcess();
+		DriftCorrectionProcess newProcess = new DriftCorrectionProcess(interruptionFlag);
 		newProcess.setFileHandler(fh);
 		return newProcess;
 	}
