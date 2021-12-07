@@ -40,14 +40,14 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'DriftCorrection.App'
+    mainClass = 'dc.App'
 }
 
 // https://stackoverflow.com/questions/49278063/how-do-i-create-an-executable-fat-jar-with-gradle-with-implementation-dependenci
 jar {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
-        attributes 'Main-Class': 'DriftCorrection.App'
+        attributes 'Main-Class': 'dc.App'
     }
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
