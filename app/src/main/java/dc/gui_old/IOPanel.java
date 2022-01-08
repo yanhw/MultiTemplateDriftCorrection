@@ -64,7 +64,7 @@ public class IOPanel extends JPanel {
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		add(inputPanel);
 		add(outputPanel);
-		add(overwriteBox);
+//		add(overwriteBox);
 	}
 	
 	protected void setController(Controller controller) {

@@ -10,9 +10,9 @@ import java.util.logging.*;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 
-import dc.gui_old.MainFrame;
-import dc.gui_old.DriftEditingPanel.DriftModel;
-import dc.gui_old.DriftEditingPanel.DriftSectionModel;
+import dc.gui.MainFrame;
+import dc.model.DriftModel;
+import dc.model.DriftSectionModel;
 import dc.model.Flag;
 import dc.model.Movie;
 import dc.model.ReadOnlyMovie;
@@ -38,8 +38,9 @@ public class Controller {
 	public static final int INIT = 0;
 	public static final int TEMPLATE_MATCHING = 1;
 	public static final int DRIFT_EDIT = 2;
-	public static final int DRIFT_CORRECTION = 3;
+	public static final int DRIFT_CORRECTION = 3;	// not in use
 	public static final int DONE = 4;				// not in use
+	private int state = INIT;
 	
 	private MainFrame myView;
 	private boolean isBusy = false;					// sync lock
@@ -68,51 +69,19 @@ public class Controller {
 		myView = mainFrame;
 		ReadOnlyMovie movie = new ReadOnlyMovie(myMovie);
 		myView.setMovie(movie);
+		setDriftTableModel();
 	}
 	
 	public void setTemplateTableModel(DefaultTableModel model) {
 		myMovie.setTemplateTableModel(model);
 	}
 	
-	public void setDriftTableModel(DriftModel model, DriftSectionModel sectionModel) {
-		myMovie.setDriftTableModel(model, sectionModel);
-	}
-	
-
-	public void advanceState() {
-		if (isBusy) {
-			return;
-		}
-		myMovie.advanceState();
-		myView.updateView(myMovie.getState());		
-		updateStateStatus();
-	}
-	
-	public void previousState() {
-		if (isBusy) {
-			return;
-		}
-		myMovie.previousState();
-		myView.updateView(myMovie.getState());
-		updateStateStatus();
-	}
-	
-
-	private void updateStateStatus() {
-		int state = myMovie.getState();
-		switch(state) {
-			case TEMPLATE_MATCHING:
-				myView.updateStatus("please select regions to match");
-				break;
-			case DRIFT_EDIT:
-				myView.updateStatus("please edit the drift");
-				break;
-			case DRIFT_CORRECTION:
-				myView.updateStatus("set drift correction options");
-				break;
-			default:
-				logger.severe("unknown state: " +state);
-		}
+	private void setDriftTableModel() {
+		DriftModel driftModel = new DriftModel();
+		DriftSectionModel sectionModel = new DriftSectionModel();
+		myMovie.setDriftTableModel(driftModel, sectionModel);
+		myView.setDriftModel(driftModel);
+		myView.setDriftSectionModel(sectionModel);
 	}
 	
 	// should be called before initialising a thread
@@ -126,6 +95,16 @@ public class Controller {
 	private void release() {
 		isBusy = false;
 		logger.info("controller is released");
+	}
+	
+	// call this method when state might be changed
+	private void checkState() {
+		state = myMovie.checkState();
+		myView.updateState(state);
+	}
+
+	public int getState() {
+		return state;
 	}
 	
 	/////////////////////////////////////////////////////////////////////
@@ -162,10 +141,17 @@ public class Controller {
 					return;
 				}
 				// success
+				checkState();
 				myView.setImageFileName(folder);
 				myView.setRawImages(fileList);
 				myView.updateStatus("");
 				autoSetSaveDir(folder);
+				
+				if (myMovie.templageMatchingPreRunValidation()) {
+					myView.setTemplateMatchingBtn(true, false);
+				} else {
+					myView.setTemplateMatchingBtn(false, false);
+				}
 				release();
 			}
 		};
@@ -186,6 +172,7 @@ public class Controller {
 		myMovie.setSaveDir(folder);
 		
 		if (myMovie.getSaveFolder() == folder) {
+			checkState();
 			myView.setSaveFolder(folder);
 		} else {
 			myView.updateStatus("it appears you cannot modify the selected folder.");
@@ -205,6 +192,11 @@ public class Controller {
 		}
 		int frameNumber = myView.getRawFrameIndex();
 		myMovie.setSegmentFrame(frameNumber);
+		if (myMovie.templageMatchingPreRunValidation()) {
+			myView.setTemplateMatchingBtn(true, false);
+		} else {
+			myView.setTemplateMatchingBtn(false, false);
+		}
 	}
 	
 	public void removeSegmentFrame(int segmentIndex) {
@@ -212,6 +204,11 @@ public class Controller {
 			return;
 		}
 		myMovie.removeSegmentFrame(segmentIndex);
+		if (myMovie.templageMatchingPreRunValidation()) {
+			myView.setTemplateMatchingBtn(true, false);
+		} else {
+			myView.setTemplateMatchingBtn(false, false);
+		}
 	}
 	
 	public void setTemplate() {
@@ -253,6 +250,11 @@ public class Controller {
 				//TODO update start and end frame
 				myView.setTMImage(frameNumber);
 				myView.updateStatus("");
+				if (myMovie.templageMatchingPreRunValidation()) {
+					myView.setTemplateMatchingBtn(true, false);
+				} else {
+					myView.setTemplateMatchingBtn(false, false);
+				}
 				release();
 			}
 		};
@@ -264,6 +266,11 @@ public class Controller {
 			return;
 		}
 		myMovie.removeTemplate(targetIndex);
+		if (myMovie.templageMatchingPreRunValidation()) {
+			myView.setTemplateMatchingBtn(true, false);
+		} else {
+			myView.setTemplateMatchingBtn(false, false);
+		}
 	}
 
 	public void runTemplateMatching(boolean blur) {
@@ -281,7 +288,7 @@ public class Controller {
 		// TODO this release mechanism is bad, need to change
 		// TODO handle interruption
 		block("starting template matching...");
-		myView.toggleTemplateMatchingBtn(false);
+		myView.setTemplateMatchingBtn(true, true);
 		stoppableWorker = new SwingWorker<Void, Integer>() {
 			
 			@Override
@@ -327,12 +334,13 @@ public class Controller {
 				if (!interrupt.get()) {
 					logger.info("finished");
 					myView.setProgress(100);
-					myView.toggleTemplateMatchingBtn(true);
+					myView.setTemplateMatchingBtn(true, false);
 					afterTemplateMatching();
 				}
+				// this will be triggered when cancel button is pressed or when there is a problem
 				else {
 					myView.setProgress(100);
-					myView.toggleTemplateMatchingBtn(true);
+					myView.setTemplateMatchingBtn(true, false);
 					release();
 				}
 //				release();
@@ -359,6 +367,7 @@ public class Controller {
 			public void done() {
 				updatePlot();
 				myView.updateStatus("ready to view drift");
+				checkState();
 				release();
 			}
 		};
@@ -385,7 +394,7 @@ public class Controller {
 					release();
 					return;
 				}
-				
+				checkState();
 				updatePlot();
 				myView.updateStatus("ready to view drift");
 				logger.info("finished reading csv");
@@ -427,12 +436,6 @@ public class Controller {
 	}
 	
 	///////////////// fitting//////////////////////////////////
-	public void setFitting(boolean blur) {
-		if (isBusy) {
-			return;
-		}
-		myMovie.setFitting(blur);
-	}
 	
 	public void changeFitDegree(int row, int intValue) {
 		if (isBusy) {
@@ -501,7 +504,7 @@ public class Controller {
 	////////////////////// Drift correction ////////////////////////////
 	/////////////////////////////////////////////////////////////////////
 	
-	public void runDriftCorrection() {
+	public void runDriftCorrection(boolean blurFlag) {
 		if (isBusy) {
 			cancelDriftCorrection();
 			return;
@@ -525,7 +528,7 @@ public class Controller {
 				// TODO: this thread is bad, need to find more straight forward way to update progress
 				Thread temp = new Thread() {
 				    public void run() {
-				    	myMovie.runDriftCorrection();
+				    	myMovie.runDriftCorrection(blurFlag);
 				    }  
 				};
 
@@ -558,6 +561,7 @@ public class Controller {
 					logger.info("finished");
 					myView.setCorrectedImages(myMovie.getSaveFiles());
 				}
+				checkState();
 				myView.setProgress(100);
 				myView.toggleDriftCorrectionBtn(true);
 				release();

@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 import java.util.logging.*;
 
-import dc.gui_old.MainFrame;
+import dc.gui.MainFrame;
 import dc.process.Controller;
 
 public class App {
@@ -61,7 +61,10 @@ public class App {
 		
 		Controller controller = new Controller();
 		controller.setFileHandler(fh);
-		new MainFrame(controller, fh);
+		// for old GUI
+//		new MainFrame(controller, fh);
+		MainFrame mf = new MainFrame();
+		mf.initialise(controller, fh);
 	}
 	
 	private String readLatestVersion() {

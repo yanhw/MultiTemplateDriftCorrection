@@ -91,7 +91,7 @@ public class DriftEditingPanel extends JPanel {
 	
 	protected void setController(Controller controller) {
 		this.controller = controller;
-		controller.setDriftTableModel(driftModel, sectionModel);
+//		controller.setDriftTableModel(driftModel, sectionModel);
 		
 	}
 	
@@ -120,7 +120,7 @@ public class DriftEditingPanel extends JPanel {
 		@Override
 		public void itemStateChanged(ItemEvent e) {
 			boolean blur = DriftEditingPanel.this.fitBox.isSelected();
-			DriftEditingPanel.this.controller.setFitting(blur);
+//			DriftEditingPanel.this.controller.setFitting(blur);
 		}
 	}
 	

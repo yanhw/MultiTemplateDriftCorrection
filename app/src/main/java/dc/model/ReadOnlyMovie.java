@@ -10,9 +10,6 @@ public class ReadOnlyMovie {
 		this.myMovie = movie;
 	}
 	
-	public int getState() {
-		return myMovie.getState();
-	}
 
 	public int getSegementStart(int frameNumber) {
 		MovieSegment segment = getMovieSegment(frameNumber);

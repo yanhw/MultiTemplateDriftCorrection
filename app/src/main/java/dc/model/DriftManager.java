@@ -17,8 +17,7 @@ import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
-import dc.gui_old.DriftEditingPanel.DriftModel;
-import dc.gui_old.DriftEditingPanel.DriftSectionModel;
+
 import dc.utils.FileSystem;
 
 /* 
@@ -49,6 +48,7 @@ public class DriftManager {
 	
 	public void setFileHandler(FileHandler fh) {
 		logger.addHandler(fh);
+		
 	}
 	
 	// initialise variables here because the movie can change
@@ -72,8 +72,6 @@ public class DriftManager {
 		assert (driftModel != null);
 		assert (sectionModel != null);
 		this.driftModel = driftModel;
-		
-		
 		this.sectionModel = sectionModel;
 	}
 	

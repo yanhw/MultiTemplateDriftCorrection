@@ -16,7 +16,6 @@ import dc.gui_old.image.ImageViewer;
 import dc.model.ReadOnlyMovie;
 import dc.process.Controller;
 
-
 @SuppressWarnings("serial")
 public class MainFrame  extends JFrame{
 	private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
@@ -44,7 +43,7 @@ public class MainFrame  extends JFrame{
 		settingPanel.setController(controller);
 
 		
-		controller.setMainFrame(this);	
+//		controller.setMainFrame(this);	
 		createUI();
 	}
 	

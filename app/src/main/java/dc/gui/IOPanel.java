@@ -45,7 +45,7 @@ public class IOPanel extends JPanel {
 		inputFilename = new JLabel();
 		inputPanel.add(inputFilename);
 		inputBtn = new JButton("choose directory");
-		inputBtn.addActionListener(new InputBtnListener());
+		
 		JLabel inputLabel = new JLabel("image directory:", JLabel.LEFT);
 		inputPanel.add(inputLabel);
 		inputPanel.add(inputBtn);
@@ -62,7 +62,7 @@ public class IOPanel extends JPanel {
 		outputFilename = new JLabel();
 		outputPanel.add(outputFilename);
 		outputBtn = new JButton("choose directory");
-		outputBtn.addActionListener(new OutputBtnListener());
+		
 		setLayout(new GridLayout(0, 1, 0, 0));
 		outputPanel.add(outputBtn);
 		add(outputPanel);
@@ -72,6 +72,12 @@ public class IOPanel extends JPanel {
 	
 	protected void setController(Controller controller) {
 		this.controller = controller;
+		setHandlers();
+	}
+	
+	private void setHandlers() {
+		inputBtn.addActionListener(new InputBtnListener());
+		outputBtn.addActionListener(new OutputBtnListener());
 	}
 	
 	public void setFileHandler(FileHandler fh) {

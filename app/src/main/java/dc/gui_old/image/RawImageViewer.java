@@ -21,7 +21,7 @@ import javax.swing.event.ChangeListener;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
-import dc.gui_old.Synchroniser;
+import dc.gui.Synchroniser;
 import dc.utils.FileSystem;
 
 @SuppressWarnings({ "serial", "unused" })

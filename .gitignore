@@ -11,3 +11,6 @@ app/src/test/resources/test_movie
 
 # Ignore log files
 *.log
+*.DriftCorrection.log.*
+
+app/.settings

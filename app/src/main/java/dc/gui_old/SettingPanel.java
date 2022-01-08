@@ -152,9 +152,9 @@ public class SettingPanel  extends JPanel {
 		public void actionPerformed(ActionEvent evt) {
 			String label = ((JButton) evt.getSource()).getText();
 			if (label == "BACK") {
-				SettingPanel.this.controller.previousState();
+//				SettingPanel.this.controller.previousState();
 			} else {
-				SettingPanel.this.controller.advanceState();
+//				SettingPanel.this.controller.advanceState();
 			}
 			
 		}	// end of method

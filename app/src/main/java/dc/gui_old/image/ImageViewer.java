@@ -28,7 +28,7 @@ public class ImageViewer extends JPanel {
 	public ImageViewer(Synchroniser sync) {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
-        rawImage = new RawImageViewer(sync);
+//        rawImage = new RawImageViewer(sync);
         
         templateImage = new TemplateImageViewer();
         
@@ -62,6 +62,7 @@ public class ImageViewer extends JPanel {
 		yDriftPlot.setFileHandler(fh);
 		correctedImage.setFileHandler(fh);
 	}
+	
 
 	public void setRawImageList(List<Path> fileList) {
 		rawImage.setImageList(fileList);

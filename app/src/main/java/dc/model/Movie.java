@@ -10,8 +10,6 @@ import java.util.logging.Logger;
 
 import javax.swing.table.DefaultTableModel;
 
-import dc.gui_old.DriftEditingPanel.DriftModel;
-import dc.gui_old.DriftEditingPanel.DriftSectionModel;
 import dc.utils.FileSystem;
 
 public class Movie {
@@ -20,11 +18,8 @@ public class Movie {
 	public static final int INIT = 0;
 	public static final int TEMPLATE_MATCHING = 1;
 	public static final int DRIFT_EDIT = 2;
-	public static final int DRIFT_CORRECTION = 3;
-	public static final int DONE = 4;				// not in use
-	private int state = INIT;
+	public static final int DRIFT_CORRECTION = 3;	// not in use
 	
-	private boolean useFittedDrift = true;
 	private String saveDir = null;
 	private List<Path> fileList;
 	
@@ -63,55 +58,21 @@ public class Movie {
 		driftManager.setTableModel(model, sectionModel);
 	}
 	
-	public void advanceState() {
-		switch (state) {
-			case INIT:
-				if (isIOReady()) {
-					this.state++;
-				}
-				break;
-			case TEMPLATE_MATCHING:
-				if (isDriftReady()) {
-					this.state++;
-				}
-				break;
-			case DRIFT_EDIT:
-				if (isDriftReady()) {
-					this.state++;
-				}
-				break;
-			case DRIFT_CORRECTION:
-				
-				break;
-			default:
-				logger.severe("unkown state: " + state);
-		}
-		
-	}
-	
-	public void previousState() {
-		switch (state) {
-			case INIT:
-				logger.info("no previous state");
-				return;
-			case TEMPLATE_MATCHING:
-				this.state--;
-				break;
-			case DRIFT_EDIT:
-				this.state--;
-				break;
-			case DRIFT_CORRECTION:
-				this.state--;
-				break;
-			default:
-				logger.severe("unkown state: " + state);
+	// call this method when state might be changed
+	public int checkState() {
+		if (!isIOReady()) {
+			logger.info("state set to: INIT");
+			return INIT;
+		} else if (!isDriftReady()) {
+			logger.info("state set to: TEMPLATE_MATCHING");
+			return TEMPLATE_MATCHING;
+		} else {
+			logger.info("state set to: DRIFT_EDIT");
+			return DRIFT_EDIT;
 		}
 	}
 	
-	public int getState() {
-		return state;
-	}
-	
+
 	
 	/////////////////////////////////////////////////////////////////////
 	///////////////////////////// IO state //////////////////////////////
@@ -254,11 +215,6 @@ public class Movie {
 		return driftManager.getFittedYDrift();
 	}
 	
-	public void setFitting(boolean fit) {
-		useFittedDrift = fit;
-		logger.info("fitting set to: " + fit);
-	}
-	
 	public void setFitDegree(int sectionIndex, int degree) {
 		driftManager.setFitDegree(sectionIndex, degree);
 	}
@@ -290,7 +246,7 @@ public class Movie {
 		return false;
 	}
 
-	public void runDriftCorrection() {
+	public void runDriftCorrection(boolean blurFlag) {
 		// TODO: customise ROI
 		String filename = fileList.get(0).toString();
 		double[][] image = imageReader.read(filename);
@@ -299,7 +255,7 @@ public class Movie {
 		ROI[1] = image.length;
 		ROI[2] = 0;
 		ROI[3] = image[0].length;
-		if (useFittedDrift) {
+		if (blurFlag) {
 			driftCorrection.run(saveDir, getXFittedDrift(), getYFittedDrift(), ROI);
 		} else {
 			driftCorrection.run(saveDir, getXDrift(), getYDrift(), ROI);

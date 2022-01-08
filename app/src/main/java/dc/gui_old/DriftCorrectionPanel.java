@@ -49,7 +49,7 @@ public class DriftCorrectionPanel extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent evt) {
 			logger.fine("triggered run btn");
-			DriftCorrectionPanel.this.controller.runDriftCorrection();
+			DriftCorrectionPanel.this.controller.runDriftCorrection(true);
 		}
 	}
 
