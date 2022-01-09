@@ -18,6 +18,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.border.EtchedBorder;
 
+@SuppressWarnings("serial")
 public class DriftCorrectedImageViewer extends JPanel implements ChangeListener  {
 	private static final Logger logger = Logger.getLogger(DriftCorrectedImageViewer.class.getName());
 	private Synchroniser sync;

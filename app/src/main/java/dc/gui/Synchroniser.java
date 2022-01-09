@@ -35,9 +35,10 @@ public class Synchroniser {
 	protected void setState(int state) {
 		this.state = state;
 		myView.updateStateBtns();
+		myView.updateTagState();
 	}
 	
-	protected int getState() {
+	public int getState() {
 		return state;
 	}
 	

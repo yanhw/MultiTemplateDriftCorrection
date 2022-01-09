@@ -21,6 +21,8 @@ public class ImageViewer extends JPanel {
 	private DriftViewer xDriftPlot;
 	private DriftViewer yDriftPlot;
 
+	private Synchroniser sync;
+
 	/**
 	 * Create the panel.
 	 */
@@ -56,8 +58,32 @@ public class ImageViewer extends JPanel {
 	}
 	
 	public void setSynchroniser(Synchroniser sync) {
+		this.sync = sync;
 		correctedImage.setSynchroniser(sync);
 	}
+	
+	
+	public void updateTagState() {
+		int state = sync.getState();
+		if (state < 0) {
+			logger.severe("unknown state: " + state);
+		}
+		logger.info("setting tab enabled upto: " + state); 
+		switch (state) {
+			case 0:
+				tabbedPane.setEnabledAt(1, false);
+				tabbedPane.setEnabledAt(2, false);
+				break;
+			case 1:
+				tabbedPane.setEnabledAt(1, true);
+				tabbedPane.setEnabledAt(2, false);
+				break;
+			default:
+				tabbedPane.setEnabledAt(1, true);
+				tabbedPane.setEnabledAt(2, true);
+		}
+	}
+	
 	
 	public void setTMImage(int frameNumber, int first, int last, Path path, int[] ROI) {
 		templateImage.setImage(frameNumber, first, last, path, ROI);

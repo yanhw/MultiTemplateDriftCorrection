@@ -286,7 +286,6 @@ public class Controller {
 		}
 		// release only in afterTemplateMatching
 		// TODO this release mechanism is bad, need to change
-		// TODO handle interruption
 		block("starting template matching...");
 		myView.setTemplateMatchingBtn(true, true);
 		stoppableWorker = new SwingWorker<Void, Integer>() {
@@ -295,7 +294,7 @@ public class Controller {
 			public Void doInBackground() {
 				publish(0);
 				
-				// TODO: this thread is bad, need to find more straigh forward way to update progress
+				// TODO: this thread is bad, need to find more straight forward way to update progress
 				Thread temp = new Thread() {
 				    public void run() {
 				    	myMovie.runTemplateMatching(blur);

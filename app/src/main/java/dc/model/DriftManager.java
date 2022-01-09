@@ -42,6 +42,8 @@ public class DriftManager {
 	private DriftModel driftModel;
 	private DriftSectionModel sectionModel;
 	
+	private boolean isDriftReady;
+	
 	public DriftManager() {
 		
 	}
@@ -63,7 +65,8 @@ public class DriftManager {
 		this.yWeight = new double[numFrame];
 		this.xFitted = new float[numFrame];
 		this.yFitted = new float[numFrame];
-
+		this.isDriftReady = false;
+		
 		setDrifts(xDrift, yDrift);
 		sectionModel.setData(cuttingPoints, degrees, numFrame);
 	}
@@ -135,7 +138,7 @@ public class DriftManager {
 		return true;
 	}
 	
-	// default entry point to initialise drifts
+	// default entry point to initialise drifts, if succeed, change isDriftReady to true, and it always stays true unless reset movie
 	// TODO: set x and y flags together with drifts, flags determined during template matching
 	protected void setDrifts(float[] x, float[] y) {
 		assert (x != null);
@@ -149,6 +152,7 @@ public class DriftManager {
 			xWeight[i] = 1;
 			yWeight[i] = 1;
 		}
+		isDriftReady = true;
 	}
 
 	protected void setDrifts(int frameNumber, float x, float y) {
@@ -390,6 +394,10 @@ public class DriftManager {
 		} catch (FileNotFoundException  e) {
 			logger.severe("failed to write to " + filename);
 		}
+	}
+
+	public boolean isDriftReady() {
+		return isDriftReady;
 	}
 
 

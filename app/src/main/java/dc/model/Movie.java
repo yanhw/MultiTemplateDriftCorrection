@@ -183,7 +183,7 @@ public class Movie {
 	}
 	
 	private boolean isDriftReady() {
-		if (templateMatching.getProgress() == 100) {
+		if (driftManager.isDriftReady()) {
 			return true;
 		}
 		return false;
