@@ -1,5 +1,7 @@
 # drift correction tool
 
+This software is developed 
+
 ### supported formats
 * png
 
@@ -9,6 +11,9 @@
 
 ### instruction
 compile source code
+
+### how to use
+* Detailed instruction can be found in "Help" menu and the wiki page
 
 ### dependency
 none

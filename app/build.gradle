@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    // Use JUnit test framework.
+    // Use JUnit test framework., for testing only
     testImplementation 'junit:junit:4.13.2'
 
     // This dependency is used by the application.
