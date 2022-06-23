@@ -81,15 +81,20 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
             public void mousePressed(MouseEvent e) {
                 Point panelPoint = e.getPoint();
                 Point piexelLocation = imagePanel.getPixelLocation(panelPoint);
-                imagePanel.setPoint(piexelLocation);
-//                System.out.println("You clicked at " + panelPoint + " which is relative to the image " + imgContext);
+                if (piexelLocation != null) {
+                	imagePanel.setPoint(piexelLocation);
+//                	System.out.println("You clicked at " + panelPoint + " which is relative to the image " + imgContext);
+                }
+                
             }
             @Override
             public void mouseReleased(MouseEvent e) {
                 Point panelPoint = e.getPoint();
                 Point piexelLocation = imagePanel.getPixelLocation(panelPoint);
-                imagePanel.setSecPoint(piexelLocation);
+                if (piexelLocation != null) {
+                	imagePanel.setSecPoint(piexelLocation);
 //                System.out.println("You clicked at " + panelPoint + " which is relative to the image " + imgContext);
+                }
             }
         });
         
@@ -98,8 +103,9 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
         	public void mouseDragged(MouseEvent e) {
         		Point panelPoint = e.getPoint();
         		Point piexelLocation = imagePanel.getPixelLocation(panelPoint);
-          
-        		imagePanel.setSecPoint(piexelLocation);
+        		if (piexelLocation != null) {
+        			imagePanel.setSecPoint(piexelLocation);
+        		}
         	}
         });
         

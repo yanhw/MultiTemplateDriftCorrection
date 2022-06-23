@@ -63,11 +63,13 @@ public class MainFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public MainFrame() {
-		setPreferredSize(new Dimension(1200, 1000));
-		setSize(new Dimension(1200, 1000));
+		int preferedWidth = 1200;
+		int preferedHeight = 1000;
+		setPreferredSize(new Dimension(preferedWidth, preferedHeight));
+		setSize(new Dimension(preferedWidth, preferedHeight));
 		setTitle("Drift Correction");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, preferedWidth, preferedHeight);
 		
 		setJMenuBar(menuBar);
 		
@@ -91,7 +93,9 @@ public class MainFrame extends JFrame {
 		splitPane.setLeftComponent(rawImageViewer);
 		
 		splitPane.setRightComponent(imageViewer);
+		splitPane.setOneTouchExpandable(true);
 		splitPane.setDividerLocation(0.5);
+		splitPane.setResizeWeight(0.5);
 		
 		contentPane.add(settingPanel, BorderLayout.NORTH);
 	}

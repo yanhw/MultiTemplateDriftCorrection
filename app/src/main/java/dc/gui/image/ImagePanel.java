@@ -66,6 +66,7 @@ class ImagePanel extends JPanel {
 		imgHeight = (int) (imgHeight*zoomLevel);
 		imgWidth = (int) (imgWidth*zoomLevel);
 		image = rawImage.getScaledInstance(imgWidth, imgHeight, Image.SCALE_FAST);
+//		System.out.println(left + " " + top + " " + width + " " + height + " " + zoomLevel);
 		top = (int) (rawTop*zoomLevel);
 		left = (int) (rawLeft*zoomLevel);
 		height = (int) (rawHeight*zoomLevel);
@@ -78,14 +79,18 @@ class ImagePanel extends JPanel {
 			int x = (getWidth() - imgWidth)/2;
 			int y = (getHeight() - imgHeight)/2;
 			p = new Point(x, y);
+//			System.out.println("getImageLocation"+p.x + " " + p.y);
 		}
 		return p;
 	}
 	
 	public Point getPixelLocation(Point p) {
 		Point imageLocation = getImageLocation();
-		Point pixelLocation = new Point(p.x-imageLocation.x, p.y-imageLocation.y);
-		return pixelLocation;
+		if (imageLocation != null) {
+			Point pixelLocation = new Point(p.x-imageLocation.x, p.y-imageLocation.y);
+			return pixelLocation;
+		}
+		return null;
 	}
 	
 	private Point computePanelLocation(int x, int y) {
@@ -114,11 +119,15 @@ class ImagePanel extends JPanel {
 			left = Math.max(left, 0);
 
 			height = (Math.max(first.y, second.y)-top);
-			width = (Math.max(first.x, second.x)-left);
-			
+			width = (Math.max(first.x, second.x)-left);			
 			height = Math.min(height, imgHeight-top);
 			width = Math.min(width, imgWidth-left);
-			if (height<0 || width < 0) {
+			rawTop = (int) (top/zoomLevel);
+			rawHeight = (int) ((height)/zoomLevel); 
+			rawLeft = (int) (left/zoomLevel);
+			rawWidth = (int) ((width)/zoomLevel);
+			
+			if (rawHeight<= 0 || rawWidth <= 0) {
 				hasROI = false;
 			} else {
 				hasROI = true;
@@ -147,6 +156,8 @@ class ImagePanel extends JPanel {
 			if (hasROI) {
 				g.setColor(Color.RED);
 				Point p2 = computePanelLocation(left, top);
+//				System.out.println(p2.x + " " + p2.y);
+//				System.out.println(left + " " + top + " " + width + " " + height);
 				g.drawRect(p2.x, p2.y, width, height);
 			}
 		}
@@ -168,6 +179,7 @@ class ImagePanel extends JPanel {
 	}
 	
 	private void updateImage() {
+		//TODO
 		//???? i think this assertion should not be here, or maybe this method is not necessary
 //		assert(hasROI);
 		repaint();
@@ -177,10 +189,7 @@ class ImagePanel extends JPanel {
 		if (!hasROI) {
 			return null;
 		}
-		int[] array = {(int) (top/zoomLevel), 
-						(int) ((top+height)/zoomLevel), 
-						(int) (left/zoomLevel), 
-						(int) ((left+width)/zoomLevel)};
+		int[] array = {rawTop, rawTop+rawHeight, rawLeft, rawLeft+rawWidth};
 		return array;
 	}
 }

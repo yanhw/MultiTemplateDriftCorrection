@@ -42,12 +42,11 @@ public class IOPanel extends JPanel {
 		// input
 		JPanel inputPanel = new JPanel();
 		inputPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		JLabel inputLabel = new JLabel("image directory:", JLabel.LEFT);
+		inputPanel.add(inputLabel);
 		inputFilename = new JLabel();
 		inputPanel.add(inputFilename);
 		inputBtn = new JButton("choose directory");
-		
-		JLabel inputLabel = new JLabel("image directory:", JLabel.LEFT);
-		inputPanel.add(inputLabel);
 		inputPanel.add(inputBtn);
 		
 		overwriteBox = new JCheckBox("overwrite existing files");
@@ -65,9 +64,10 @@ public class IOPanel extends JPanel {
 		
 		setLayout(new GridLayout(0, 1, 0, 0));
 		outputPanel.add(outputBtn);
-		add(outputPanel);
 		add(inputPanel);
-		add(overwriteBox);
+		add(outputPanel);
+		//TODO: overwrite warning
+//		add(overwriteBox);
 	}
 	
 	protected void setController(Controller controller) {

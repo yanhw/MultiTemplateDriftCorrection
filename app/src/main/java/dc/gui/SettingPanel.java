@@ -111,6 +111,7 @@ public class SettingPanel extends JPanel {
 			stepPanel.add(driftEditingPanel);
 		}
 		stepPanel.revalidate();
+		stepPanel.repaint();
 		logger.info("changed view state to: " + state);
 	}
 	

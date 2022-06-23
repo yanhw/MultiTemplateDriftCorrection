@@ -4,6 +4,7 @@
 # Ignore Gradle build output directory
 app/build
 app/bin
+app/.classpath
 
 # Ignore large test movies
 # will provide alternative way to download
@@ -11,6 +12,8 @@ app/src/test/resources/test_movie
 
 # Ignore log files
 *.log
-*.DriftCorrection.log.*
+*.log.*
+
+*.temp-*
 
 app/.settings
