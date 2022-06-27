@@ -56,6 +56,9 @@ class ImagePanel extends JPanel {
 			return;
 		}
 		zoomLevel = newLevel;
+		if (rawImage == null) {
+			return;
+		}
 		scaleImage();
 		updateImage();
 	}

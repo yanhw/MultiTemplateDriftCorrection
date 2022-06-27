@@ -145,6 +145,9 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
 	
 	/** Update the label to display the image for the current frame. */
     protected void updatePicture(int frameNumber) {
+    	if (imgList == null) {
+    		return;
+    	}
     	if (!imagePanel.updateImage(imgList.get(frameNumber).toString()));
     	// TODO give feedback for bad image
     }

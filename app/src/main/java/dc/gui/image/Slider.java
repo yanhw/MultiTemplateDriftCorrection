@@ -20,7 +20,6 @@ import java.awt.GridLayout;
 
 @SuppressWarnings("serial")
 public class Slider extends JPanel implements ChangeListener {
-	private int numFrame=2;
 	private JButton nextBtn;
 	private JButton prevBtn;
 	private JSlider imageSlider;
@@ -29,7 +28,7 @@ public class Slider extends JPanel implements ChangeListener {
 	
 	public Slider() {
         
-        model = new DefaultBoundedRangeModel(0, 1, 0, numFrame);
+        model = new DefaultBoundedRangeModel(0, 0, 0, 0);
         imageSlider = new JSlider(model);
         imageSlider.setPreferredSize(new Dimension(200, 10));
         imageSlider.setPaintTicks(true);
@@ -38,19 +37,19 @@ public class Slider extends JPanel implements ChangeListener {
         		BorderFactory.createEmptyBorder(0,0,10,0));
         Font font = new Font("Serif", Font.ITALIC, 15);
         imageSlider.setFont(font);
-        setLayout(new GridLayout(0, 4, 0, 0));
-        setPreferredSize(new Dimension(200, 16));
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setPreferredSize(new Dimension(200, 40));
         
         JPanel labelGroup = new JPanel();
         labelGroup.setLayout(new BoxLayout(labelGroup, BoxLayout.X_AXIS));
-        sliderLabel = new JLabel("Frame: 0/"+numFrame, JLabel.CENTER);
+        sliderLabel = new JLabel("Frame: 0/0", JLabel.CENTER);
         sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         labelGroup.add(sliderLabel);
         
         add(labelGroup);
         prevBtn = new JButton("<");
-        prevBtn.setMaximumSize(new Dimension(23, 23));
-        prevBtn.setPreferredSize(new Dimension(23, 23));
+//        prevBtn.setMaximumSize(new Dimension(10, 10));
+//        prevBtn.setPreferredSize(new Dimension(10, 10));
         add(prevBtn);
         prevBtn.addActionListener(new PrevBtnListener());
         add(imageSlider);
@@ -61,24 +60,23 @@ public class Slider extends JPanel implements ChangeListener {
 	}
 	
 	public void setMaximum(int numFrame) {
-		this.numFrame = numFrame;
-		model.setMaximum(numFrame);
+		model.setMaximum(numFrame-1);
 	}
 
 	public void addChangeListener(ChangeListener listener) {
 		imageSlider.addChangeListener(listener);
 	}
 	
-	public int getFrameNumber() {
-		return imageSlider.getValue();
-	}
+//	public int getFrameNumber() {
+//		return imageSlider.getValue();
+//	}
 	
 	public void setFrameNumber(int frameNumber) {
-		if (frameNumber < 0 || frameNumber >= numFrame) {
+		if (frameNumber < 0 || frameNumber >= model.getMaximum()) {
 			return;
 		}
 		model.setValue(frameNumber);
-		sliderLabel.setText("Frame: "+(frameNumber)+"/"+numFrame);
+//		sliderLabel.setText("Frame: "+(frameNumber)+"/"+model.getMaximum());
 	}
 	
 	@Override
@@ -86,7 +84,7 @@ public class Slider extends JPanel implements ChangeListener {
 		JSlider source = (JSlider)e.getSource();
         if (!source.getValueIsAdjusting()) {
         	int frameNumber = (int)source.getValue();
-        	sliderLabel.setText("Frame: "+(frameNumber)+"/"+numFrame);
+        	sliderLabel.setText("Frame: "+(frameNumber)+"/"+model.getMaximum());
         }
 	}
 	
@@ -104,7 +102,7 @@ public class Slider extends JPanel implements ChangeListener {
 		@Override
 		public void actionPerformed(ActionEvent evt) {
 			int current = Slider.this.imageSlider.getValue();
-			if (current < numFrame-1) {
+			if (current < model.getMaximum()) {
 				Slider.this.imageSlider.setValue(current+1);
 			}
 		}

@@ -1,6 +1,7 @@
 package dc.gui_old.image;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 
 import javax.swing.BorderFactory;
@@ -47,16 +48,17 @@ public class ZoomSlider extends JPanel implements ChangeListener {
         		BorderFactory.createEmptyBorder(0,0,10,0));
         Font font = new Font("Serif", Font.ITALIC, 15);
         slider.setFont(font);
-        
+        slider.setPreferredSize(new Dimension(200, 10));
+        setPreferredSize(new Dimension(200, 40));
         add(sliderLabel);
         add(slider);
         addChangeListener(this);
 	}
 	
-	public void setMaximum(int numFrame) {
-		this.NUM_STEP = numFrame;
-		model.setMaximum(numFrame);
-	}
+//	public void setMaximum(int numFrame) {
+//		this.NUM_STEP = numFrame;
+//		model.setMaximum(numFrame);
+//	}
 
 	protected void addChangeListener(ChangeListener listener) {
 		slider.addChangeListener(listener);
