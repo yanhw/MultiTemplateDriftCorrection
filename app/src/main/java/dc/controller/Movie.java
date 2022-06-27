@@ -12,15 +12,11 @@ import javax.swing.table.DefaultTableModel;
 
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
+import dc.model.MovieStateModel;
 import dc.utils.FileSystem;
 
 public class Movie {
 	private static final Logger logger = Logger.getLogger(Movie.class.getName());
-	
-	public static final int INIT = 0;
-	public static final int TEMPLATE_MATCHING = 1;
-	public static final int DRIFT_EDIT = 2;
-	public static final int DRIFT_CORRECTION = 3;	// not in use
 	
 	private String saveDir = null;
 	private List<Path> fileList;
@@ -29,6 +25,7 @@ public class Movie {
 	private TemplateMatchingManager templateMatching;
 	private DriftManager driftManager;
 	private DriftCorrectionManager driftCorrection;
+	private MovieStateModel myState;
 	
 	public Movie() {
 		logger.setLevel(Level.FINE);
@@ -55,22 +52,30 @@ public class Movie {
 		templateMatching.setTableModel(model);
 	}
 	
+	protected void setMovieStateModel(MovieStateModel model) {
+		myState = model;
+	}
+	
 
 	public void setDriftTableModel(DriftModel model, DriftSectionModel sectionModel) {
 		driftManager.setTableModel(model, sectionModel);
 	}
 	
 	// call this method when state might be changed
-	public int checkState() {
+	@SuppressWarnings("static-access")
+	public void checkState() {
 		if (!isIOReady()) {
 			logger.info("state set to: INIT");
-			return INIT;
+			myState.setValue(myState.INIT);
 		} else if (!isDriftReady()) {
 			logger.info("state set to: TEMPLATE_MATCHING");
-			return TEMPLATE_MATCHING;
-		} else {
+			myState.setValue(myState.TEMPLATE_MATCHING);
+		} else if (!driftCorrectionDone()) {
 			logger.info("state set to: DRIFT_EDIT");
-			return DRIFT_EDIT;
+			myState.setValue(myState.DRIFT_EDIT);
+		} else {
+			logger.info("state set to: DRIFT_CORRECTION");
+			myState.setValue(myState.DRIFT_CORRECTION);
 		}
 	}
 	
@@ -119,9 +124,11 @@ public class Movie {
 	
 	private boolean isIOReady() {
 		if (fileList == null ||fileList.size() <= 2) {
+			logger.fine("need at least 2 frames");
 			return false;
 		}
 		if (saveDir == null) {
+			logger.fine("no saveDir");
 			return false;
 		}
 		
@@ -185,10 +192,7 @@ public class Movie {
 	}
 	
 	private boolean isDriftReady() {
-		if (driftManager.isDriftReady()) {
-			return true;
-		}
-		return false;
+		return driftManager.isDriftReady();
 	}
 	
 	public void setDriftCsv(String filename) {
@@ -273,6 +277,11 @@ public class Movie {
 		return driftCorrection.getSaveFiles();
 	}
 
-
+	private boolean driftCorrectionDone() {
+		if (getDriftCorrectionProgress() == 100) {
+			return true;
+		}
+		return false;
+	}
 
 }

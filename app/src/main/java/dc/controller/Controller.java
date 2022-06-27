@@ -13,6 +13,7 @@ import javax.swing.table.DefaultTableModel;
 import dc.gui.MainFrame;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
+import dc.model.MovieStateModel;
 
 /*
  * This class serves as central controller for the app
@@ -32,12 +33,8 @@ import dc.model.DriftSectionModel;
 public class Controller {
 	private static final Logger logger = Logger.getLogger(Controller.class.getName());
 	
-	public static final int INIT = 0;
-	public static final int TEMPLATE_MATCHING = 1;
-	public static final int DRIFT_EDIT = 2;
-	public static final int DRIFT_CORRECTION = 3;	// not in use
-	public static final int DONE = 4;				// not in use
-	private int state = INIT;
+
+//	private int state = INIT;
 	
 	private MainFrame myView;
 	private boolean isBusy = false;					// sync lock
@@ -67,6 +64,7 @@ public class Controller {
 		ReadOnlyMovie movie = new ReadOnlyMovie(myMovie);
 		myView.setMovie(movie);
 		setDriftTableModel();
+		setMovieStateModel();
 	}
 	
 	public void setTemplateTableModel(DefaultTableModel model) {
@@ -79,6 +77,12 @@ public class Controller {
 		myMovie.setDriftTableModel(driftModel, sectionModel);
 		myView.setDriftModel(driftModel);
 		myView.setDriftSectionModel(sectionModel);
+	}
+	
+	private void setMovieStateModel() {
+		MovieStateModel myState = new MovieStateModel();
+		myMovie.setMovieStateModel(myState);
+		myView.setMovieStateModel(myState);
 	}
 	
 	// should be called before initialising a thread
@@ -96,13 +100,9 @@ public class Controller {
 	
 	// call this method when state might be changed
 	private void checkState() {
-		state = myMovie.checkState();
-		myView.updateState(state);
+		myMovie.checkState();
 	}
 
-	public int getState() {
-		return state;
-	}
 	
 	/////////////////////////////////////////////////////////////////////
 	/////////////////////// set advanced parameter //////////////////////

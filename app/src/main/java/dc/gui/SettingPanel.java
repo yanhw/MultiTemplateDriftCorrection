@@ -1,10 +1,13 @@
 package dc.gui;
 
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import dc.controller.Controller;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
+import dc.model.MovieStateModel;
 
 import javax.swing.JLayeredPane;
 import java.awt.BorderLayout;
@@ -15,18 +18,20 @@ import java.util.logging.Logger;
 import java.awt.event.ActionEvent;
 import java.awt.FlowLayout;
 
+@SuppressWarnings("serial")
 public class SettingPanel extends JPanel {
 	private static final Logger logger = Logger.getLogger(SettingPanel.class.getName());
 	private Controller controller;
 	private Synchroniser sync;
-	private int state = controller.INIT;		// state that GUI is displaying
+	private MovieStateModel state;		// state that GUI is displaying
 	
-	JButton prevButton;
-	JButton nextButton;
+	private JButton prevButton;
+	private JButton nextButton;
 	private JPanel stepPanel;
 	private IOPanel ioPanel;
 	private TemplateMatchingPanel templateMatchingPanel;
 	private DriftEditingPanel driftEditingPanel;
+	private int viewState;
 //	private DriftCorrectionPanel driftCorrectionPanel;
 	
 	/**
@@ -63,8 +68,6 @@ public class SettingPanel extends JPanel {
 		templateMatchingPanel.setController(controller);
 		driftEditingPanel.setController(controller);
 		
-		setHandlers();
-		setButtons(); 
 	}
 	
 	public void setFileHandler(FileHandler fh) {
@@ -81,8 +84,8 @@ public class SettingPanel extends JPanel {
 	private void setHandlers() { 
 		prevButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				assert state > 0;
-				state--;
+				assert state.getValue() != state.INIT;
+				viewState--;
 				updateView();
 				setButtons();
 			}
@@ -90,22 +93,49 @@ public class SettingPanel extends JPanel {
 		
 		nextButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				int modelState = sync.getState();
-				assert state < modelState;
-				state++;
+				assert viewState < state.getValue();
+				viewState++;
 				updateView();
 				setButtons();
 			}
 		});
 	}
 	
+	public void addMovieStateModelListener(MovieStateModel model) {
+		state = model;
+		model.addChangeListener(new StateChangeListener());
+		viewState = model.getValue();
+		
+		setHandlers();
+		setButtons(); 
+	}
+	
+	private class StateChangeListener implements ChangeListener{
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			MovieStateModel source = (MovieStateModel) e.getSource();
+			int state = (int)source.getValue();
+			switch (state) {
+				case 0:
+				case 1:
+				case 2:
+					viewState = state;
+					break;
+				case 3:
+					viewState = 2;		// do not have view for model state3
+			}
+			updateView();
+			setButtons();
+		}
+	}
 	
 	@SuppressWarnings("static-access")
 	private void updateView() {
 		stepPanel.removeAll();
-		if (state == controller.INIT) {
+		if (viewState == state.INIT) {
 			stepPanel.add(ioPanel);
-		} else if (state == controller.TEMPLATE_MATCHING) {
+		} else if (viewState == state.TEMPLATE_MATCHING) {
 			stepPanel.add(templateMatchingPanel);
 		} else {
 			stepPanel.add(driftEditingPanel);
@@ -117,35 +147,35 @@ public class SettingPanel extends JPanel {
 	
 	@SuppressWarnings("static-access")
 	protected void setButtons() {
-		assert state <= sync.getState();
-		assert state >= 0;
+		assert viewState <= state.getValue();
+		assert viewState >= 0;
 		// not using switch because switch conditions must be constant
-		if (state == controller.INIT) {
+		if (viewState == state.INIT) {
 			prevButton.setToolTipText("There is no previous step.");
-			if (sync.getState() > state) {
+			if (state.getValue() > viewState) {
 				nextButton.setToolTipText("must set movie and save locations before continue");
 			} else {
 				nextButton.setToolTipText("ready to set templates");
 			}		
-		} else if (state == controller.TEMPLATE_MATCHING) {
+		} else if (viewState == state.TEMPLATE_MATCHING) {
 			prevButton.setToolTipText("Go back to movie setting.");
-			if (sync.getState() > state) {
+			if (state.getValue() > viewState) {
 				nextButton.setToolTipText("must perform template matching before continue");
 			} else {
 				nextButton.setToolTipText("ready to view drift");
 			}
-		} else if (state == controller.DRIFT_EDIT) {
+		} else if (viewState == state.DRIFT_EDIT) {
 			prevButton.setToolTipText("Go back to template matching.");
 			nextButton.setToolTipText("This is the last step.");
 		} else {
-			logger.severe("unknown state: " + state);
+			logger.severe("unknown state: " + viewState);
 		}
-		if (state == controller.INIT) {
+		if (viewState == state.INIT) {
 			prevButton.setEnabled(false);
 		} else {
 			prevButton.setEnabled(true);
 		}
-		if (state == sync.getState()) {
+		if (viewState == state.getValue()) {
 			nextButton.setEnabled(false);
 		} else {
 			nextButton.setEnabled(true);

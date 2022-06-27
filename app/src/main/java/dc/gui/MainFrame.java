@@ -14,6 +14,7 @@ import javax.swing.border.EmptyBorder;
 import dc.gui.image.RawImageViewer;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
+import dc.model.MovieStateModel;
 
 import javax.swing.JSplitPane;
 import javax.swing.JMenuBar;
@@ -113,7 +114,6 @@ public class MainFrame extends JFrame {
 		rawImageViewer.setSynchroniser(sync);
 		settingPanel.setSynchroniser(sync);
 		imageViewer.setSynchroniser(sync);
-		imageViewer.updateTagState();
 		settingPanel.setController(controller);
 		controller.setMainFrame(this);
 		
@@ -124,10 +124,12 @@ public class MainFrame extends JFrame {
 		sync.setMovie(movie);
 	}
 	
-	public void updateState(int state) {
-		sync.setState(state);
+	public void setMovieStateModel(MovieStateModel model) {
+		settingPanel.addMovieStateModelListener(model);
+		imageViewer.addMovieStateModelListener(model);
 	}
 	
+
 	//////////// setting panel 
 	protected void updateStateBtns() {
 		settingPanel.setButtons();
@@ -189,10 +191,7 @@ public class MainFrame extends JFrame {
 	
 	////////// right image panel
 	
-	public void updateTagState() {
-		imageViewer.updateTagState();
-	}
-	
+
 	public void setTMImage(int frameNumber, int first, int last, Path path, int[] ROI) {
 		imageViewer.setTMImage(frameNumber, first, last, path, ROI);
 	}

@@ -11,16 +11,10 @@ import dc.controller.ReadOnlyMovie;
  */
 
 public class Synchroniser {
-	
-	public static final int INIT = 0;
-	public static final int TEMPLATE_MATCHING = 1;
-	public static final int DRIFT_EDIT = 2;
-	public static final int DRIFT_CORRECTION = 3;
-	public static final int DONE = 4;				// not in use
+
 	
 	private MainFrame myView;
 	private ReadOnlyMovie myMovie;
-	private int state;			// maybe should access this from controller
 	
 	public Synchroniser(MainFrame view) {
 		myView = view;
@@ -31,24 +25,16 @@ public class Synchroniser {
 		this.myMovie = movie;
 	}
 	
-	
-	protected void setState(int state) {
-		this.state = state;
-		myView.updateStateBtns();
-		myView.updateTagState();
-	}
-	
-	public int getState() {
-		return state;
-	}
+
+
 	
 	
 	public void rawImageChanged(int frameNumber) {
-		switch (state) {
-			case TEMPLATE_MATCHING:
-				setTMImage(frameNumber);
-				break;
-		}
+//		switch (state) {
+//			case TEMPLATE_MATCHING:
+//				setTMImage(frameNumber);
+//				break;
+//		}
 	}
 	
 	public void tableRowSelected(int rowNumber) {

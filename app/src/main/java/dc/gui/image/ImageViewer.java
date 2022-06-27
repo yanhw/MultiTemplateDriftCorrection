@@ -2,8 +2,11 @@ package dc.gui.image;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import dc.gui.Synchroniser;
+import dc.model.MovieStateModel;
 
 import java.awt.BorderLayout;
 import java.nio.file.Path;
@@ -46,7 +49,8 @@ public class ImageViewer extends JPanel {
 		
 		correctedImage = new DriftCorrectedImageViewer();
 		tabbedPane.addTab("Drift Corrected Image", null, correctedImage, null);
-
+		tabbedPane.setEnabledAt(1, false);
+		tabbedPane.setEnabledAt(2, false);
 	}
 	
 	public void setFileHandler(FileHandler fh) {
@@ -60,28 +64,6 @@ public class ImageViewer extends JPanel {
 	public void setSynchroniser(Synchroniser sync) {
 		this.sync = sync;
 		correctedImage.setSynchroniser(sync);
-	}
-	
-	
-	public void updateTagState() {
-		int state = sync.getState();
-		if (state < 0) {
-			logger.severe("unknown state: " + state);
-		}
-		logger.info("setting tab enabled upto: " + state); 
-		switch (state) {
-			case 0:
-				tabbedPane.setEnabledAt(1, false);
-				tabbedPane.setEnabledAt(2, false);
-				break;
-			case 1:
-				tabbedPane.setEnabledAt(1, true);
-				tabbedPane.setEnabledAt(2, false);
-				break;
-			default:
-				tabbedPane.setEnabledAt(1, true);
-				tabbedPane.setEnabledAt(2, true);
-		}
 	}
 	
 	
@@ -101,26 +83,38 @@ public class ImageViewer extends JPanel {
 		correctedImage.setImageList(list);
 	}
 	
-	public void setActiveState(int state) {
-		switch (state) {
-			case 0:
-			case 1:
-				tabbedPane.setEnabledAt(0, true);
-				tabbedPane.setEnabledAt(1, false);
-				tabbedPane.setEnabledAt(2, false);
-				tabbedPane.setSelectedIndex(0);
-				break;
-			case 2:
-				tabbedPane.setEnabledAt(0, true);
-				tabbedPane.setEnabledAt(1, true);
-				tabbedPane.setEnabledAt(2, false);
-				tabbedPane.setSelectedIndex(1);
-				break;
-			case 3:
-				tabbedPane.setEnabledAt(0, true);
-				tabbedPane.setEnabledAt(1, true);
-				tabbedPane.setEnabledAt(2, true);
-				tabbedPane.setSelectedIndex(2);
-		}
+	public void addMovieStateModelListener(MovieStateModel model) {
+		model.addChangeListener(new StateChangeListener());
 	}
+	
+	private class StateChangeListener implements ChangeListener{
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			MovieStateModel source = (MovieStateModel) e.getSource();
+			int state = (int)source.getValue();
+			switch (state) {
+				case 0:
+				case 1:
+					tabbedPane.setEnabledAt(0, true);
+					tabbedPane.setEnabledAt(1, false);
+					tabbedPane.setEnabledAt(2, false);
+					tabbedPane.setSelectedIndex(0);
+					break;
+				case 2:
+					tabbedPane.setEnabledAt(0, true);
+					tabbedPane.setEnabledAt(1, true);
+					tabbedPane.setEnabledAt(2, false);
+					tabbedPane.setSelectedIndex(1);
+					break;
+				case 3:
+					tabbedPane.setEnabledAt(0, true);
+					tabbedPane.setEnabledAt(1, true);
+					tabbedPane.setEnabledAt(2, true);
+					tabbedPane.setSelectedIndex(2);
+			}
+		}
+		
+	}
+	
 }

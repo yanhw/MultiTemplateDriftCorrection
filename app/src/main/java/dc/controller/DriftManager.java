@@ -68,7 +68,7 @@ public class DriftManager {
 		this.yFitted = new float[numFrame];
 		this.isDriftReady = false;
 		
-		setDrifts(xDrift, yDrift);
+//		setDrifts(xDrift, yDrift);
 		sectionModel.setData(cuttingPoints, degrees, numFrame);
 	}
 	

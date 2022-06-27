@@ -20,7 +20,7 @@ public class SettingPanel  extends JPanel {
 	private Controller controller;
 	//TODO remove this.state
 	@SuppressWarnings("static-access")
-	private int state = controller.INIT;
+	private int state = 0;
 	
 	private JTabbedPane tabbedPane;
 	private IOPanel ioPanel;
@@ -82,24 +82,24 @@ public class SettingPanel  extends JPanel {
 	
 	@SuppressWarnings("static-access")
 	protected void updateView(int state) {
-		if (state < controller.INIT || state > controller.DONE) {
-			logger.severe("unknown controller state: " + state);
-			return;
-		}
-		if (state == this.state) {
-			logger.warning("view state not chaged: " + state);
-			return;
-		}
-		if (this.state >= controller.DRIFT_CORRECTION) {
-			nextBtn.setText("NEXT");
-		}
-		tabbedPane.setEnabledAt(this.state, false);
-		this.state = state;
-		tabbedPane.setEnabledAt(this.state, true);
-		tabbedPane.setSelectedIndex(this.state);
-		if (this.state >= controller.DRIFT_CORRECTION) {
-			nextBtn.setText("");
-		}
+//		if (state < controller.INIT || state > controller.DONE) {
+//			logger.severe("unknown controller state: " + state);
+//			return;
+//		}
+//		if (state == this.state) {
+//			logger.warning("view state not chaged: " + state);
+//			return;
+//		}
+//		if (this.state >= controller.DRIFT_CORRECTION) {
+//			nextBtn.setText("NEXT");
+//		}
+//		tabbedPane.setEnabledAt(this.state, false);
+//		this.state = state;
+//		tabbedPane.setEnabledAt(this.state, true);
+//		tabbedPane.setSelectedIndex(this.state);
+//		if (this.state >= controller.DRIFT_CORRECTION) {
+//			nextBtn.setText("");
+//		}
 //		if (state == controller.INIT) {
 //			
 //		} else if (state == controller.CENTER) {
