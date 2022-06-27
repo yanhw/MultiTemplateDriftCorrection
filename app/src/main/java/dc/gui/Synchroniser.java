@@ -2,7 +2,7 @@ package dc.gui;
 
 import java.nio.file.Path;
 
-import dc.model.ReadOnlyMovie;
+import dc.controller.ReadOnlyMovie;
 
 /*****************************
  * 

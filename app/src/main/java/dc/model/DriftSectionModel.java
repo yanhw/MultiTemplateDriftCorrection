@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import javax.swing.table.AbstractTableModel;
 
-import dc.process.Controller;
+import dc.controller.Controller;
 
 @SuppressWarnings("serial")
 public class DriftSectionModel extends AbstractTableModel {

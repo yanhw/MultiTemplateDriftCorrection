@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 
-import dc.process.ImageData;
+import dc.controller.ImageData;
 
 import static org.bytedeco.opencv.global.opencv_core.CV_32F;
 import static org.bytedeco.opencv.global.opencv_core.copyMakeBorder;

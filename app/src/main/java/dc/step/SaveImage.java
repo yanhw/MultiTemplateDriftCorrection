@@ -6,7 +6,7 @@ import java.util.logging.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
 
-import dc.process.ImageData;
+import dc.controller.ImageData;
 import dc.utils.FileSystem;
 
 public class SaveImage extends OutputProcessStep {

@@ -1,4 +1,4 @@
-package dc.model;
+package dc.controller;
 
 public class Flag {
 	private boolean flag;

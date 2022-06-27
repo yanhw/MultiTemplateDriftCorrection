@@ -1,9 +1,8 @@
-package dc.model;
+package dc.controller;
 
 import java.util.LinkedList;
 import java.util.logging.*;
 
-import dc.process.ImageData;
 import dc.step.OutputProcessStep;
 import dc.step.ProcessStep;
 

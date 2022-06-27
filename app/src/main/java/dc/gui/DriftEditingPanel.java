@@ -7,9 +7,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import dc.controller.Controller;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
-import dc.process.Controller;
 
 import javax.swing.JButton;
 import java.awt.Dimension;

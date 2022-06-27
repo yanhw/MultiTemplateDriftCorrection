@@ -1,4 +1,4 @@
-package dc.model;
+package dc.controller;
 
 import java.util.LinkedList;
 import java.util.List;

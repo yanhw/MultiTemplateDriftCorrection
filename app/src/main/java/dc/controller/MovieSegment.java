@@ -1,4 +1,4 @@
-package dc.model;
+package dc.controller;
 
 /* both startFrame and endFrame are immutable
  * startFrame and endFrame are inclusive

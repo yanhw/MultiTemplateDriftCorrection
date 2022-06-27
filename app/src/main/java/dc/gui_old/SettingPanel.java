@@ -12,7 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import dc.process.Controller;
+import dc.controller.Controller;
 
 @SuppressWarnings("serial")
 public class SettingPanel  extends JPanel {

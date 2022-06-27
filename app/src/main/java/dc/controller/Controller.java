@@ -1,4 +1,4 @@
-package dc.process;
+package dc.controller;
 
 
 import java.io.File;
@@ -13,9 +13,6 @@ import javax.swing.table.DefaultTableModel;
 import dc.gui.MainFrame;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
-import dc.model.Flag;
-import dc.model.Movie;
-import dc.model.ReadOnlyMovie;
 
 /*
  * This class serves as central controller for the app

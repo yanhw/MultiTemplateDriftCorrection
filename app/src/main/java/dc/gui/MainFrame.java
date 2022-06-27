@@ -14,13 +14,14 @@ import javax.swing.border.EmptyBorder;
 import dc.gui.image.RawImageViewer;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
-import dc.model.ReadOnlyMovie;
-import dc.process.Controller;
 
 import javax.swing.JSplitPane;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+
+import dc.controller.Controller;
+import dc.controller.ReadOnlyMovie;
 import dc.gui.image.ImageViewer;
 import java.awt.Dimension;
 

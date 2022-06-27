@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 import java.util.logging.*;
 
+import dc.controller.Controller;
 import dc.gui.MainFrame;
-import dc.process.Controller;
 
 public class App {
 	

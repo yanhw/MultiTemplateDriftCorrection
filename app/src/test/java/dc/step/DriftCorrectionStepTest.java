@@ -12,8 +12,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.Before;
 import org.junit.Test;
 
-import dc.model.ImageArrayReader;
-import dc.process.ImageData;
+import dc.controller.ImageArrayReader;
+import dc.controller.ImageData;
 import dc.step.DriftCorrectionStep;
 import dc.step.ImageReader;
 

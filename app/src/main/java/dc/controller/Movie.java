@@ -1,4 +1,4 @@
-package dc.model;
+package dc.controller;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -10,6 +10,8 @@ import java.util.logging.Logger;
 
 import javax.swing.table.DefaultTableModel;
 
+import dc.model.DriftModel;
+import dc.model.DriftSectionModel;
 import dc.utils.FileSystem;
 
 public class Movie {

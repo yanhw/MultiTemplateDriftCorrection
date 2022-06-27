@@ -1,4 +1,4 @@
-package dc.model;
+package dc.controller;
 
 import static dc.utils.Constants.MAX_WORKER;
 

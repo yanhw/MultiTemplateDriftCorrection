@@ -22,7 +22,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
-import dc.process.Controller;
+import dc.controller.Controller;
 
 @SuppressWarnings("serial")
 public class TemplateMatchingPanel extends JPanel {

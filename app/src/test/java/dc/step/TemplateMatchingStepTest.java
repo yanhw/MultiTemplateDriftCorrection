@@ -6,8 +6,8 @@ import org.junit.Test;
 
 import java.util.List;
 
-import dc.model.ImageArrayReader;
-import dc.process.ImageData;
+import dc.controller.ImageArrayReader;
+import dc.controller.ImageData;
 import dc.step.ImageReader;
 import dc.step.TemplateMatching;
 

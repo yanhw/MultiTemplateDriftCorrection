@@ -2,9 +2,9 @@ package dc.gui;
 
 import javax.swing.JPanel;
 
+import dc.controller.Controller;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
-import dc.process.Controller;
 
 import javax.swing.JLayeredPane;
 import java.awt.BorderLayout;

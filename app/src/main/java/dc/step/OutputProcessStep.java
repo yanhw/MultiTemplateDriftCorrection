@@ -2,7 +2,7 @@ package dc.step;
 
 import java.util.logging.*;
 
-import dc.process.ImageData;
+import dc.controller.ImageData;
 
 
 public abstract class OutputProcessStep implements ProcessStep {

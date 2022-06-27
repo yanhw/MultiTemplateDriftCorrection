@@ -6,7 +6,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
-import dc.process.Controller;
+import dc.controller.Controller;
 
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;

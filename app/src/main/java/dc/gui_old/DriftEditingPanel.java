@@ -19,7 +19,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
 
-import dc.process.Controller;
+import dc.controller.Controller;
 
 @SuppressWarnings("serial")
 public class DriftEditingPanel extends JPanel {

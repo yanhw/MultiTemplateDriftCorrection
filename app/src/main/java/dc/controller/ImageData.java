@@ -1,4 +1,4 @@
-package dc.process;
+package dc.controller;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 

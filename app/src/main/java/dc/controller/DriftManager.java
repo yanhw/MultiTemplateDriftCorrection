@@ -1,4 +1,4 @@
-package dc.model;
+package dc.controller;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,7 +17,8 @@ import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
-
+import dc.model.DriftModel;
+import dc.model.DriftSectionModel;
 import dc.utils.FileSystem;
 
 /* 

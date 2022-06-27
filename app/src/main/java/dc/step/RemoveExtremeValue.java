@@ -5,7 +5,7 @@ import java.util.logging.*;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 
-import dc.process.ImageData;
+import dc.controller.ImageData;
 
 public class RemoveExtremeValue extends SimpleProcessStep {
 	private static final String name = "remove extremas";

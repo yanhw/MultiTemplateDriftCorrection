@@ -1,4 +1,4 @@
-package dc.model;
+package dc.controller;
 
 import javax.swing.table.DefaultTableModel;
 
@@ -13,9 +13,9 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import dc.model.ImageArrayReader;
-import dc.model.MovieSegment;
-import dc.model.TemplateMatchingManager;
+import dc.controller.ImageArrayReader;
+import dc.controller.MovieSegment;
+import dc.controller.TemplateMatchingManager;
 
 public class TemplateMatchingManagerTest {
 	private TemplateMatchingManager myManager;

@@ -12,9 +12,9 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 //import javax.swing.JPanel;
 
+import dc.controller.Controller;
+import dc.controller.ReadOnlyMovie;
 import dc.gui_old.image.ImageViewer;
-import dc.model.ReadOnlyMovie;
-import dc.process.Controller;
 
 @SuppressWarnings("serial")
 public class MainFrame  extends JFrame{

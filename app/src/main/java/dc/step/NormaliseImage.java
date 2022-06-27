@@ -7,7 +7,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 //import static org.bytedeco.opencv.global.opencv_core.CV_32F;
 //import static org.bytedeco.opencv.global.opencv_core.normalize;
 
-import dc.process.ImageData;
+import dc.controller.ImageData;
 
 public class NormaliseImage extends SimpleProcessStep {
 	private static final String name = "normalise";

@@ -9,7 +9,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import dc.process.Controller;
+import dc.controller.Controller;
 
 @SuppressWarnings("serial")
 public class DriftCorrectionPanel extends JPanel {

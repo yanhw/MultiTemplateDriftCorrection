@@ -6,7 +6,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
 
-import dc.process.ImageData;
+import dc.controller.ImageData;
 
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCOEFF;
