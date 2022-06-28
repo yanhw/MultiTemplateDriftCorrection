@@ -8,6 +8,7 @@ import dc.controller.Controller;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
 import dc.model.MovieStateModel;
+import dc.model.TemplateMatchingSegmentModel;
 
 import javax.swing.JLayeredPane;
 import java.awt.BorderLayout;
@@ -191,6 +192,10 @@ public class SettingPanel extends JPanel {
 	protected void setOutputFile(String folderName) {
 		assert (folderName != null);
 		ioPanel.setOutputFile(folderName);
+	}
+	
+	protected void setTemplateTableModel(TemplateMatchingSegmentModel model) {
+		templateMatchingPanel.setTableModel(model);
 	}
 	
 	protected void setDriftModel(DriftModel driftModel) {

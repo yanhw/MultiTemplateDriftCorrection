@@ -96,13 +96,15 @@ public class TemplateMatchingPanel extends JPanel {
 	
 	protected void setController(Controller controller) {
 		this.controller = controller;
-		model = new TemplateMatchingSegmentModel() {
-			@Override
-			public boolean isCellEditable(int row, int column) {       
-				return false; // or a condition at your choice with row and column
-			}
-		};
-		controller.setTemplateTableModel(model);
+
+	}
+	
+	public void setFileHandler(FileHandler fh) {
+		logger.addHandler(fh);
+	}
+	
+	public void setTableModel(TemplateMatchingSegmentModel model) {
+		this.model = model;
 		table.setCellSelectionEnabled(true);  
 		// don't do this. this disables selection, overwrite isCellEditable instead
 //		table.setEnabled(false);	
@@ -117,10 +119,6 @@ public class TemplateMatchingPanel extends JPanel {
 		table.removeColumn(table.getColumn("left"));
 		table.removeColumn(table.getColumn("right"));
 		setHandlers();
-	}
-	
-	public void setFileHandler(FileHandler fh) {
-		logger.addHandler(fh);
 	}
 	
 	private void setHandlers() {

@@ -15,6 +15,7 @@ import dc.gui.image.RawImageViewer;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
 import dc.model.MovieStateModel;
+import dc.model.TemplateMatchingSegmentModel;
 
 import javax.swing.JSplitPane;
 import javax.swing.JMenuBar;
@@ -129,6 +130,11 @@ public class MainFrame extends JFrame {
 		imageViewer.addMovieStateModelListener(model);
 	}
 	
+	public void setTemplateTableModel(TemplateMatchingSegmentModel model) {
+		settingPanel.setTemplateTableModel(model);
+		imageViewer.setTemplateTableModel(model);
+	}
+	
 
 	//////////// setting panel 
 	protected void updateStateBtns() {
@@ -175,6 +181,7 @@ public class MainFrame extends JFrame {
 	/////////// raw Image
 	public void setRawImages(List<Path> fileList) {
 		rawImageViewer.setImageList(fileList);
+		imageViewer.setRawImages(fileList);
 	}
 	
 	public void setRawImageFrame(int frameNumber) {
@@ -190,11 +197,6 @@ public class MainFrame extends JFrame {
 	}
 	
 	////////// right image panel
-	
-
-	public void setTMImage(int frameNumber, int first, int last, Path path, int[] ROI) {
-		imageViewer.setTMImage(frameNumber, first, last, path, ROI);
-	}
 	
 	public void setTMImage(int frameNumber) {
 		sync.setTMImage(frameNumber);

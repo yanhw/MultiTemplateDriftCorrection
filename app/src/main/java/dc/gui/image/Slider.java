@@ -62,7 +62,15 @@ public class Slider extends JPanel implements ChangeListener {
 	public void setMaximum(int numFrame) {
 		model.setMaximum(numFrame-1);
 	}
-
+	
+	public int getFrameNumber() {
+		return model.getMaximum()+1;
+	}
+	
+	public int getValue() {
+		return model.getValue();
+	}
+	
 	public void addChangeListener(ChangeListener listener) {
 		imageSlider.addChangeListener(listener);
 	}

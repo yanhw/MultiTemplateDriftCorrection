@@ -49,7 +49,7 @@ public class TemplateMatchingSegmentModel extends DefaultTableModel{
 		setRowCount(0);
 		templates.clear();
 		blurredTemplates.clear();
-		addRow(new Object[] {1, 0, movieSize-1, "", false, 0,0,0,0});
+		addRow(new Object[] {1, 0, movieSize-1, 0, false, 0,0,0,0});
 		templates.add(null);
 		blurredTemplates.add(null);
 	}
@@ -92,7 +92,7 @@ public class TemplateMatchingSegmentModel extends DefaultTableModel{
 		int targetIdx = getRowNumber(frameNumber);
 		int ending = (int)getValueAt(targetIdx, END_IDX);
 		setValueAt(frameNumber, targetIdx, END_IDX);
-		insertRow(targetIdx+1, new Object[] {targetIdx+2, frameNumber, ending, "", false, 0,0,0,0});
+		insertRow(targetIdx+1, new Object[] {targetIdx+2, frameNumber, ending, 0, false, 0,0,0,0});
 		templates.add(targetIdx+1, null);
 		blurredTemplates.add(targetIdx+1, null);
 		if ((boolean)getValueAt(targetIdx, HAS_TEMPLATE_IDX)) {

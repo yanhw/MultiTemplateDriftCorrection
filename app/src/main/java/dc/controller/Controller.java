@@ -61,10 +61,19 @@ public class Controller {
 		myView.setMovie(movie);
 		setDriftTableModel();
 		setMovieStateModel();
+		setTemplateTableModel();
 	}
 	
-	public void setTemplateTableModel(TemplateMatchingSegmentModel model) {
+	private void setTemplateTableModel() {
+		@SuppressWarnings("serial")
+		TemplateMatchingSegmentModel model = new TemplateMatchingSegmentModel() {
+			@Override
+			public boolean isCellEditable(int row, int column) {       
+				return false; // or a condition at your choice with row and column
+			}
+		};
 		myMovie.setTemplateTableModel(model);
+		myView.setTemplateTableModel(model);
 	}
 	
 	private void setDriftTableModel() {

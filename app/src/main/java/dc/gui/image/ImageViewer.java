@@ -7,6 +7,7 @@ import javax.swing.event.ChangeListener;
 
 import dc.gui.Synchroniser;
 import dc.model.MovieStateModel;
+import dc.model.TemplateMatchingSegmentModel;
 
 import java.awt.BorderLayout;
 import java.nio.file.Path;
@@ -61,14 +62,17 @@ public class ImageViewer extends JPanel {
 		correctedImage.setFileHandler(fh);
 	}
 	
+	public void setTemplateTableModel(TemplateMatchingSegmentModel model) {
+		templateImage.setTemplateTableModel(model);
+	}
+	
 	public void setSynchroniser(Synchroniser sync) {
 		this.sync = sync;
 		correctedImage.setSynchroniser(sync);
 	}
 	
-	
-	public void setTMImage(int frameNumber, int first, int last, Path path, int[] ROI) {
-		templateImage.setImage(frameNumber, first, last, path, ROI);
+	public void setRawImages(List<Path> fileList) {
+		templateImage.setFileList(fileList);
 	}
 	
 	public void setXDriftData(int[] xList, float[] xFittedList) {

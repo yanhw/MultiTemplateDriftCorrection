@@ -167,14 +167,19 @@ class ImagePanel extends JPanel {
 	}
 	
 	public boolean updateImage(String filename) {
-		try {
-    		rawImage = ImageIO.read(new File(filename));
-		} catch(IOException e) {
-			logger.severe("failed to open image:" + filename);
-		}		
-		scaleImage();
+		if (filename == null) {
+			rawImage = null;
+		} else {
+			try {
+	    		rawImage = ImageIO.read(new File(filename));
+			} catch(IOException e) {
+				logger.severe("failed to open image:" + filename);
+			}		
+			scaleImage();
+		}
+		repaint();
 		if (image != null) {
-			repaint();
+			
 			return true;
 		}
 		return false;
