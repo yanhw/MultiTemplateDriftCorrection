@@ -15,8 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
-import javax.swing.table.DefaultTableModel;
-
+import dc.model.TemplateMatchingSegmentModel;
 import dc.step.GaussianImage;
 
 public class TemplateMatchingManager {
@@ -32,9 +31,7 @@ public class TemplateMatchingManager {
 	private Flag interruptionFlag;
 	
 	private List<Path> fileList;
-	private List<MovieSegment> movieSegments;
-	private List<Integer> keyFrameList;	//TODO: should remove this in the future
-	private DefaultTableModel model;	//TODO: use this to replace movieSegments? or maybe integrate these two together
+	private TemplateMatchingSegmentModel model;
 	private GaussianImage gaussianFilter;
 	//TODO monitor the changes and template match only changed sections
 	
@@ -59,23 +56,14 @@ public class TemplateMatchingManager {
 		interruptionFlag = interrupt;
 	}
 	
-	public void setTableModel(DefaultTableModel model) {
+	public void setTableModel(TemplateMatchingSegmentModel model) {
 		this.model = model;
-		model.addColumn("index");
-		model.addColumn("frist frame");
-		model.addColumn("last frame");
-		model.addColumn("template frame");
-		model.addColumn("has template");
-//		model.addRow(new Object[] {"1","","",""});
 	}
 	
 	public void init(List<Path> fileList) {
 		this.fileList = fileList;
-		movieSegments = new LinkedList<MovieSegment>();
-		keyFrameList = new LinkedList<Integer>();
 		progress = 0;
-		movieSegments.add(new MovieSegment(0, fileList.size()-1));
-		refreshTable();
+		model.init(fileList.size());
 	}
 	
 	protected void setSegmentFrame(int frameNumber) {
@@ -85,61 +73,14 @@ public class TemplateMatchingManager {
 		if (frameNumber >= fileList.size()-1) {
 			return;
 		}
-		if (keyFrameList.contains(frameNumber)) {
+		if (model.isEndFrame(frameNumber)) {
 			return;
 		}
-		int idx = 0;
-		for (int i: keyFrameList) {
-			if (i > frameNumber) {
-				break;
-			}
-			idx++;
-		}
-		MovieSegment target = movieSegments.remove(idx);
-		int starting = target.getStartFrame();
-		int ending = target.getEndFrame();
-		MovieSegment first = new MovieSegment(starting, frameNumber);
-		MovieSegment second = new MovieSegment(frameNumber, ending);
-		if (target.isReady()) {
-			int ROIFrame = target.getROIFrame();
-			if (ROIFrame < frameNumber) {
-				first.setROI(ROIFrame, target.getROI(), target.getTemplate(), target.getBlurredTemplate());
-			} else {
-				second.setROI(ROIFrame, target.getROI(), target.getTemplate(), target.getBlurredTemplate());
-			}
-		}
-		movieSegments.add(idx, first);
-		movieSegments.add(idx+1, second);
-		keyFrameList.add(idx, frameNumber);
-		logger.info("set key frame at: " + frameNumber);
-		refreshTable();
-		assert (keyFrameList.size() == movieSegments.size()-1);
+		model.setEndFrame(frameNumber);
 	}
 	
 	protected void removeSegmentFrame(int segmentIndex) {
-		// first segment cannot be removed
-		if (segmentIndex == 0) {
-			return;
-		}
-		if (segmentIndex >= movieSegments.size()) {
-			return;
-		}
-		MovieSegment target = movieSegments.get(segmentIndex);
-		MovieSegment previous = movieSegments.get(segmentIndex-1);		
-		int starting = previous.getStartFrame();
-		int ending = target.getEndFrame();
-		MovieSegment merge = new MovieSegment(starting, ending);
-		if (previous.isReady()) {
-			merge.setROI(previous.getROIFrame(), previous.getROI(), previous.getTemplate(), previous.getBlurredTemplate());
-		} else if (target.isReady()) {
-			merge.setROI(target.getROIFrame(), target.getROI(), target.getTemplate(), target.getBlurredTemplate());
-		}
-		movieSegments.remove(previous);
-		movieSegments.remove(target);
-		movieSegments.add(segmentIndex-1,merge);
-		keyFrameList.remove(segmentIndex-1);
-		refreshTable();
-		assert (keyFrameList.size()+1 == movieSegments.size());
+		model.removeEndFrame(segmentIndex);
 	}
 	
 	/* warning: cannot set ROI at the last frame of a segment, unless it
@@ -192,36 +133,16 @@ public class TemplateMatchingManager {
 			}
 		}
 		logger.info("setting ROI");
-		getSegment(frameNumber).setROI(frameNumber, ROI, template, blurredTemplate);
-		refreshTable();
+		model.setROI(frameNumber, ROI, template, blurredTemplate);
 		return true;
 	}
 	
 	protected void removeROI(int segmentIndex) {
-		if (segmentIndex >= movieSegments.size()) {
-			return;
-		}
-		MovieSegment target = movieSegments.get(segmentIndex);
-		target.removeROI();
-		refreshTable();
+		model.removeROI(segmentIndex);
 	}
 	
-	private void refreshTable() {
-		model.setRowCount(0);
-		int count = 1;
-		for (MovieSegment segment: movieSegments) {
-			int startingIdx = segment.getStartFrame();
-			int endingIdx = segment.getEndFrame();
-			int templateFrame = segment.getROIFrame();
-			if (templateFrame == -1) {
-				model.addRow(new Object[] {count, startingIdx, endingIdx, "", false});
-			} else {
-				model.addRow(new Object[] {count, startingIdx, endingIdx, templateFrame, true});
-			}
-			count++;
-		}
-	}
 	
+	@SuppressWarnings("static-access")
 	protected void run(String saveDir, float[] tempXDrift, float[] tempYDrift, boolean blur) {
 		logger.info("TemplateMatching started running...");
 		logger.info("blur image: " + blur);
@@ -232,15 +153,15 @@ public class TemplateMatchingManager {
 		List<Integer> endingIdx = new LinkedList<Integer>();
 		List<double[][]> templates = new LinkedList<double[][]>();
 //		List<Integer> indexIdx = new LinkedList<Integer>();
-		for (MovieSegment segment: movieSegments) {
-			templateXList.add(segment.getROI()[LEFT]);
-			templateYList.add(segment.getROI()[TOP]);
-			startingIdx.add(segment.getStartFrame());
-			endingIdx.add(segment.getEndFrame());
+		for (int i = 0; i < model.getRowCount(); i++) {
+			templateXList.add((Integer) model.getValueAt(i, model.LEFT));
+			templateYList.add((Integer) model.getValueAt(i, model.TOP));
+			startingIdx.add((Integer) model.getValueAt(i, model.START_IDX));
+			endingIdx.add((Integer) model.getValueAt(i, model.END_IDX));
 			if (!blur) {
-				templates.add(segment.getTemplate());
+				templates.add(model.getTemplate(i));
 			} else {
-				templates.add(segment.getBlurredTemplate());
+				templates.add(model.getBlurredTemplate(i));
 			}
 		}
 		
@@ -365,32 +286,9 @@ public class TemplateMatchingManager {
 		return;
 	}
 	
-	// warning: if the frameNumber is at intersection of two MovieSegments
-	// it returns the first MovieSegment
-	protected MovieSegment getSegment(int frameNumber) {
-		assert (frameNumber >= 0);
-		assert (keyFrameList.size()+1 == movieSegments.size());
-		
-		
-		int idx = 0;
-		for (int i: keyFrameList) {
-			if (i > frameNumber) {
-				break;
-			}
-			idx++;
-		}
-		return movieSegments.get(idx);
-	}
 	
 	protected boolean templageMatchingPreRunValidation() {
-		for (MovieSegment segment: movieSegments) {
-			if (!segment.isReady()) {
-				logger.info("rejected because ROI is not set bewteen " + segment.getStartFrame() + " and " + segment.getEndFrame());
-				return false;
-			}
-		}
-		logger.info("passed pre-run validation");
-		return true;
+		return model.isReady();
 	}
 	
 	protected int getProgress() {

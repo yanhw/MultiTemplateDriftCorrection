@@ -1,60 +1,36 @@
-Jun 23, 2022 12:09:42 PM dc.App <init>
+Jun 28, 2022 12:28:35 PM dc.App <init>
 INFO: ---------------New session----------------
-Jun 23, 2022 12:09:42 PM dc.App <init>
+Jun 28, 2022 12:28:35 PM dc.App <init>
 INFO: starting the program...
-Jun 23, 2022 12:09:42 PM dc.App <init>
+Jun 28, 2022 12:28:35 PM dc.App <init>
 INFO: running at: G:\DriftCorrection\app
-Jun 23, 2022 12:09:42 PM dc.App <init>
+Jun 28, 2022 12:28:35 PM dc.App <init>
 INFO: number of processors: 16
-Jun 23, 2022 12:09:44 PM dc.gui.image.ImageViewer updateTagState
-INFO: setting tab enabled upto: 0
-Jun 23, 2022 12:09:54 PM dc.process.Controller block
+Jun 28, 2022 12:28:54 PM dc.controller.Controller block
 INFO: blocking controller, getting images from G:\DriftCorrection\app\src\test\resources\test_movie\rod_short_movie
-Jun 23, 2022 12:09:55 PM dc.model.Movie checkState
+Jun 28, 2022 12:28:55 PM dc.controller.Movie isIOReady
+FINE: no saveDir
+Jun 28, 2022 12:28:55 PM dc.controller.Movie checkState
 INFO: state set to: INIT
-Jun 23, 2022 12:09:55 PM dc.gui.image.ImageViewer updateTagState
-INFO: setting tab enabled upto: 0
-Jun 23, 2022 12:09:55 PM dc.gui.image.RawImageViewer stateChanged
+Jun 28, 2022 12:28:55 PM dc.gui.image.RawImageViewer stateChanged
 INFO: updating to image: 0
-Jun 23, 2022 12:09:55 PM dc.model.Movie checkState
-INFO: state set to: DRIFT_EDIT
-Jun 23, 2022 12:09:55 PM dc.gui.image.ImageViewer updateTagState
-INFO: setting tab enabled upto: 2
-Jun 23, 2022 12:09:55 PM dc.model.TemplateMatchingManager templageMatchingPreRunValidation
-INFO: rejected because ROI is not set bewteen 0 and 24
-Jun 23, 2022 12:09:55 PM dc.process.Controller release
+Jun 28, 2022 12:28:55 PM dc.controller.Movie checkState
+INFO: state set to: TEMPLATE_MATCHING
+Jun 28, 2022 12:28:55 PM dc.gui.SettingPanel updateView
+INFO: changed view state to: dc.model.MovieStateModel[value=1, extent=1, min=0, max=3, adj=false]
+Jun 28, 2022 12:28:55 PM dc.controller.Controller release
 INFO: controller is released
-Jun 23, 2022 12:10:06 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 1
-Jun 23, 2022 12:10:13 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 0
-Jun 23, 2022 12:10:17 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 1
-Jun 23, 2022 12:10:18 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 2
-Jun 23, 2022 12:10:23 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 3
-Jun 23, 2022 12:10:24 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 2
-Jun 23, 2022 12:10:25 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 1
-Jun 23, 2022 12:10:28 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 0
-Jun 23, 2022 12:10:29 PM dc.gui.image.RawImageViewer$3 stateChanged
-INFO: changing zoom level to: 0.5
-Jun 23, 2022 12:10:33 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 1
-Jun 23, 2022 12:10:34 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 2
-Jun 23, 2022 12:10:35 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 3
-Jun 23, 2022 12:10:35 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 4
-Jun 23, 2022 12:10:37 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 3
-Jun 23, 2022 12:10:37 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 2
-Jun 23, 2022 12:10:37 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 1
-Jun 23, 2022 12:10:38 PM dc.gui.image.RawImageViewer stateChanged
-INFO: updating to image: 0
+Jun 28, 2022 12:29:05 PM dc.gui.TemplateMatchingPanel$2 actionPerformed
+INFO: setting template
+Jun 28, 2022 12:29:05 PM dc.controller.Controller setTemplate
+INFO: ROI is not set
+Jun 28, 2022 12:29:10 PM dc.gui.TemplateMatchingPanel$2 actionPerformed
+INFO: setting template
+Jun 28, 2022 12:29:10 PM dc.controller.Controller block
+INFO: blocking controller, setting key frame, please wait...
+Jun 28, 2022 12:29:26 PM dc.controller.TemplateMatchingManager setROI
+INFO: setting ROI
+Jun 28, 2022 12:29:26 PM dc.controller.Controller$2 done
+WARNING: failed to set ROI
+Jun 28, 2022 12:29:26 PM dc.controller.Controller release
+INFO: controller is released

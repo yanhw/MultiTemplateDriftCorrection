@@ -58,11 +58,11 @@ public class Synchroniser {
 
 
 	protected void setTMImage(int frameNumber) {
-		int first = myMovie.getSegementStart(frameNumber);
-		int last = myMovie.getSegementEnd(frameNumber);
-		Path path = myMovie.getROIFrame(frameNumber);
-		int[] ROI = myMovie.getROI(frameNumber);
-		myView.setTMImage(frameNumber, first, last, path, ROI);
+//		int first = myMovie.getSegementStart(frameNumber);
+//		int last = myMovie.getSegementEnd(frameNumber);
+//		Path path = myMovie.getROIFrame(frameNumber);
+//		int[] ROI = myMovie.getROI(frameNumber);
+//		myView.setTMImage(frameNumber, first, last, path, ROI);
 		
 	}
 

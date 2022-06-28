@@ -7,6 +7,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
 import dc.controller.Controller;
+import dc.model.TemplateMatchingSegmentModel;
 
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -40,7 +41,7 @@ public class TemplateMatchingPanel extends JPanel {
 	private JButton runButton;
 	private JButton loadDriftButton;
 	
-	DefaultTableModel model;
+	TemplateMatchingSegmentModel model;
 	/**
 	 * Create the panel.
 	 */
@@ -95,7 +96,7 @@ public class TemplateMatchingPanel extends JPanel {
 	
 	protected void setController(Controller controller) {
 		this.controller = controller;
-		model = new DefaultTableModel() {
+		model = new TemplateMatchingSegmentModel() {
 			@Override
 			public boolean isCellEditable(int row, int column) {       
 				return false; // or a condition at your choice with row and column
@@ -111,7 +112,10 @@ public class TemplateMatchingPanel extends JPanel {
 
 		table.setFillsViewportHeight(true);
 		table.setModel(model);
-		
+		table.removeColumn(table.getColumn("top"));
+		table.removeColumn(table.getColumn("bottom"));
+		table.removeColumn(table.getColumn("left"));
+		table.removeColumn(table.getColumn("right"));
 		setHandlers();
 	}
 	

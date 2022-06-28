@@ -6,14 +6,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.*;
-
 import javax.swing.SwingWorker;
-import javax.swing.table.DefaultTableModel;
 
 import dc.gui.MainFrame;
-import dc.model.DriftModel;
-import dc.model.DriftSectionModel;
-import dc.model.MovieStateModel;
+import dc.model.*;
 
 /*
  * This class serves as central controller for the app
@@ -67,7 +63,7 @@ public class Controller {
 		setMovieStateModel();
 	}
 	
-	public void setTemplateTableModel(DefaultTableModel model) {
+	public void setTemplateTableModel(TemplateMatchingSegmentModel model) {
 		myMovie.setTemplateTableModel(model);
 	}
 	

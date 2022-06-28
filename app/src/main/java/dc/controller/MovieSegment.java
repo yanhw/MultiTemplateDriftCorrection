@@ -9,6 +9,7 @@ package dc.controller;
  * 
  * Note: input validation is expected to be done by controller!
  */
+@Deprecated
 public class MovieSegment {
 	private int startFrame;
 	private int endFrame;

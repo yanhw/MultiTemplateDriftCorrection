@@ -8,11 +8,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.table.DefaultTableModel;
-
-import dc.model.DriftModel;
-import dc.model.DriftSectionModel;
-import dc.model.MovieStateModel;
+import dc.model.*;
 import dc.utils.FileSystem;
 
 public class Movie {
@@ -48,7 +44,7 @@ public class Movie {
 		driftCorrection.setInterruptionFlag(interrupt);
 	}
 	
-	public void setTemplateTableModel(DefaultTableModel model) {
+	public void setTemplateTableModel(TemplateMatchingSegmentModel model) {
 		templateMatching.setTableModel(model);
 	}
 	
@@ -158,9 +154,9 @@ public class Movie {
 		templateMatching.removeROI(targetIndex);
 	}
 
-	protected MovieSegment getMovieSegment(int frameNumber) {
-		return templateMatching.getSegment(frameNumber);
-	}
+//	protected MovieSegment getMovieSegment(int frameNumber) {
+//		return templateMatching.getSegment(frameNumber);
+//	}
 
 	public boolean templageMatchingPreRunValidation() {
 		return templateMatching.templageMatchingPreRunValidation();

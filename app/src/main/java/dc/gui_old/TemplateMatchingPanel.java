@@ -99,7 +99,7 @@ public class TemplateMatchingPanel extends JPanel {
 
 	protected void setController(Controller controller) {
 		this.controller = controller;
-		controller.setTemplateTableModel(model);
+//		controller.setTemplateTableModel(model);
 	}
 	
 	public void setFileHandler(FileHandler fh) {

@@ -315,6 +315,7 @@ public class DriftManager {
 		if (start < xDrift.length-1) {
 			fitDrift(degrees.get(cuttingPoints.size()), start, xDrift.length-1, directionOption);
 		}
+		isDriftReady = true;
 		logger.info("drift fitting done");
 	}
 	
