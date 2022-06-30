@@ -22,8 +22,6 @@ import java.awt.FlowLayout;
 @SuppressWarnings("serial")
 public class SettingPanel extends JPanel {
 	private static final Logger logger = Logger.getLogger(SettingPanel.class.getName());
-	private Controller controller;
-	private Synchroniser sync;
 	private MovieStateModel state;		// state that GUI is displaying
 	
 	private JButton prevButton;
@@ -64,7 +62,6 @@ public class SettingPanel extends JPanel {
 	
 	
 	public void setController(Controller controller) {
-		this.controller = controller;
 		ioPanel.setController(controller);
 		templateMatchingPanel.setController(controller);
 		driftEditingPanel.setController(controller);
@@ -78,14 +75,11 @@ public class SettingPanel extends JPanel {
 		driftEditingPanel.setFileHandler(fh);
 	}
 	
-	public void setSynchroniser(Synchroniser sync) {
-		this.sync = sync;
-	}
 	
 	private void setHandlers() { 
 		prevButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				assert state.getValue() != state.INIT;
+				assert state.getValue() != MovieStateModel.INIT;
 				viewState--;
 				updateView();
 				setButtons();

@@ -163,12 +163,13 @@ public class Movie {
 	}
 	
 	public void runTemplateMatching(boolean blur) {
-		templateMatching.run(saveDir, driftManager.getXDrift(), driftManager.getYDrift(), blur);
+		templateMatching.run(saveDir, blur);
 	}
 	
 
 	public void afterTemplateMatching() {
 //		logger.info("at after template matching");
+		driftManager.setDrifts(templateMatching.tempXDrift, templateMatching.tempYDrift);
 		driftManager.fitDrift(driftManager.FITBOTH);
 		driftManager.saveFittedDrift(saveDir);
 		saveRawDrift();

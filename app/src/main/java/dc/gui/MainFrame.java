@@ -113,7 +113,6 @@ public class MainFrame extends JFrame {
 		
 		sync = new Synchroniser(this);
 		rawImageViewer.setSynchroniser(sync);
-		settingPanel.setSynchroniser(sync);
 		imageViewer.setSynchroniser(sync);
 		settingPanel.setController(controller);
 		controller.setMainFrame(this);
@@ -158,6 +157,7 @@ public class MainFrame extends JFrame {
 	/////////// drift editing
 	public void setDriftModel(DriftModel driftModel) {
 		settingPanel.setDriftModel(driftModel);
+		imageViewer.setDriftDataModel(driftModel);
 	}
 	
 	public void setDriftSectionModel(DriftSectionModel sectionModel) {
@@ -205,13 +205,6 @@ public class MainFrame extends JFrame {
 //	protected void removeTMImage(int frameNumber) {
 //		imagePanel.removeTMImage();
 //	}
-	
-	public void setXDriftData(int[] xList, float[] xFittedList) {
-		imageViewer.setXDriftData(xList, xFittedList);
-	}
-	public void setYDriftData(int[] yList, float[] yFittedList) {
-		imageViewer.setYDriftData(yList, yFittedList);
-	}
 	
 	public void setCorrectedImages(List<String> list) {
 		imageViewer.setCorrectedImages(list);

@@ -33,6 +33,9 @@ public class TemplateMatchingManager {
 	private List<Path> fileList;
 	private TemplateMatchingSegmentModel model;
 	private GaussianImage gaussianFilter;
+	
+	protected float[] tempXDrift;
+	protected float[] tempYDrift;
 	//TODO monitor the changes and template match only changed sections
 	
 	/*
@@ -64,6 +67,8 @@ public class TemplateMatchingManager {
 		this.fileList = fileList;
 		progress = 0;
 		model.init(fileList.size());
+		tempXDrift = new float[fileList.size()];
+		tempYDrift = new float[fileList.size()];
 	}
 	
 	protected void setSegmentFrame(int frameNumber) {
@@ -143,7 +148,7 @@ public class TemplateMatchingManager {
 	
 	
 	@SuppressWarnings("static-access")
-	protected void run(String saveDir, float[] tempXDrift, float[] tempYDrift, boolean blur) {
+	protected void run(String saveDir, boolean blur) {
 		logger.info("TemplateMatching started running...");
 		logger.info("blur image: " + blur);
 		progress = 0;

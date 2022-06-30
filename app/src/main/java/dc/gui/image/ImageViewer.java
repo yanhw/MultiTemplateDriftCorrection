@@ -6,6 +6,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import dc.gui.Synchroniser;
+import dc.model.DriftModel;
 import dc.model.MovieStateModel;
 import dc.model.TemplateMatchingSegmentModel;
 
@@ -25,7 +26,7 @@ public class ImageViewer extends JPanel {
 	private DriftViewer xDriftPlot;
 	private DriftViewer yDriftPlot;
 
-	private Synchroniser sync;
+
 
 	/**
 	 * Create the panel.
@@ -42,10 +43,10 @@ public class ImageViewer extends JPanel {
 		JTabbedPane driftPlotPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("Drift Plot", null, driftPlotPane, null);
 		
-		xDriftPlot = new DriftViewer();
+		xDriftPlot = new DriftViewer("x");
 		driftPlotPane.addTab("x drift", null, xDriftPlot, null);
 		
-		yDriftPlot = new DriftViewer();
+		yDriftPlot = new DriftViewer("y");
 		driftPlotPane.addTab("y drift", null, yDriftPlot, null);
 		
 		correctedImage = new DriftCorrectedImageViewer();
@@ -66,21 +67,17 @@ public class ImageViewer extends JPanel {
 		templateImage.setTemplateTableModel(model);
 	}
 	
+	public void setDriftDataModel(DriftModel model) {
+		xDriftPlot.setDriftModelListener(model);
+		yDriftPlot.setDriftModelListener(model);
+	}
+	
 	public void setSynchroniser(Synchroniser sync) {
-		this.sync = sync;
 		correctedImage.setSynchroniser(sync);
 	}
 	
 	public void setRawImages(List<Path> fileList) {
 		templateImage.setFileList(fileList);
-	}
-	
-	public void setXDriftData(int[] xList, float[] xFittedList) {
-		xDriftPlot.setData(xList, xFittedList);
-	}
-	
-	public void setYDriftData(int[] yList, float[] yFittedList) {
-		yDriftPlot.setData(yList, yFittedList);
 	}
 	
 	public void setCorrectedImages(List<String> list) {

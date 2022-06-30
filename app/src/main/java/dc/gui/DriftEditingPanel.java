@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import javax.swing.JSplitPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.AbstractTableModel;
 
 import dc.controller.Controller;
@@ -17,12 +18,16 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+
 import java.awt.event.ActionListener;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.awt.event.ActionEvent;
 import java.awt.FlowLayout;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultCellEditor;
+import javax.swing.InputVerifier;
 import javax.swing.JSeparator;
 
 @SuppressWarnings("serial")
@@ -62,7 +67,8 @@ public class DriftEditingPanel extends JPanel {
 		
 		driftSectionTable = new JTable();
 		scrollPane_1.setRowHeaderView(driftSectionTable);
-		splitPane.setDividerLocation(0.50);
+		splitPane.setDividerLocation(0.5);
+		splitPane.setResizeWeight(0.5);
 		
 		JPanel buttonPanel = new JPanel();
 		add(buttonPanel, BorderLayout.EAST);
@@ -119,6 +125,60 @@ public class DriftEditingPanel extends JPanel {
 	
 	protected void setDriftModel(DriftModel driftModel) {
 		driftTable.setModel(driftModel);
+		driftTable.removeColumn(driftTable.getColumn("fitted dx"));
+		driftTable.removeColumn(driftTable.getColumn("fitted dy"));
+		driftTable.removeColumn(driftTable.getColumn("weight x"));
+		driftTable.removeColumn(driftTable.getColumn("weight y"));
+		// https://stackoverflow.com/questions/13508851/validate-a-tables-cell-using-editors
+		final InputVerifier iv = new InputVerifier() {
+
+		    @Override
+		    public boolean verify(JComponent input) {
+		        JTextField field = (JTextField) input;
+		        float floatValue = 0;
+				try {
+					floatValue = Float.parseFloat(String.valueOf(field));
+					logger.info("value input: " + floatValue);
+				} catch (ClassCastException e) {
+					logger.warning("failed to render");
+					return false;
+				} catch (NumberFormatException e) {
+					logger.info("input is not a number: " + field);
+					return false;
+				}
+		        return true;
+		    }
+		    
+		    @Override
+		    public boolean shouldYieldFocus(JComponent input) {
+		        boolean valid = verify(input);
+		        if (!valid) {
+		        	logger.fine("invalid input: " + input);
+		        }
+		        return valid;
+		    }
+
+		};
+		DefaultCellEditor editor = new DefaultCellEditor(new JTextField()) {
+		    {
+		        getComponent().setInputVerifier(iv);
+		    }
+
+		    @SuppressWarnings("deprecation")
+			@Override
+		    public boolean stopCellEditing() {
+		        if (!iv.shouldYieldFocus(getComponent())) return false;
+		        return super.stopCellEditing();
+		    }
+
+		    @Override
+		    public JTextField getComponent() {
+		        return (JTextField) super.getComponent();
+		    }
+
+		};
+
+		driftTable.setDefaultEditor(Object.class, editor);
 	}
 	
 	protected void setDriftSectionModel(DriftSectionModel sectionModel) {

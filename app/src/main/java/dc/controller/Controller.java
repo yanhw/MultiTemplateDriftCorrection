@@ -380,7 +380,6 @@ public class Controller {
 			}
 			@Override
 			public void done() {
-				updatePlot();
 				myView.updateStatus("ready to view drift");
 				checkState();
 				release();
@@ -410,7 +409,6 @@ public class Controller {
 					return;
 				}
 				checkState();
-				updatePlot();
 				myView.updateStatus("ready to view drift");
 				logger.info("finished reading csv");
 				
@@ -438,7 +436,6 @@ public class Controller {
 			return;
 		}
 		myMovie.setXDrift(frameNumber, newVal);
-		updateXPlot();
 //		logger.info("aaaaaaa");
 	}
 	
@@ -447,7 +444,6 @@ public class Controller {
 			return;
 		}
 		myMovie.setYDrift(frameNumber, newVal);
-		updateYPlot();
 	}
 	
 	///////////////// fitting//////////////////////////////////
@@ -457,7 +453,7 @@ public class Controller {
 			return;
 		}
 		myMovie.setFitDegree(row, intValue);
-		updatePlot();
+
 	}
 	
 	public void addCuttingPoint(int frameNumber) {
@@ -466,7 +462,7 @@ public class Controller {
 		}
 		myMovie.addCuttingPoint(frameNumber);
 		myView.updateDriftSectionTable();
-		updatePlot();
+
 	}
 	
 	public void removeCuttingPoint(int sectionIndex) {
@@ -475,44 +471,12 @@ public class Controller {
 		}
 		myMovie.removeCuttingPoint(sectionIndex);
 		myView.updateDriftSectionTable();
-		updatePlot();
+
 	}
 
 
 	///////////////// plot////////////////////
-	private void updatePlot() {
-		updateXPlot();
-		updateYPlot();
-	}
-	
-	private void updateXPlot() {
-		float[] xRawList = myMovie.getXDrift();
-		float[] xFittedList = myMovie.getXFittedDrift();
-		
-		assert (xRawList != null);
-		
-		assert (xFittedList != null);
-		
-		int[] xList = new int[xRawList.length];
-		
-		for (int idx = 0; idx < xRawList.length; idx++) {
-			xList[idx] = (int) xRawList[idx];
-		}
-		myView.setXDriftData(xList, xFittedList);
-	}
-	
-	private void updateYPlot() {
-		float[] yRawList = myMovie.getYDrift();
-		float[] yFittedList = myMovie.getYFittedDrift();
-		assert (yRawList != null);
-		assert (yFittedList != null);
-		int[] yList = new int[yRawList.length];
-		for (int idx = 0; idx < yRawList.length; idx++) {
-			yList[idx] = (int) yRawList[idx];
-		}
-		myView.setYDriftData(yList, yFittedList);
-	}
-	
+
 
 
 	/////////////////////////////////////////////////////////////////////

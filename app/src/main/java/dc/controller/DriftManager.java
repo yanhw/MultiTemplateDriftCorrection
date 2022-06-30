@@ -31,12 +31,8 @@ public class DriftManager {
 	public final int FITX = 0;
 	public final int FITY = 1;
 	public final int FITBOTH = 2;
-	private float[] xDrift;
-	private float[] yDrift;
-	private double[] xWeight;
-	private double[] yWeight;
-	private float[] xFitted;
-	private float[] yFitted;
+	
+	
 	private List<Integer> cuttingPoints;
 	private List<Integer> degrees;
 
@@ -57,16 +53,13 @@ public class DriftManager {
 	// initialise variables here because the movie can change
 	protected void init(int numFrame) {
 		assert (numFrame >= 2);
+		this.isDriftReady = false;
+		driftModel.initData(numFrame);
+		
 		this.cuttingPoints = new LinkedList<Integer>();
 		this.degrees = new LinkedList<Integer>();
 		this.degrees.add(DEFAULTFITTINGDEGREE);
-		this.xDrift = new float[numFrame];
-		this.yDrift = new float[numFrame];
-		this.xWeight = new double[numFrame];
-		this.yWeight = new double[numFrame];
-		this.xFitted = new float[numFrame];
-		this.yFitted = new float[numFrame];
-		this.isDriftReady = false;
+		
 		
 //		setDrifts(xDrift, yDrift);
 		sectionModel.setData(cuttingPoints, degrees, numFrame);
@@ -99,8 +92,8 @@ public class DriftManager {
 			logger.info("wrong format: " + filename);
 			return false;
 		}
-		float[] tempX = new float[xDrift.length];
-		float[] tempY = new float[xDrift.length];
+		float[] tempX = new float[driftModel.getRowCount()];
+		float[] tempY = new float[driftModel.getRowCount()];
 		try (Scanner scanner = new Scanner(new File(filename));) {
 		    if (!scanner.hasNextLine()) {
 		    	logger.info("empty file!");
@@ -112,7 +105,7 @@ public class DriftManager {
 		    	return false;
 		    }
 		    int idx = 0;
-			while (scanner.hasNextLine() && idx < xDrift.length) {
+			while (scanner.hasNextLine() && idx < driftModel.getRowCount()) {
 		    	String data = scanner.nextLine();
 		    	StringTokenizer tokenizer = new StringTokenizer(data, ",");
 		    	if (tokenizer.countTokens() != 3) {
@@ -145,64 +138,90 @@ public class DriftManager {
 		assert (x != null);
 		assert (y != null);
 		assert (x.length == y.length);
-		assert (x.length == xDrift.length);
-		this.xDrift = x;
-		this.yDrift = y;
+		assert (x.length == driftModel.getRowCount());
 		driftModel.setData(x, y);
-		for (int i = 0; i < xDrift.length; i++) {
-			xWeight[i] = 1;
-			yWeight[i] = 1;
-		}
 		isDriftReady = true;
 	}
 
 	protected void setDrifts(int frameNumber, float x, float y) {
 		assert (frameNumber >= 0);
-		assert (frameNumber < xDrift.length);
-		this.xDrift[frameNumber] = x;
-		this.yDrift[frameNumber] = y;
+		assert (frameNumber < driftModel.getRowCount());
+		driftModel.setValueAt(x, frameNumber, DriftModel.DX);
+		driftModel.setValueAt(y, frameNumber, DriftModel.DY);
 	}
 	
 	protected void setXDrift(int frameNumber, float newVal) {
 		assert (frameNumber >= 0);
-		assert (frameNumber < xDrift.length);
-		xDrift[frameNumber] = newVal;
+		assert (frameNumber < driftModel.getRowCount());
+		driftModel.setValueAt(newVal, frameNumber, DriftModel.DX);
 		logger.info("xDrift at frame " + frameNumber + " is changed to " + newVal);
 		fitDrift(FITX);
 	}
 	
 	protected void setYDrift(int frameNumber, float newVal) {
 		assert (frameNumber >= 0);
-		assert (frameNumber < xDrift.length);
-		yDrift[frameNumber] = newVal;
+		assert (frameNumber < driftModel.getRowCount());
+		driftModel.setValueAt(newVal, frameNumber, DriftModel.DY);
 		logger.info("yDrift at frame " + frameNumber + " is changed to " + newVal);
 		fitDrift(FITY);
 	}
 	
 	protected void removeDrift(int frameNumber) {
 		assert (frameNumber >= 0);
-		assert (frameNumber < xDrift.length);
-		driftModel.setValueAt(0, frameNumber, 1);
-		driftModel.setValueAt(0, frameNumber, 2);
-		xWeight[frameNumber] = 0;
-		yWeight[frameNumber] = 0;
+		assert (frameNumber < driftModel.getRowCount());
+		driftModel.setValueAt(0, frameNumber, DriftModel.DX);
+		driftModel.setValueAt(0, frameNumber, DriftModel.DY);
+		driftModel.setValueAt(0, frameNumber, DriftModel.WEIGHT_X);
+		driftModel.setValueAt(0, frameNumber, DriftModel.WEIGHT_Y);
 	}
 
 
 	protected float[] getXDrift() {
-		return xDrift;
+		float[] drift = new float[driftModel.getRowCount()];
+		for (int i = 0; i < drift.length; i++) {
+			drift[i] = ((Double) driftModel.getValueAt(i, DriftModel.DX)).floatValue();
+		}
+		return drift;
 	}
 	
 	protected float[] getYDrift() {
-		return yDrift;
+		float[] drift = new float[driftModel.getRowCount()];
+		for (int i = 0; i < drift.length; i++) {
+			drift[i] = ((Double) driftModel.getValueAt(i, DriftModel.DY)).floatValue();
+		}
+		return drift;
 	}
 	
 	protected float[] getFittedXDrift() {
-		return xFitted;
+		float[] drift = new float[driftModel.getRowCount()];
+		for (int i = 0; i < drift.length; i++) {
+			drift[i] = ((Double) driftModel.getValueAt(i, DriftModel.FITTED_DX)).floatValue();
+		}
+		return drift;
 	}
 	
 	protected float[] getFittedYDrift() {
-		return yFitted;
+		float[] drift = new float[driftModel.getRowCount()];
+		for (int i = 0; i < drift.length; i++) {
+			drift[i] = ((Double) driftModel.getValueAt(i, DriftModel.FITTED_DY)).floatValue();
+		}
+		return drift;
+	}
+	
+	private double[] getXWeight() {
+		double[] drift = new double[driftModel.getRowCount()];
+		for (int i = 0; i < drift.length; i++) {
+			drift[i] = (double) driftModel.getValueAt(i, DriftModel.WEIGHT_X);
+		}
+		return drift;
+	}
+	
+	private double[] getYWeight() {
+		double[] drift = new double[driftModel.getRowCount()];
+		for (int i = 0; i < drift.length; i++) {
+			drift[i] = (double) driftModel.getValueAt(i, DriftModel.WEIGHT_Y);
+		}
+		return drift;
 	}
 	
 	protected boolean isReady() {
@@ -215,7 +234,7 @@ public class DriftManager {
 	// so the first frame cannot be a cutting point
 	protected void addCuttingPoint(int frameNumber) {
 		assert (frameNumber >= 0);
-		assert (frameNumber < xDrift.length);
+		assert (frameNumber < driftModel.getRowCount());
 		assert(degrees.size() == cuttingPoints.size()+1);
 		if (cuttingPoints.contains(frameNumber)) {
 			logger.info(frameNumber + " is already a cutting point");
@@ -244,7 +263,7 @@ public class DriftManager {
 		// fit second section
 		start = frameNumber;
 		if (index == cuttingPoints.size()-1) {
-			end = xDrift.length-1;
+			end = driftModel.getRowCount()-1;
 		} else {
 			end = cuttingPoints.get(index+1);
 		}
@@ -270,7 +289,7 @@ public class DriftManager {
 		}
 		cuttingPoints.remove(sectionIndex-1);
 		degrees.remove(sectionIndex-1);
-		int start = 0, end = xDrift.length-1, degree = 0;
+		int start = 0, end = driftModel.getRowCount()-1, degree = 0;
 		if (sectionIndex > 1) {
 			start = cuttingPoints.get(sectionIndex-1);
 		}
@@ -295,7 +314,7 @@ public class DriftManager {
 		}
 		degrees.set(sectionIndex, degree);
 		int start = 0;
-		int end = xDrift.length-1;
+		int end = driftModel.getRowCount()-1;
 		if (sectionIndex != 0) {
 			start = cuttingPoints.get(sectionIndex-1);
 		}
@@ -312,8 +331,8 @@ public class DriftManager {
 			fitDrift(degrees.get(i), start, cuttingPoints.get(i), directionOption);
 			start = cuttingPoints.get(i);
 		}
-		if (start < xDrift.length-1) {
-			fitDrift(degrees.get(cuttingPoints.size()), start, xDrift.length-1, directionOption);
+		if (start < driftModel.getRowCount()-1) {
+			fitDrift(degrees.get(cuttingPoints.size()), start, driftModel.getRowCount()-1, directionOption);
 		}
 		isDriftReady = true;
 		logger.info("drift fitting done");
@@ -325,17 +344,21 @@ public class DriftManager {
 		double[] fitted;
 		double diff;
 		if (directionOption == FITX || directionOption == FITBOTH) {
+			float[] xDrift = getXDrift();
+			double[] xWeight = getXWeight();
 			fitted = fitDrift(degree, start, end, xDrift, xWeight);
 			diff = xDrift[start] - fitted[0];
 			for (int i = start; i <= end; i++) {
-				xFitted[i] = (float) (fitted[i-start] - diff);
+				driftModel.setValueAt((float) (fitted[i-start] - diff), i, DriftModel.FITTED_DX);
 			}
 		}
 		if (directionOption == FITY || directionOption == FITBOTH) {
+			float[] yDrift = getYDrift();
+			double[] yWeight = getYWeight();
 			fitted = fitDrift(degree, start, end, yDrift, yWeight);
 			diff = yDrift[start] - fitted[0];
 			for (int i = start; i <= end; i++) {
-				yFitted[i] = (float) (fitted[i-start] - diff);
+				driftModel.setValueAt((float) (fitted[i-start] - diff), i, DriftModel.FITTED_DY);
 			}
 		}
 	}
@@ -361,16 +384,16 @@ public class DriftManager {
 	///////////////// csv saving////////////////////////////////
 	protected void saveRawDrift(String saveDir) {
 		assert (saveDir != null);
-		assert (xDrift != null && yDrift != null);
+		assert (isDriftReady);
 		String filename = FileSystem.joinPath(saveDir, "drift.csv");
-		saveCsv(filename, xDrift, yDrift);
+		saveCsv(filename, getXDrift(), getYDrift());
 	}
 	
 	protected void saveFittedDrift(String saveDir) {
 		assert (saveDir != null);
-		assert (xFitted != null && yFitted != null);
+		assert (isDriftReady);
 		String filename = FileSystem.joinPath(saveDir, "fitted_drift.csv");
-		saveCsv(filename, xFitted, yFitted);
+		saveCsv(filename, getFittedXDrift(), getFittedYDrift());
 	}
 	
 	private void saveCsv(String filename, float[] xArray, float[] yArray) {

@@ -18,6 +18,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import dc.gui.Synchroniser;
+import dc.model.DriftModel;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -25,8 +26,9 @@ import java.awt.Color;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 //import javax.swing.UIManager;
 
 
@@ -38,8 +40,19 @@ public class DriftViewer extends JPanel {
 	private XYSeries fittedDrift;
 	private Synchroniser mySynchroniser;
 	
+	private int rawIdx;
+	private int fittedIdx;
+	
 	private int[] idxList;
-	public DriftViewer() {
+	public DriftViewer(String direction) {
+		if (direction.equals("x")) {
+			rawIdx = DriftModel.DX;
+			fittedIdx = DriftModel.FITTED_DX;
+		} else {
+			rawIdx = DriftModel.DY;
+			fittedIdx = DriftModel.FITTED_DY;
+		}
+		
         rawDrift = new XYSeries("raw drift");
         fittedDrift = new XYSeries("fitted drift");
         XYSeriesCollection dataset = new XYSeriesCollection();
@@ -86,21 +99,64 @@ public class DriftViewer extends JPanel {
 		mySynchroniser = synchroniser;
 	}
 	
-	protected void setData(int[] xList, float[] xFittedList) {
-		assert (xList.length == xFittedList.length);
-		int numFrame = xList.length;
-		
-		rawDrift.clear();
-		fittedDrift.clear();
-		for (int i = 0; i < numFrame; i++) {
-			rawDrift.add(i, xList[i]);
-			fittedDrift.add(i, xFittedList[i]);
+	public void setDriftModelListener(DriftModel model) {
+		model.addTableModelListener(new DriftModelListener());
+	}
+	
+	private class DriftModelListener implements TableModelListener {
+
+		@Override
+		public void tableChanged(TableModelEvent e) {
+			DriftModel model = (DriftModel)e.getSource();
+			int col = e.getColumn();
+			if (col == rawIdx || col == TableModelEvent.ALL_COLUMNS) {
+				switch (e.getType()) {
+				
+					case TableModelEvent.INSERT:
+						int start = e.getFirstRow();
+						int end = e.getLastRow();
+						for (int i = start; i <= end; i++) {
+							rawDrift.add((double)i, (Number) model.getValueAt(i, rawIdx));
+						}
+						break;
+					case TableModelEvent.DELETE:
+						rawDrift.clear();
+						break;
+					case TableModelEvent.UPDATE:
+						int start1 = e.getFirstRow();
+						int end1 = e.getLastRow();
+						rawDrift.delete(start1, end1);
+						
+						for (int i = start1; i <= end1; i++) {
+							rawDrift.add((double)i, (Number) model.getValueAt(i, rawIdx));
+						}
+						break;
+				}
+			}
+			if (col == fittedIdx || col == TableModelEvent.ALL_COLUMNS) {
+				switch (e.getType()) {
+					case TableModelEvent.INSERT:
+						int start = e.getFirstRow();
+						int end = e.getLastRow();
+						for (int i = start; i <= end; i++) {
+							fittedDrift.add(i, (Number) model.getValueAt(i, rawIdx));
+						}
+						break;
+					case TableModelEvent.DELETE:
+						fittedDrift.clear();
+						break;
+					case TableModelEvent.UPDATE:
+						int start1 = e.getFirstRow();
+						int end1 = e.getLastRow();
+						fittedDrift.delete(start1, end1);
+						for (int i = start1; i <= end1; i++) {
+							fittedDrift.add(i, (Number) model.getValueAt(i, rawIdx));
+						}
+						break;
+				}
+			}
 		}
 		
-		this.idxList = new int[xList.length];
-		for (int i = 0; i < xList.length; i++) {
-			this.idxList[i] = i;
-		}
 	}
 	
 	//https://www.jfree.org/forum/viewtopic.php?t=27383
@@ -108,7 +164,6 @@ public class DriftViewer extends JPanel {
 
 		@Override
 		public void chartMouseClicked(ChartMouseEvent event) {
-			// TODO Auto-generated method stub
 			ChartEntity entity = event.getEntity();
 			if (entity == null) {
 				return;
@@ -140,44 +195,4 @@ public class DriftViewer extends JPanel {
 		
 	}
 
-	// for testing
-	private void createDataset() {   
-		  int[] xList = new int[100];
-		  float[] yList = new float[100];
-		  for (int i = 0; i < 100; i++) {
-			  xList[i] = i;
-			  yList[i] = i*i-10;
-		  }
-		  setData(xList, yList);
-	}
-
-	
-	// for testing
-    private static void createAndShowGUI() {
-        //Create and set up the window.
-        JFrame frame = new JFrame("PlotTest");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        DriftViewer imageViewer = new DriftViewer();
-        imageViewer.createDataset();
-                
-        //Add content to the window.
-        frame.add(imageViewer, BorderLayout.CENTER);
-
-        //Display the window.
-        frame.pack();
-        frame.setSize(800,400);
-        frame.setLocation(200,200);
-        frame.setVisible(true);
-//        imageViewer.updatePicture(0); 
-        
-    }
-    
-    // for testing
-    public static void main(String[] args) {
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createAndShowGUI();
-            }
-        });
-    }
 }
