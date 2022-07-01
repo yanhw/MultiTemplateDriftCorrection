@@ -5,8 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
@@ -26,15 +24,9 @@ import dc.utils.FileSystem;
  */
 public class DriftManager {
 	private static final Logger logger = Logger.getLogger(DriftManager.class.getName());
-	private static final int DEFAULTFITTINGDEGREE = 5;
-	public final int MAXFITTINGDEGREE = 25;
-	public final int FITX = 0;
-	public final int FITY = 1;
-	public final int FITBOTH = 2;
-	
-	
-	private List<Integer> cuttingPoints;
-	private List<Integer> degrees;
+	public static final int FITX = 0;
+	public static final int FITY = 1;
+	public static final int FITBOTH = 2;
 
 	private DriftModel driftModel;
 	private DriftSectionModel sectionModel;
@@ -50,27 +42,24 @@ public class DriftManager {
 		
 	}
 	
-	// initialise variables here because the movie can change
-	protected void init(int numFrame) {
-		assert (numFrame >= 2);
-		this.isDriftReady = false;
-		driftModel.initData(numFrame);
-		
-		this.cuttingPoints = new LinkedList<Integer>();
-		this.degrees = new LinkedList<Integer>();
-		this.degrees.add(DEFAULTFITTINGDEGREE);
-		
-		
-//		setDrifts(xDrift, yDrift);
-		sectionModel.setData(cuttingPoints, degrees, numFrame);
-	}
-	
 	protected void setTableModel(DriftModel driftModel, DriftSectionModel sectionModel) {
 		assert (driftModel != null);
 		assert (sectionModel != null);
 		this.driftModel = driftModel;
 		this.sectionModel = sectionModel;
+	}	
+	
+	// initialise variables here because the movie can change
+	protected void init(int numFrame) {
+		assert (numFrame >= 2);
+		this.isDriftReady = false;
+		driftModel.initData(numFrame);
+		sectionModel.initData(numFrame);
 	}
+	
+	
+	
+////////////////////set drift///////////////////////
 	
 	/*
 	 *  required csv file structure:
@@ -133,7 +122,6 @@ public class DriftManager {
 	}
 	
 	// default entry point to initialise drifts, if succeed, change isDriftReady to true, and it always stays true unless reset movie
-	// TODO: set x and y flags together with drifts, flags determined during template matching
 	protected void setDrifts(float[] x, float[] y) {
 		assert (x != null);
 		assert (y != null);
@@ -141,6 +129,7 @@ public class DriftManager {
 		assert (x.length == driftModel.getRowCount());
 		driftModel.setData(x, y);
 		isDriftReady = true;
+		logger.info("ready: " + isDriftReady);
 	}
 
 	protected void setDrifts(int frameNumber, float x, float y) {
@@ -155,7 +144,6 @@ public class DriftManager {
 		assert (frameNumber < driftModel.getRowCount());
 		driftModel.setValueAt(newVal, frameNumber, DriftModel.DX);
 		logger.info("xDrift at frame " + frameNumber + " is changed to " + newVal);
-		fitDrift(FITX);
 	}
 	
 	protected void setYDrift(int frameNumber, float newVal) {
@@ -163,23 +151,19 @@ public class DriftManager {
 		assert (frameNumber < driftModel.getRowCount());
 		driftModel.setValueAt(newVal, frameNumber, DriftModel.DY);
 		logger.info("yDrift at frame " + frameNumber + " is changed to " + newVal);
-		fitDrift(FITY);
 	}
 	
 	protected void removeDrift(int frameNumber) {
 		assert (frameNumber >= 0);
 		assert (frameNumber < driftModel.getRowCount());
-		driftModel.setValueAt(0, frameNumber, DriftModel.DX);
-		driftModel.setValueAt(0, frameNumber, DriftModel.DY);
-		driftModel.setValueAt(0, frameNumber, DriftModel.WEIGHT_X);
-		driftModel.setValueAt(0, frameNumber, DriftModel.WEIGHT_Y);
+		driftModel.removeDrift(frameNumber);
 	}
 
 
 	protected float[] getXDrift() {
 		float[] drift = new float[driftModel.getRowCount()];
 		for (int i = 0; i < drift.length; i++) {
-			drift[i] = ((Double) driftModel.getValueAt(i, DriftModel.DX)).floatValue();
+			drift[i] = ((Number) driftModel.getValueAt(i, DriftModel.DX)).floatValue();
 		}
 		return drift;
 	}
@@ -187,7 +171,7 @@ public class DriftManager {
 	protected float[] getYDrift() {
 		float[] drift = new float[driftModel.getRowCount()];
 		for (int i = 0; i < drift.length; i++) {
-			drift[i] = ((Double) driftModel.getValueAt(i, DriftModel.DY)).floatValue();
+			drift[i] = ((Number) driftModel.getValueAt(i, DriftModel.DY)).floatValue();
 		}
 		return drift;
 	}
@@ -195,7 +179,7 @@ public class DriftManager {
 	protected float[] getFittedXDrift() {
 		float[] drift = new float[driftModel.getRowCount()];
 		for (int i = 0; i < drift.length; i++) {
-			drift[i] = ((Double) driftModel.getValueAt(i, DriftModel.FITTED_DX)).floatValue();
+			drift[i] = ((Number) driftModel.getValueAt(i, DriftModel.FITTED_DX)).floatValue();
 		}
 		return drift;
 	}
@@ -203,7 +187,7 @@ public class DriftManager {
 	protected float[] getFittedYDrift() {
 		float[] drift = new float[driftModel.getRowCount()];
 		for (int i = 0; i < drift.length; i++) {
-			drift[i] = ((Double) driftModel.getValueAt(i, DriftModel.FITTED_DY)).floatValue();
+			drift[i] = ((Number) driftModel.getValueAt(i, DriftModel.FITTED_DY)).floatValue();
 		}
 		return drift;
 	}
@@ -211,7 +195,7 @@ public class DriftManager {
 	private double[] getXWeight() {
 		double[] drift = new double[driftModel.getRowCount()];
 		for (int i = 0; i < drift.length; i++) {
-			drift[i] = (double) driftModel.getValueAt(i, DriftModel.WEIGHT_X);
+			drift[i] = ((Double) driftModel.getValueAt(i, DriftModel.WEIGHT_X)).doubleValue();
 		}
 		return drift;
 	}
@@ -219,7 +203,7 @@ public class DriftManager {
 	private double[] getYWeight() {
 		double[] drift = new double[driftModel.getRowCount()];
 		for (int i = 0; i < drift.length; i++) {
-			drift[i] = (double) driftModel.getValueAt(i, DriftModel.WEIGHT_Y);
+			drift[i] = ((Double) driftModel.getValueAt(i, DriftModel.WEIGHT_Y)).doubleValue();
 		}
 		return drift;
 	}
@@ -228,53 +212,22 @@ public class DriftManager {
 		return true;
 	}
 	
-	//////////////////// drift fitting///////////////////////
+	//////////////////// drift section///////////////////////
 	
 	// cutting point belongs to the second section only,
 	// so the first frame cannot be a cutting point
 	protected void addCuttingPoint(int frameNumber) {
 		assert (frameNumber >= 0);
 		assert (frameNumber < driftModel.getRowCount());
-		assert(degrees.size() == cuttingPoints.size()+1);
-		if (cuttingPoints.contains(frameNumber)) {
+		if (sectionModel.isEndFrame(frameNumber)) {
 			logger.info(frameNumber + " is already a cutting point");
 			return;
 		}
-
-		int index = cuttingPoints.size();
-		for (int i = 0; i < cuttingPoints.size(); i++) {
-			if (cuttingPoints.get(i) > frameNumber) {
-				index = i;
-			}
-		}
-		int degree = degrees.get(index);
-		cuttingPoints.add(index, frameNumber);
-		degrees.add(degrees.get(index));
-		int start = 0, end = 0;
-		// fit first section
-		if (index == 0) {
-			start = 0;
-		} else {
-			start = cuttingPoints.get(index-1);
-		}
-		end = frameNumber;
-		degree = degrees.get(index);
-		fitDrift(degree, start, end, FITBOTH);
-		// fit second section
-		start = frameNumber;
-		if (index == cuttingPoints.size()-1) {
-			end = driftModel.getRowCount()-1;
-		} else {
-			end = cuttingPoints.get(index+1);
-		}
-		degree = degrees.get(index+1);
-		fitDrift(degree, start, end, FITBOTH);
-		assert(degrees.size() == cuttingPoints.size()+1);
+		sectionModel.setEndFrame(frameNumber);
 	}
 	
 	protected void removeCuttingPoint(int sectionIndex) {
-		assert(degrees.size() == cuttingPoints.size()+1);
-		if (cuttingPoints.size() == 0) {
+		if (sectionModel.getRowCount() == 1) {
 			logger.info("must have at least 1 section");
 			return;
 		}
@@ -283,63 +236,67 @@ public class DriftManager {
 			logger.info("invalid sectionIndex: " + sectionIndex);
 			return;
 		}
-		if (sectionIndex >= degrees.size()) {
-			logger.info("section index: " + sectionIndex + " total number of sections: " + degrees.size());
+		if (sectionIndex >= sectionModel.getRowCount()) {
+			logger.info("section index: " + sectionIndex + " total number of sections: " + sectionModel.getRowCount());
 			return;
 		}
-		cuttingPoints.remove(sectionIndex-1);
-		degrees.remove(sectionIndex-1);
-		int start = 0, end = driftModel.getRowCount()-1, degree = 0;
-		if (sectionIndex > 1) {
-			start = cuttingPoints.get(sectionIndex-1);
-		}
-		if (sectionIndex < cuttingPoints.size()-1) {
-			end = cuttingPoints.get(sectionIndex);
-		}
-		degree = degrees.get(sectionIndex-1);
-		fitDrift(degree, start, end, FITBOTH);
-
-		assert(degrees.size() == cuttingPoints.size()+1);
+		sectionModel.removeEndFrame(sectionIndex);
 	}
 	
 	
 	protected void setFitDegree(int sectionIndex, int degree) {
-		if (sectionIndex >= degrees.size() || sectionIndex < 0) {
+		if (sectionIndex >= sectionModel.getRowCount() || sectionIndex < 0) {
 			logger.warning("invalid sectionIndex:" + sectionIndex);
 			return;
 		}
-		if (degree <= 0 || degree > MAXFITTINGDEGREE) {
+		if (degree <= 0 || degree > DriftSectionModel.MAXFITTINGDEGREE) {
 			logger.info("invalid degree: " + degree);
 			return;
 		}
-		degrees.set(sectionIndex, degree);
-		int start = 0;
-		int end = driftModel.getRowCount()-1;
-		if (sectionIndex != 0) {
-			start = cuttingPoints.get(sectionIndex-1);
-		}
-		if (sectionIndex < cuttingPoints.size()) {
-			end = cuttingPoints.get(sectionIndex);
-		}
-		fitDrift(degree, start, end, FITBOTH);
+		sectionModel.setValueAt(degree, sectionIndex, DriftSectionModel.DEGREE);
 	}
 	
-	protected void fitDrift(int directionOption) {
-		assert(degrees.size() == cuttingPoints.size()+1);
-		int start = 0;
-		for (int i = 0; i < cuttingPoints.size(); i++) {
-			fitDrift(degrees.get(i), start, cuttingPoints.get(i), directionOption);
-			start = cuttingPoints.get(i);
+	////////////////////drift fitting///////////////////////
+	
+	
+//	
+//	protected void fitDrift(int directionOption) {
+//		int start, end;
+//		for (int i = 0; i < cuttingPoints.size(); i++) {
+//			fitDrift(degrees.get(i), start, cuttingPoints.get(i), directionOption);
+//			start = cuttingPoints.get(i);
+//		}
+//		if (start < driftModel.getRowCount()-1) {
+//			fitDrift(degrees.get(cuttingPoints.size()), start, driftModel.getRowCount()-1, directionOption);
+//		}
+//		isDriftReady = true;
+//		logger.info("drift fitting done");
+//	}
+//	
+	
+	protected void fitDrift(int start, int end, int directionOption) {
+		assert start >= 0 && start <= end && end < driftModel.getRowCount();
+		assert directionOption == FITX || directionOption == FITY || directionOption == FITBOTH;
+		int startSection = sectionModel.getRowNumber(start);
+		int endSection = sectionModel.getRowNumber(end);
+		for (int i = startSection; i <= endSection; i++) {
+			int startFrame = ((Number) sectionModel.getValueAt(i, DriftSectionModel.START)).intValue();
+			int endFrame = (int) sectionModel.getValueAt(i, DriftSectionModel.END);
+			if (endFrame == startFrame) {
+				logger.warning("1 frame section: " + startFrame + " " + i);
+				continue;
+			}
+			int degree = (int) sectionModel.getValueAt(i, DriftSectionModel.DEGREE);
+			fitDrift(degree, startFrame, endFrame, directionOption);
 		}
-		if (start < driftModel.getRowCount()-1) {
-			fitDrift(degrees.get(cuttingPoints.size()), start, driftModel.getRowCount()-1, directionOption);
-		}
-		isDriftReady = true;
-		logger.info("drift fitting done");
 	}
+	
 	
 	// fit a segment
 	private void fitDrift(int degree, int start, int end, int directionOption) {
+		assert degree > 0 && degree <= DriftSectionModel.MAXFITTINGDEGREE;
+		assert start >= 0 && start < end && end < driftModel.getRowCount();
+		assert directionOption == FITX || directionOption == FITY || directionOption == FITBOTH;
 		logger.info("fitting drift for segment " + start + " to " + end + " with degree " + degree);
 		double[] fitted;
 		double diff;
@@ -347,10 +304,11 @@ public class DriftManager {
 			float[] xDrift = getXDrift();
 			double[] xWeight = getXWeight();
 			fitted = fitDrift(degree, start, end, xDrift, xWeight);
-			diff = xDrift[start] - fitted[0];
+			diff = xDrift[start] - fitted[0];		
 			for (int i = start; i <= end; i++) {
-				driftModel.setValueAt((float) (fitted[i-start] - diff), i, DriftModel.FITTED_DX);
+				fitted[i-start] -= diff;
 			}
+			driftModel.setDrift(fitted, start, end, DriftModel.FITTED_DX);
 		}
 		if (directionOption == FITY || directionOption == FITBOTH) {
 			float[] yDrift = getYDrift();
@@ -358,8 +316,9 @@ public class DriftManager {
 			fitted = fitDrift(degree, start, end, yDrift, yWeight);
 			diff = yDrift[start] - fitted[0];
 			for (int i = start; i <= end; i++) {
-				driftModel.setValueAt((float) (fitted[i-start] - diff), i, DriftModel.FITTED_DY);
+				fitted[i-start] -= diff;
 			}
+			driftModel.setDrift(fitted, start, end, DriftModel.FITTED_DY);
 		}
 	}
 	
@@ -424,6 +383,7 @@ public class DriftManager {
 	public boolean isDriftReady() {
 		return isDriftReady;
 	}
-
+	
+	
 
 }

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.*;
 import javax.swing.SwingWorker;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 import dc.gui.MainFrame;
 import dc.model.*;
@@ -19,10 +21,6 @@ import dc.model.*;
  * Exception: models for JTable are updated directly by the class that stores relevant data,
  * (hence bypass the MainFrame route)
  * 
- * Note: gui.Synchroniser is the other class that handles gui events. All events that does
- * not require approval go to Synchroniser, all events that requires approval go to Controller.
- * In other words, all events that only affect the view go to Synchroniser, all events that
- * modify the model go to Controller.
  * 
  * Note: logger fileHandler is added outside constructor, so avoid log inside constructor in this package
  */
@@ -82,6 +80,9 @@ public class Controller {
 		myMovie.setDriftTableModel(driftModel, sectionModel);
 		myView.setDriftModel(driftModel);
 		myView.setDriftSectionModel(sectionModel);
+		// listeners are here (instead of inside DriftManager) for thread management purpose
+		driftModel.addTableModelListener(new DriftModelListener());
+		sectionModel.addTableModelListener(new DriftSectionModelListener());
 	}
 	
 	private void setMovieStateModel() {
@@ -424,6 +425,77 @@ public class Controller {
 //	//////////////////////// edit drift /////////////////////////////////
 //	/////////////////////////////////////////////////////////////////////
 	
+	private class DriftModelListener implements TableModelListener {
+
+		@Override
+		public void tableChanged(TableModelEvent e) {
+//			DriftModel model = (DriftModel)e.getSource();
+			int col = e.getColumn();
+			int direction;
+			switch(col) {
+				case DriftModel.FITTED_DX:
+				case DriftModel.FITTED_DY:
+					return;
+				case DriftModel.DX:
+				case DriftModel.WEIGHT_X:
+					direction = DriftManager.FITX;
+					break;
+				case DriftModel.DY:
+				case DriftModel.WEIGHT_Y:
+					direction = DriftManager.FITY;
+					break;
+				default:
+					direction = DriftManager.FITBOTH;
+			}
+			int start = e.getFirstRow();
+			int end = e.getLastRow();
+			logger.info("drift table changed: " + start + " " + end + " " + direction);
+			fitDrift(start, end, direction);
+		}
+		
+	}
+	
+	private class DriftSectionModelListener implements TableModelListener {
+
+		@Override
+		public void tableChanged(TableModelEvent e) {
+			if (e.getType() == TableModelEvent.DELETE) {
+				return;
+			}
+			DriftSectionModel model = (DriftSectionModel)e.getSource();
+			int direction = DriftManager.FITBOTH;
+
+			int startRow = e.getFirstRow();
+			int endRow = e.getLastRow();
+			int start = (int) model.getValueAt(startRow, DriftSectionModel.START);
+			int end = (int) model.getValueAt(endRow, DriftSectionModel.END);
+			logger.info("drift section table changed: " + start + " " + end + " " + direction);
+			fitDrift(start, end, direction);
+		}
+		
+	}
+	
+	// allowing to run when controller is "blocked"
+	private void fitDrift(int start, int end, int direction) {
+		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+			@Override
+			public Void doInBackground() {
+//				logger.info("fitDrift worker running");
+//				if (myMovie.isDriftReady()) {
+//					return null;
+//				}
+				myMovie.fitDrift(start, end, direction);
+//				logger.info("fitDrift worker finishing");
+				return null;     
+			}
+			@Override
+			public void done() {
+				myView.updateStatus("");
+				checkState();
+			}
+		};
+		worker.execute();
+	}
 	
 	public void removeDrift(int frameNumber) {
 		if (isBusy) {
@@ -436,7 +508,6 @@ public class Controller {
 			return;
 		}
 		myMovie.setXDrift(frameNumber, newVal);
-//		logger.info("aaaaaaa");
 	}
 	
 	public void changeYDrift(int frameNumber, float newVal) {
@@ -461,8 +532,6 @@ public class Controller {
 			return;
 		}
 		myMovie.addCuttingPoint(frameNumber);
-		myView.updateDriftSectionTable();
-
 	}
 	
 	public void removeCuttingPoint(int sectionIndex) {
@@ -470,10 +539,8 @@ public class Controller {
 			return;
 		}
 		myMovie.removeCuttingPoint(sectionIndex);
-		myView.updateDriftSectionTable();
-
 	}
-
+	
 
 	///////////////// plot////////////////////
 

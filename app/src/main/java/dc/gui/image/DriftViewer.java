@@ -43,7 +43,7 @@ public class DriftViewer extends JPanel {
 	private int rawIdx;
 	private int fittedIdx;
 	
-	private int[] idxList;
+//	private int[] idxList;
 	public DriftViewer(String direction) {
 		if (direction.equals("x")) {
 			rawIdx = DriftModel.DX;
@@ -139,7 +139,7 @@ public class DriftViewer extends JPanel {
 						int start = e.getFirstRow();
 						int end = e.getLastRow();
 						for (int i = start; i <= end; i++) {
-							fittedDrift.add(i, (Number) model.getValueAt(i, rawIdx));
+							fittedDrift.add(i, (Number) model.getValueAt(i, fittedIdx));
 						}
 						break;
 					case TableModelEvent.DELETE:
@@ -150,7 +150,7 @@ public class DriftViewer extends JPanel {
 						int end1 = e.getLastRow();
 						fittedDrift.delete(start1, end1);
 						for (int i = start1; i <= end1; i++) {
-							fittedDrift.add(i, (Number) model.getValueAt(i, rawIdx));
+							fittedDrift.add(i, (Number) model.getValueAt(i, fittedIdx));
 						}
 						break;
 				}

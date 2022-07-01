@@ -1,34 +1,31 @@
 package dc.gui;
 
-import javax.swing.JPanel;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+
+import java.awt.event.ActionListener;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
+
 import javax.swing.JSplitPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.table.AbstractTableModel;
+import javax.swing.DefaultCellEditor;
+import javax.swing.InputVerifier;
+import javax.swing.JSeparator;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 import dc.controller.Controller;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
 
-import javax.swing.JButton;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Rectangle;
-
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-
-import java.awt.event.ActionListener;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.awt.event.ActionEvent;
-import java.awt.FlowLayout;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultCellEditor;
-import javax.swing.InputVerifier;
-import javax.swing.JSeparator;
 
 @SuppressWarnings("serial")
 public class DriftEditingPanel extends JPanel {
@@ -66,7 +63,7 @@ public class DriftEditingPanel extends JPanel {
 		splitPane.setRightComponent(scrollPane_1);
 		
 		driftSectionTable = new JTable();
-		scrollPane_1.setRowHeaderView(driftSectionTable);
+		scrollPane_1.setViewportView(driftSectionTable);
 		splitPane.setDividerLocation(0.5);
 		splitPane.setResizeWeight(0.5);
 		
@@ -108,10 +105,22 @@ public class DriftEditingPanel extends JPanel {
 	private void setHandlers() {
 		addCuttingPointButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				int[] row = driftTable.getSelectedRows(); 
+				if (row.length == 1) {
+					int targetFrame = row[0];
+					DriftEditingPanel.logger.info("adding frame " + targetFrame + "as cutting point");
+					DriftEditingPanel.this.controller.addCuttingPoint(targetFrame);
+				}
 			}
 		});
 		removeCuttingPointButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				int[] row = driftSectionTable.getSelectedRows(); 
+				if (row.length == 1) {
+					int targetFrame = row[0];
+					DriftEditingPanel.logger.info("removing cuttingPoint at index " + targetFrame);
+					DriftEditingPanel.this.controller.removeCuttingPoint(targetFrame);
+				}
 			}
 		});
 		runButton.addActionListener(new ActionListener() {
@@ -135,9 +144,10 @@ public class DriftEditingPanel extends JPanel {
 		    @Override
 		    public boolean verify(JComponent input) {
 		        JTextField field = (JTextField) input;
+		        String text = field.getText();
 		        float floatValue = 0;
 				try {
-					floatValue = Float.parseFloat(String.valueOf(field));
+					floatValue = Float.parseFloat(text);
 					logger.info("value input: " + floatValue);
 				} catch (ClassCastException e) {
 					logger.warning("failed to render");
@@ -183,12 +193,63 @@ public class DriftEditingPanel extends JPanel {
 	
 	protected void setDriftSectionModel(DriftSectionModel sectionModel) {
 		driftSectionTable.setModel(sectionModel);
-		revalidate();
+		driftSectionTable.removeColumn(driftSectionTable.getColumn("fit"));
+		
+		final InputVerifier iv = new InputVerifier() {
+
+		    @Override
+		    public boolean verify(JComponent input) {
+		        JTextField field = (JTextField) input;
+		        String text = field.getText();
+		        int intValue = 0;
+				try {
+					intValue = Integer.parseInt(text);
+					logger.info("value input: " + intValue);
+				} catch (ClassCastException e) {
+					logger.warning("failed to render");
+					return false;
+				} catch (NumberFormatException e) {
+					logger.info("input is not a number: " + text);
+					return false;
+				}
+				if (intValue > 0 && intValue <= DriftSectionModel.MAXFITTINGDEGREE) {
+					 return true;
+				}
+		        return false;
+		    }
+		    
+		    @Override
+		    public boolean shouldYieldFocus(JComponent input) {
+		        boolean valid = verify(input);
+		        if (!valid) {
+		        	logger.fine("invalid input: " + input);
+		        }
+		        return valid;
+		    }
+
+		};
+		DefaultCellEditor editor = new DefaultCellEditor(new JTextField()) {
+		    {
+		        getComponent().setInputVerifier(iv);
+		    }
+
+		    @SuppressWarnings("deprecation")
+			@Override
+		    public boolean stopCellEditing() {
+		        if (!iv.shouldYieldFocus(getComponent())) return false;
+		        return super.stopCellEditing();
+		    }
+
+		    @Override
+		    public JTextField getComponent() {
+		        return (JTextField) super.getComponent();
+		    }
+
+		};
+
+		driftSectionTable.setDefaultEditor(Object.class, editor);
 	}
 	
-	public void updateDriftSectionTable() {
-		((AbstractTableModel) driftSectionTable.getModel()).fireTableDataChanged();
-	};
 	
 	//https://www.codejava.net/java-se/swing/how-to-scroll-jtable-row-to-visible-area-programmatically
 	public void setDriftTableVisible(int frameNumber) {

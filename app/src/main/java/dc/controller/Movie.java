@@ -170,7 +170,6 @@ public class Movie {
 	public void afterTemplateMatching() {
 //		logger.info("at after template matching");
 		driftManager.setDrifts(templateMatching.tempXDrift, templateMatching.tempYDrift);
-		driftManager.fitDrift(driftManager.FITBOTH);
 		driftManager.saveFittedDrift(saveDir);
 		saveRawDrift();
 //		logger.info("end of after template matching");
@@ -194,7 +193,6 @@ public class Movie {
 	
 	public void setDriftCsv(String filename) {
 		if (driftManager.setDrifts(filename)) {
-			driftManager.fitDrift(driftManager.FITBOTH);
 			setTemplateMatchingProgress(100);
 		}	
 	}
@@ -202,6 +200,7 @@ public class Movie {
 	/////////////////////////////////////////////////////////////////////
 	////////////////////// drift editing ////////////////////////////////
 	/////////////////////////////////////////////////////////////////////
+	// setters in this section is for testing and for non GUI mode
 	public float[] getXDrift() {
 		return driftManager.getXDrift();
 	}
@@ -238,6 +237,10 @@ public class Movie {
 		driftManager.removeCuttingPoint(sectionIndex);
 	}
 	
+	protected void fitDrift(int start, int end, int directionOption) {
+		driftManager.fitDrift(start, end, directionOption);
+	}
+	
 	/////////////////////////////////////////////////////////////////////
 	////////////////////// drift correction /////////////////////////////
 	/////////////////////////////////////////////////////////////////////
@@ -250,7 +253,7 @@ public class Movie {
 	}
 
 	public void runDriftCorrection(boolean blurFlag) {
-		// TODO: customise ROI
+		// TODO: customise ROI for output images
 		String filename = fileList.get(0).toString();
 		double[][] image = imageReader.read(filename);
 		int[] ROI = new int[4];

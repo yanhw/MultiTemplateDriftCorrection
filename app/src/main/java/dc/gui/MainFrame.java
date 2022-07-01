@@ -164,10 +164,6 @@ public class MainFrame extends JFrame {
 		settingPanel.setDriftSectionModel(sectionModel);
 	}
 	
-	public void updateDriftSectionTable() {
-		settingPanel.updateDriftSectionTable();
-	}
-	
 
 	public void setDriftTableVisible(int frameNumber) {
 		settingPanel.setDriftTableVisible(frameNumber);

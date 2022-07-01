@@ -200,9 +200,6 @@ public class SettingPanel extends JPanel {
 		driftEditingPanel.setDriftSectionModel(sectionModel);
 	}
 	
-	protected void updateDriftSectionTable() {
-		driftEditingPanel.updateDriftSectionTable();
-	}	
 	
 	protected void setDriftTableVisible(int frameNumber) {
 		driftEditingPanel.setDriftTableVisible(frameNumber);
