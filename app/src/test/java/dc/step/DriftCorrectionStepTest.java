@@ -14,8 +14,8 @@ import org.junit.Test;
 
 import dc.controller.ImageArrayReader;
 import dc.controller.ImageData;
-import dc.step.DriftCorrectionStep;
-import dc.step.ImageReader;
+//import dc.step.DriftCorrectionStep;
+//import dc.step.ImageReader;
 
 public class DriftCorrectionStepTest {
 	private DriftCorrectionStep myDriftCorrection;

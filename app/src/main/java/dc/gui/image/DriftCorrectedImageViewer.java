@@ -3,11 +3,8 @@ package dc.gui.image;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 
-import dc.gui.Synchroniser;
-
 import java.awt.BorderLayout;
 import javax.swing.JSplitPane;
-import javax.swing.border.LineBorder;
 import java.awt.Color;
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -21,7 +18,6 @@ import javax.swing.border.EtchedBorder;
 @SuppressWarnings("serial")
 public class DriftCorrectedImageViewer extends JPanel implements ChangeListener  {
 	private static final Logger logger = Logger.getLogger(DriftCorrectedImageViewer.class.getName());
-	private Synchroniser sync;
 	
 	protected static int NUM_FRAME;
 	private int frameNumber = 0;
@@ -53,9 +49,6 @@ public class DriftCorrectedImageViewer extends JPanel implements ChangeListener 
 		setHandlers();
 	}
 	
-	public void setSynchroniser(Synchroniser sync) {
-		this.sync = sync;
-	}
 	
 	public void setFileHandler(FileHandler fh) {
 		logger.addHandler(fh);
@@ -89,7 +82,6 @@ public class DriftCorrectedImageViewer extends JPanel implements ChangeListener 
 			frameNumber = (int)source.getValue();
 			logger.info("updating to image: " + frameNumber);
 			updatePicture(frameNumber);
-			sync.rawImageChanged(frameNumber);
 		}
 	}
 	

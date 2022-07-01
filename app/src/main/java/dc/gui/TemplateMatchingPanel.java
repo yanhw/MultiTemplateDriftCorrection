@@ -4,7 +4,6 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.DefaultTableModel;
 
 import dc.controller.Controller;
 import dc.model.TemplateMatchingSegmentModel;

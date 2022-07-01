@@ -21,6 +21,7 @@ import dc.model.*;
  * Exception: models for JTable are updated directly by the class that stores relevant data,
  * (hence bypass the MainFrame route)
  * 
+ * commented methods are kept for future non-GUI version
  * 
  * Note: logger fileHandler is added outside constructor, so avoid log inside constructor in this package
  */
@@ -55,8 +56,6 @@ public class Controller {
 			logger.severe("recieved null mainFrame");
 		}
 		myView = mainFrame;
-		ReadOnlyMovie movie = new ReadOnlyMovie(myMovie);
-		myView.setMovie(movie);
 		setDriftTableModel();
 		setMovieStateModel();
 		setTemplateTableModel();
@@ -265,7 +264,6 @@ public class Controller {
 					return;
 				}
 				//TODO update start and end frame
-				myView.setTMImage(frameNumber);
 				myView.updateStatus("");
 				if (myMovie.templageMatchingPreRunValidation()) {
 					myView.setTemplateMatchingBtn(true, false);
@@ -496,36 +494,36 @@ public class Controller {
 		};
 		worker.execute();
 	}
-	
-	public void removeDrift(int frameNumber) {
-		if (isBusy) {
-			return;
-		}
-	}
-	
-	public void changeXDrift(int frameNumber, float newVal) {
-		if (isBusy) {
-			return;
-		}
-		myMovie.setXDrift(frameNumber, newVal);
-	}
-	
-	public void changeYDrift(int frameNumber, float newVal) {
-		if (isBusy) {
-			return;
-		}
-		myMovie.setYDrift(frameNumber, newVal);
-	}
+//	
+//	public void removeDrift(int frameNumber) {
+//		if (isBusy) {
+//			return;
+//		}
+//	}
+//	
+//	public void changeXDrift(int frameNumber, float newVal) {
+//		if (isBusy) {
+//			return;
+//		}
+//		myMovie.setXDrift(frameNumber, newVal);
+//	}
+//	
+//	public void changeYDrift(int frameNumber, float newVal) {
+//		if (isBusy) {
+//			return;
+//		}
+//		myMovie.setYDrift(frameNumber, newVal);
+//	}
 	
 	///////////////// fitting//////////////////////////////////
 	
-	public void changeFitDegree(int row, int intValue) {
-		if (isBusy) {
-			return;
-		}
-		myMovie.setFitDegree(row, intValue);
-
-	}
+//	public void changeFitDegree(int row, int intValue) {
+//		if (isBusy) {
+//			return;
+//		}
+//		myMovie.setFitDegree(row, intValue);
+//
+//	}
 	
 	public void addCuttingPoint(int frameNumber) {
 		if (isBusy) {

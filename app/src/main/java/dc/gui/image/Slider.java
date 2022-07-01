@@ -16,7 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.GridLayout;
 
 @SuppressWarnings("serial")
 public class Slider extends JPanel implements ChangeListener {

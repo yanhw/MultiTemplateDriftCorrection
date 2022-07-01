@@ -5,7 +5,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import dc.gui.Synchroniser;
 import dc.model.DriftModel;
 import dc.model.MovieStateModel;
 import dc.model.TemplateMatchingSegmentModel;
@@ -72,9 +71,6 @@ public class ImageViewer extends JPanel {
 		yDriftPlot.setDriftModelListener(model);
 	}
 	
-	public void setSynchroniser(Synchroniser sync) {
-		correctedImage.setSynchroniser(sync);
-	}
 	
 	public void setRawImages(List<Path> fileList) {
 		templateImage.setFileList(fileList);

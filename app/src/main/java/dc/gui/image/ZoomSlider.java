@@ -6,7 +6,6 @@ import java.awt.Font;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoundedRangeModel;
-import javax.swing.BoxLayout;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JLabel;
 import javax.swing.JPanel;

@@ -217,17 +217,17 @@ public class Movie {
 		return driftManager.getFittedYDrift();
 	}
 	
-	public void setFitDegree(int sectionIndex, int degree) {
-		driftManager.setFitDegree(sectionIndex, degree);
-	}
-	
-	public void setXDrift(int frameNumber, float newVal) {
-		driftManager.setXDrift(frameNumber, newVal);
-	}
-	
-	public void setYDrift(int frameNumber, float newVal) {
-		driftManager.setYDrift(frameNumber, newVal);
-	}
+//	public void setFitDegree(int sectionIndex, int degree) {
+//		driftManager.setFitDegree(sectionIndex, degree);
+//	}
+//	
+//	public void setXDrift(int frameNumber, float newVal) {
+//		driftManager.setXDrift(frameNumber, newVal);
+//	}
+//	
+//	public void setYDrift(int frameNumber, float newVal) {
+//		driftManager.setYDrift(frameNumber, newVal);
+//	}
 	
 	public void addCuttingPoint(int frameNumber) {
 		driftManager.addCuttingPoint(frameNumber);

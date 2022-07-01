@@ -21,6 +21,8 @@ import dc.utils.FileSystem;
 
 /* 
  * always try to fit data with polynomial here, decides which to use in Movie
+ * 
+ * commented methods are kept for future non-gui version
  */
 public class DriftManager {
 	private static final Logger logger = Logger.getLogger(DriftManager.class.getName());
@@ -132,32 +134,32 @@ public class DriftManager {
 		logger.info("ready: " + isDriftReady);
 	}
 
-	protected void setDrifts(int frameNumber, float x, float y) {
-		assert (frameNumber >= 0);
-		assert (frameNumber < driftModel.getRowCount());
-		driftModel.setValueAt(x, frameNumber, DriftModel.DX);
-		driftModel.setValueAt(y, frameNumber, DriftModel.DY);
-	}
-	
-	protected void setXDrift(int frameNumber, float newVal) {
-		assert (frameNumber >= 0);
-		assert (frameNumber < driftModel.getRowCount());
-		driftModel.setValueAt(newVal, frameNumber, DriftModel.DX);
-		logger.info("xDrift at frame " + frameNumber + " is changed to " + newVal);
-	}
-	
-	protected void setYDrift(int frameNumber, float newVal) {
-		assert (frameNumber >= 0);
-		assert (frameNumber < driftModel.getRowCount());
-		driftModel.setValueAt(newVal, frameNumber, DriftModel.DY);
-		logger.info("yDrift at frame " + frameNumber + " is changed to " + newVal);
-	}
-	
-	protected void removeDrift(int frameNumber) {
-		assert (frameNumber >= 0);
-		assert (frameNumber < driftModel.getRowCount());
-		driftModel.removeDrift(frameNumber);
-	}
+//	protected void setDrifts(int frameNumber, float x, float y) {
+//		assert (frameNumber >= 0);
+//		assert (frameNumber < driftModel.getRowCount());
+//		driftModel.setValueAt(x, frameNumber, DriftModel.DX);
+//		driftModel.setValueAt(y, frameNumber, DriftModel.DY);
+//	}
+//	
+//	protected void setXDrift(int frameNumber, float newVal) {
+//		assert (frameNumber >= 0);
+//		assert (frameNumber < driftModel.getRowCount());
+//		driftModel.setValueAt(newVal, frameNumber, DriftModel.DX);
+//		logger.info("xDrift at frame " + frameNumber + " is changed to " + newVal);
+//	}
+//	
+//	protected void setYDrift(int frameNumber, float newVal) {
+//		assert (frameNumber >= 0);
+//		assert (frameNumber < driftModel.getRowCount());
+//		driftModel.setValueAt(newVal, frameNumber, DriftModel.DY);
+//		logger.info("yDrift at frame " + frameNumber + " is changed to " + newVal);
+//	}
+//	
+//	protected void removeDrift(int frameNumber) {
+//		assert (frameNumber >= 0);
+//		assert (frameNumber < driftModel.getRowCount());
+//		driftModel.removeDrift(frameNumber);
+//	}
 
 
 	protected float[] getXDrift() {
@@ -244,17 +246,17 @@ public class DriftManager {
 	}
 	
 	
-	protected void setFitDegree(int sectionIndex, int degree) {
-		if (sectionIndex >= sectionModel.getRowCount() || sectionIndex < 0) {
-			logger.warning("invalid sectionIndex:" + sectionIndex);
-			return;
-		}
-		if (degree <= 0 || degree > DriftSectionModel.MAXFITTINGDEGREE) {
-			logger.info("invalid degree: " + degree);
-			return;
-		}
-		sectionModel.setValueAt(degree, sectionIndex, DriftSectionModel.DEGREE);
-	}
+//	protected void setFitDegree(int sectionIndex, int degree) {
+//		if (sectionIndex >= sectionModel.getRowCount() || sectionIndex < 0) {
+//			logger.warning("invalid sectionIndex:" + sectionIndex);
+//			return;
+//		}
+//		if (degree <= 0 || degree > DriftSectionModel.MAXFITTINGDEGREE) {
+//			logger.info("invalid degree: " + degree);
+//			return;
+//		}
+//		sectionModel.setValueAt(degree, sectionIndex, DriftSectionModel.DEGREE);
+//	}
 	
 	////////////////////drift fitting///////////////////////
 	

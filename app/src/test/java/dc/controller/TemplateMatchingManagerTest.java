@@ -5,16 +5,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Arrays;
 
-import static dc.utils.ImageProcessing.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import dc.controller.ImageArrayReader;
-import dc.controller.MovieSegment;
-import dc.controller.TemplateMatchingManager;
 import dc.model.TemplateMatchingSegmentModel;
 
 public class TemplateMatchingManagerTest {
@@ -31,13 +26,13 @@ public class TemplateMatchingManagerTest {
 	@Test
 	public void testSetROI() {
 		String testFileName = "src/test/resources/test_image/rodImage.png";
-		String expectedResultFileName = "src/test/resources/test_image/rodImage_320_430_110_360.png";
-		String outputFileName = "src/test/resources/test_image/rodImageTestOutput.png";
+//		String expectedResultFileName = "src/test/resources/test_image/rodImage_320_430_110_360.png";
+//		String outputFileName = "src/test/resources/test_image/rodImageTestOutput.png";
 		int[] ROI = {320,569,110,359};
 		
 		ImageArrayReader reader = new ImageArrayReader("png");
 		double[][] raw = reader.read(testFileName);
-		double[][] result = reader.read(expectedResultFileName);
+//		double[][] result = reader.read(expectedResultFileName);
 //		System.out.println(result[0][0]);
 		List<Path> fileList = new LinkedList<Path>();
 		fileList.add(Paths.get(testFileName));

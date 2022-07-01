@@ -5,10 +5,10 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import dc.controller.DriftManager;
+//import dc.controller.DriftManager;
 
 public class DriftManagerTest {
-	private DriftManager myManager;
+//	private DriftManager myManager;
 	
 	@Before
 	public void init() {

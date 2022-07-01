@@ -11,6 +11,7 @@ import java.awt.GridLayout;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+@SuppressWarnings("serial")
 public class AdvancedOptions extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();

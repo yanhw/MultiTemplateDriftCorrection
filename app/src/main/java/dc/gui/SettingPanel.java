@@ -10,7 +10,6 @@ import dc.model.DriftSectionModel;
 import dc.model.MovieStateModel;
 import dc.model.TemplateMatchingSegmentModel;
 
-import javax.swing.JLayeredPane;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;

@@ -23,7 +23,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import dc.controller.Controller;
-import dc.controller.ReadOnlyMovie;
 import dc.gui.image.ImageViewer;
 import java.awt.Dimension;
 
@@ -31,7 +30,6 @@ import java.awt.Dimension;
 public class MainFrame extends JFrame {
 	
 	private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
-	private Synchroniser sync;
 	
 	private JPanel contentPane;
 	private final StatusPanel statusPanel = new StatusPanel(0);
@@ -111,17 +109,10 @@ public class MainFrame extends JFrame {
 		imageViewer.setFileHandler(fh);
 		statusPanel.setFileHandler(fh);
 		
-		sync = new Synchroniser(this);
-		rawImageViewer.setSynchroniser(sync);
-		imageViewer.setSynchroniser(sync);
 		settingPanel.setController(controller);
 		controller.setMainFrame(this);
 		
 		this.setVisible(true);
-	}
-	
-	public void setMovie(ReadOnlyMovie movie) {
-		sync.setMovie(movie);
 	}
 	
 	public void setMovieStateModel(MovieStateModel model) {
@@ -194,9 +185,6 @@ public class MainFrame extends JFrame {
 	
 	////////// right image panel
 	
-	public void setTMImage(int frameNumber) {
-		sync.setTMImage(frameNumber);
-	}
 //	
 //	protected void removeTMImage(int frameNumber) {
 //		imagePanel.removeTMImage();

@@ -17,7 +17,6 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import dc.gui.Synchroniser;
 import dc.model.DriftModel;
 
 import java.awt.BasicStroke;
@@ -38,7 +37,6 @@ public class DriftViewer extends JPanel {
 	private static final Logger logger = Logger.getLogger(DriftViewer.class.getName());
 	private XYSeries rawDrift;
 	private XYSeries fittedDrift;
-	private Synchroniser mySynchroniser;
 	
 	private int rawIdx;
 	private int fittedIdx;
@@ -92,12 +90,6 @@ public class DriftViewer extends JPanel {
 		logger.addHandler(fh);
 	}
 	
-	protected void setSynchroniser(Synchroniser synchroniser) {
-		if (synchroniser == null) {
-			return;
-		}
-		mySynchroniser = synchroniser;
-	}
 	
 	public void setDriftModelListener(DriftModel model) {
 		model.addTableModelListener(new DriftModelListener());
@@ -178,11 +170,11 @@ public class DriftViewer extends JPanel {
 				// You have the dataset the data point belongs to, the index of the series in that dataset of the data point, and the specific item index in the series of the data point.
 //				XYSeries series = ((XYSeriesCollection)dataset).getSeries(seriesIndex);
 //				XYDataItem xyItem = series.getDataItem(item);	
-//				System.out.println(item);
-				if (mySynchroniser != null) {
-					logger.info("selected frame: " + item + " on drift plot.");
-					mySynchroniser.driftPlotPointSelected(item);
-				}
+				System.out.println(item);
+//				if (mySynchroniser != null) {
+//					logger.info("selected frame: " + item + " on drift plot.");
+//					mySynchroniser.driftPlotPointSelected(item);
+//				}
 			}
 			
 		}
