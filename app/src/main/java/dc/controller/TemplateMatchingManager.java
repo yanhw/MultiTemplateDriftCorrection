@@ -49,21 +49,25 @@ public class TemplateMatchingManager {
 		this.gaussianFilter = new GaussianImage(5,3);
 	}
 	
-	public void setFileHandler(FileHandler fh) {
+	protected void setFileHandler(FileHandler fh) {
 		this.fh = fh;
 		logger.addHandler(fh);
 		gaussianFilter.setFileHandler(fh);
 	}
 
-	public void setInterruptionFlag(Flag interrupt) {
+	protected void setInterruptionFlag(Flag interrupt) {
 		interruptionFlag = interrupt;
 	}
 	
-	public void setTableModel(TemplateMatchingSegmentModel model) {
+	protected void setTableModel(TemplateMatchingSegmentModel model) {
 		this.model = model;
 	}
 	
-	public void init(List<Path> fileList) {
+	protected TemplateMatchingSegmentModel getTableModel() {
+		return model;
+	}
+	
+	protected void init(List<Path> fileList) {
 		this.fileList = fileList;
 		progress = 0;
 		model.init(fileList.size());

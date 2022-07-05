@@ -120,6 +120,9 @@ public class TemplateImageViewer extends JPanel {
 	}
 	
 	private void updateDisplay(int sectionNumber) {
+		if (sections.getRowCount()==0) {
+			return;
+		}
 		int start = (int) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.START_IDX);
 		int end = (int) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.END_IDX);
 		int keyframe = (int) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.KEY_IDX);

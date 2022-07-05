@@ -49,7 +49,15 @@ public class DriftManager {
 		assert (sectionModel != null);
 		this.driftModel = driftModel;
 		this.sectionModel = sectionModel;
-	}	
+	}
+	
+	protected DriftModel getDriftModel() {
+		return driftModel;
+	}
+	
+	protected DriftSectionModel getDriftSectionModel() {
+		return sectionModel;
+	}
 	
 	// initialise variables here because the movie can change
 	protected void init(int numFrame) {

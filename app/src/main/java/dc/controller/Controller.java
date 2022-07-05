@@ -28,21 +28,22 @@ import dc.model.*;
 public class Controller {
 	private static final Logger logger = Logger.getLogger(Controller.class.getName());
 	
-
-//	private int state = INIT;
+	private boolean isBusy = false;							// sync lock
+	private SwingWorker<Void, Integer> stoppableWorker;		// multi-process worker for long processes
+	private Flag interrupt = new Flag();					// flag for stoppableWorker to stop
 	
 	private MainFrame myView;
-	private boolean isBusy = false;					// sync lock
-	private SwingWorker<Void, Integer> stoppableWorker;
-	
-	private Flag interrupt = new Flag();
-	
 	private Movie myMovie;
-
+	
 	public Controller() {
 		logger.setLevel(Level.FINE);
 //		logger.setUseParentHandlers(true);
 		this.myMovie = new Movie();
+		// listeners are here (instead of inside DriftManager) for thread management purpose
+		DriftModel driftModel = myMovie.getDriftModel();
+		DriftSectionModel sectionModel = myMovie.getDriftSectionModel();		
+		driftModel.addTableModelListener(new DriftModelListener());
+		sectionModel.addTableModelListener(new DriftSectionModelListener());
 		myMovie.setInterruptionFlag(interrupt);
 	}
 	
@@ -56,40 +57,12 @@ public class Controller {
 			logger.severe("recieved null mainFrame");
 		}
 		myView = mainFrame;
-		setDriftTableModel();
-		setMovieStateModel();
-		setTemplateTableModel();
+		myView.setMovieStateModel(myMovie.getMovieStateModel());
+		myView.setTemplateTableModel(myMovie.getTemplateTableModel());
+		myView.setDriftModel(myMovie.getDriftModel());
+		myView.setDriftSectionModel(myMovie.getDriftSectionModel());
 	}
-	
-	private void setTemplateTableModel() {
-		@SuppressWarnings("serial")
-		TemplateMatchingSegmentModel model = new TemplateMatchingSegmentModel() {
-			@Override
-			public boolean isCellEditable(int row, int column) {       
-				return false; // or a condition at your choice with row and column
-			}
-		};
-		myMovie.setTemplateTableModel(model);
-		myView.setTemplateTableModel(model);
-	}
-	
-	private void setDriftTableModel() {
-		DriftModel driftModel = new DriftModel();
-		DriftSectionModel sectionModel = new DriftSectionModel();
-		myMovie.setDriftTableModel(driftModel, sectionModel);
-		myView.setDriftModel(driftModel);
-		myView.setDriftSectionModel(sectionModel);
-		// listeners are here (instead of inside DriftManager) for thread management purpose
-		driftModel.addTableModelListener(new DriftModelListener());
-		sectionModel.addTableModelListener(new DriftSectionModelListener());
-	}
-	
-	private void setMovieStateModel() {
-		MovieStateModel myState = new MovieStateModel();
-		myMovie.setMovieStateModel(myState);
-		myView.setMovieStateModel(myState);
-	}
-	
+
 	// should be called before initialising a thread
 	private void block(String message) {
 		isBusy = true;
@@ -102,12 +75,6 @@ public class Controller {
 		isBusy = false;
 		logger.info("controller is released");
 	}
-	
-	// call this method when state might be changed
-	private void checkState() {
-		myMovie.checkState();
-	}
-
 	
 	/////////////////////////////////////////////////////////////////////
 	/////////////////////// set advanced parameter //////////////////////
@@ -157,7 +124,7 @@ public class Controller {
 					return;
 				}
 				// success
-				checkState();
+				myMovie.checkState();
 				myView.setImageFileName(folder);
 				myView.setRawImages(fileList);
 				myView.updateStatus("");
@@ -188,7 +155,7 @@ public class Controller {
 		myMovie.setSaveDir(folder);
 		
 		if (myMovie.getSaveFolder() == folder) {
-			checkState();
+			myMovie.checkState();
 			myView.setSaveFolder(folder);
 		} else {
 			myView.updateStatus("it appears you cannot modify the selected folder.");
@@ -380,7 +347,7 @@ public class Controller {
 			@Override
 			public void done() {
 				myView.updateStatus("ready to view drift");
-				checkState();
+				myMovie.checkState();
 				release();
 			}
 		};
@@ -407,7 +374,7 @@ public class Controller {
 					release();
 					return;
 				}
-				checkState();
+				myMovie.checkState();
 				myView.updateStatus("ready to view drift");
 				logger.info("finished reading csv");
 				
@@ -489,7 +456,7 @@ public class Controller {
 			@Override
 			public void done() {
 				myView.updateStatus("");
-				checkState();
+				myMovie.checkState();
 			}
 		};
 		worker.execute();
@@ -605,7 +572,7 @@ public class Controller {
 					logger.info("finished");
 					myView.setCorrectedImages(myMovie.getSaveFiles());
 				}
-				checkState();
+				myMovie.checkState();
 				myView.setProgress(100);
 				myView.toggleDriftCorrectionBtn(true);
 				release();

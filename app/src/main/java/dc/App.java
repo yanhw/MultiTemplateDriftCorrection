@@ -61,8 +61,6 @@ public class App {
 		
 		Controller controller = new Controller();
 		controller.setFileHandler(fh);
-		// for old GUI
-//		new MainFrame(controller, fh);
 		MainFrame mf = new MainFrame();
 		mf.initialise(controller, fh);
 	}

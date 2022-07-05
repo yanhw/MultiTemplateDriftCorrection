@@ -25,13 +25,26 @@ public class Movie {
 	
 	public Movie() {
 		logger.setLevel(Level.FINE);
-		this.imageReader = new ImageArrayReader("png");
-		this.templateMatching = new TemplateMatchingManager();
-		this.driftManager = new DriftManager();
-		this.driftCorrection = new DriftCorrectionManager();
+		imageReader = new ImageArrayReader("png");
+		templateMatching = new TemplateMatchingManager();
+		driftManager = new DriftManager();
+		driftCorrection = new DriftCorrectionManager();
+		myState = new MovieStateModel();
+		@SuppressWarnings("serial")
+		TemplateMatchingSegmentModel templateMatchingSegmentModel = new TemplateMatchingSegmentModel() {
+			@Override
+			public boolean isCellEditable(int row, int column) {       
+				return false;
+			}
+		};
+		templateMatching.setTableModel(templateMatchingSegmentModel);
+		DriftModel driftModel = new DriftModel();
+		DriftSectionModel sectionModel = new DriftSectionModel();
+		driftManager.setTableModel(driftModel, sectionModel);
 	}
 	
-	public void setFileHandler(FileHandler fh) {
+	// getters and setters for GUI
+	protected void setFileHandler(FileHandler fh) {
 		logger.addHandler(fh);
 		imageReader.setFileHandler(fh);
 		templateMatching.setFileHandler(fh);
@@ -39,27 +52,30 @@ public class Movie {
 		driftCorrection.setFileHandler(fh);
 	}
 	
-	public void setInterruptionFlag(Flag interrupt) {
+	protected void setInterruptionFlag(Flag interrupt) {
 		templateMatching.setInterruptionFlag(interrupt);
 		driftCorrection.setInterruptionFlag(interrupt);
 	}
 	
-	public void setTemplateTableModel(TemplateMatchingSegmentModel model) {
-		templateMatching.setTableModel(model);
+	protected MovieStateModel getMovieStateModel() {
+		return myState;
 	}
 	
-	protected void setMovieStateModel(MovieStateModel model) {
-		myState = model;
+	protected TemplateMatchingSegmentModel getTemplateTableModel() {
+		return templateMatching.getTableModel();
 	}
 	
-
-	public void setDriftTableModel(DriftModel model, DriftSectionModel sectionModel) {
-		driftManager.setTableModel(model, sectionModel);
+	protected DriftModel getDriftModel() {
+		return driftManager.getDriftModel();
+	}
+	
+	protected DriftSectionModel getDriftSectionModel() {
+		return driftManager.getDriftSectionModel();
 	}
 	
 	// call this method when state might be changed
 	@SuppressWarnings("static-access")
-	public void checkState() {
+	protected void checkState() {
 		if (!isIOReady()) {
 			logger.info("state set to: INIT");
 			myState.setValue(myState.INIT);
@@ -81,7 +97,7 @@ public class Movie {
 	///////////////////////////// IO state //////////////////////////////
 	/////////////////////////////////////////////////////////////////////
 	
-	public void setSrcDir(String folder) {
+	protected void setSrcDir(String folder) {
 		fileList = FileSystem.getFiles(Paths.get(folder), ".png");
 		if (fileList == null) {
 			logger.warning("invalid inputDir :" + folder);
@@ -101,7 +117,7 @@ public class Movie {
 		driftCorrection.init(fileList);
 	}
 	
-	public void setSaveDir(String folder) {
+	protected void setSaveDir(String folder) {
 		File file = new File(folder);
 		if (file.canWrite()) {
 			saveDir = folder;
@@ -110,11 +126,11 @@ public class Movie {
 		}
 	}
 	
-	public List<Path> getFileList() {
+	protected List<Path> getFileList() {
 		return fileList;
 	}
 	
-	public String getSaveFolder() {
+	protected String getSaveFolder() {
 		return saveDir;
 	}
 	
@@ -135,22 +151,22 @@ public class Movie {
 	////////////////////// template matching ////////////////////////////
 	/////////////////////////////////////////////////////////////////////
 
-	public void setSegmentFrame(int frameNumber) {
+	protected void setSegmentFrame(int frameNumber) {
 		templateMatching.setSegmentFrame(frameNumber);
 	}
 
-	public void removeSegmentFrame(int segmentIndex) {
+	protected void removeSegmentFrame(int segmentIndex) {
 		templateMatching.removeSegmentFrame(segmentIndex);
 	}
 	
-	public boolean setTemplate(int frameNumber, int[] ROI) {
+	protected boolean setTemplate(int frameNumber, int[] ROI) {
 		String filename = fileList.get(frameNumber).toString();
 		double[][] image = imageReader.read(filename);
 		Boolean res = templateMatching.setROI(frameNumber, ROI, image);
 		return res; 
 	}
 	
-	public void removeTemplate(int targetIndex) {
+	protected void removeTemplate(int targetIndex) {
 		templateMatching.removeROI(targetIndex);
 	}
 
@@ -158,16 +174,16 @@ public class Movie {
 //		return templateMatching.getSegment(frameNumber);
 //	}
 
-	public boolean templageMatchingPreRunValidation() {
+	protected boolean templageMatchingPreRunValidation() {
 		return templateMatching.templageMatchingPreRunValidation();
 	}
 	
-	public void runTemplateMatching(boolean blur) {
+	protected void runTemplateMatching(boolean blur) {
 		templateMatching.run(saveDir, blur);
 	}
 	
 
-	public void afterTemplateMatching() {
+	protected void afterTemplateMatching() {
 //		logger.info("at after template matching");
 		driftManager.setDrifts(templateMatching.tempXDrift, templateMatching.tempYDrift);
 		driftManager.saveFittedDrift(saveDir);
@@ -175,7 +191,7 @@ public class Movie {
 //		logger.info("end of after template matching");
 	}
 	
-	public int getTemplateMatchingProgress() {
+	protected int getTemplateMatchingProgress() {
 		return templateMatching.getProgress();
 	}
 	
@@ -191,7 +207,7 @@ public class Movie {
 		return driftManager.isDriftReady();
 	}
 	
-	public void setDriftCsv(String filename) {
+	protected void setDriftCsv(String filename) {
 		if (driftManager.setDrifts(filename)) {
 			setTemplateMatchingProgress(100);
 		}	
@@ -201,19 +217,19 @@ public class Movie {
 	////////////////////// drift editing ////////////////////////////////
 	/////////////////////////////////////////////////////////////////////
 	// setters in this section is for testing and for non GUI mode
-	public float[] getXDrift() {
+	protected float[] getXDrift() {
 		return driftManager.getXDrift();
 	}
 	
-	public float[] getYDrift() {
+	protected float[] getYDrift() {
 		return driftManager.getYDrift();
 	}
 	
-	public float[] getXFittedDrift() {
+	protected float[] getXFittedDrift() {
 		return driftManager.getFittedXDrift();
 	}
 	
-	public float[] getYFittedDrift() {
+	protected float[] getYFittedDrift() {
 		return driftManager.getFittedYDrift();
 	}
 	
@@ -229,11 +245,11 @@ public class Movie {
 //		driftManager.setYDrift(frameNumber, newVal);
 //	}
 	
-	public void addCuttingPoint(int frameNumber) {
+	protected void addCuttingPoint(int frameNumber) {
 		driftManager.addCuttingPoint(frameNumber);
 	}
 	
-	public void removeCuttingPoint(int sectionIndex) {
+	protected void removeCuttingPoint(int sectionIndex) {
 		driftManager.removeCuttingPoint(sectionIndex);
 	}
 	
@@ -245,14 +261,14 @@ public class Movie {
 	////////////////////// drift correction /////////////////////////////
 	/////////////////////////////////////////////////////////////////////
 	
-	public boolean driftCorrectionPreRunValidation() {
+	protected boolean driftCorrectionPreRunValidation() {
 		if (driftManager.isReady()) {
 			return true;
 		}
 		return false;
 	}
 
-	public void runDriftCorrection(boolean blurFlag) {
+	protected void runDriftCorrection(boolean blurFlag) {
 		// TODO: customise ROI for output images
 		String filename = fileList.get(0).toString();
 		double[][] image = imageReader.read(filename);
@@ -268,12 +284,12 @@ public class Movie {
 		}
 	}
 
-	public int getDriftCorrectionProgress() {
+	protected int getDriftCorrectionProgress() {
 		return driftCorrection.getProgress();
 	}
 	
 	
-	public List<String> getSaveFiles() {
+	protected List<String> getSaveFiles() {
 		return driftCorrection.getSaveFiles();
 	}
 
