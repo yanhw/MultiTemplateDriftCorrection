@@ -123,13 +123,12 @@ public class SettingPanel extends JPanel {
 			setButtons();
 		}
 	}
-	
-	@SuppressWarnings("static-access")
+
 	private void updateView() {
 		stepPanel.removeAll();
-		if (viewState == state.INIT) {
+		if (viewState == MovieStateModel.INIT) {
 			stepPanel.add(ioPanel);
-		} else if (viewState == state.TEMPLATE_MATCHING) {
+		} else if (viewState == MovieStateModel.TEMPLATE_MATCHING) {
 			stepPanel.add(templateMatchingPanel);
 		} else {
 			stepPanel.add(driftEditingPanel);
@@ -139,32 +138,31 @@ public class SettingPanel extends JPanel {
 		logger.info("changed view state to: " + state);
 	}
 	
-	@SuppressWarnings("static-access")
-	protected void setButtons() {
+	private void setButtons() {
 		assert viewState <= state.getValue();
 		assert viewState >= 0;
 		// not using switch because switch conditions must be constant
-		if (viewState == state.INIT) {
+		if (viewState == MovieStateModel.INIT) {
 			prevButton.setToolTipText("There is no previous step.");
 			if (state.getValue() > viewState) {
 				nextButton.setToolTipText("must set movie and save locations before continue");
 			} else {
 				nextButton.setToolTipText("ready to set templates");
 			}		
-		} else if (viewState == state.TEMPLATE_MATCHING) {
+		} else if (viewState == MovieStateModel.TEMPLATE_MATCHING) {
 			prevButton.setToolTipText("Go back to movie setting.");
 			if (state.getValue() > viewState) {
 				nextButton.setToolTipText("must perform template matching before continue");
 			} else {
 				nextButton.setToolTipText("ready to view drift");
 			}
-		} else if (viewState == state.DRIFT_EDIT) {
+		} else if (viewState == MovieStateModel.DRIFT_EDIT) {
 			prevButton.setToolTipText("Go back to template matching.");
 			nextButton.setToolTipText("This is the last step.");
 		} else {
 			logger.severe("unknown state: " + viewState);
 		}
-		if (viewState == state.INIT) {
+		if (viewState == MovieStateModel.INIT) {
 			prevButton.setEnabled(false);
 		} else {
 			prevButton.setEnabled(true);

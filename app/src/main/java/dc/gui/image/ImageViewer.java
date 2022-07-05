@@ -7,10 +7,10 @@ import javax.swing.event.ChangeListener;
 
 import dc.model.DriftModel;
 import dc.model.MovieStateModel;
+import dc.model.RawFileModel;
 import dc.model.TemplateMatchingSegmentModel;
 
 import java.awt.BorderLayout;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -72,8 +72,8 @@ public class ImageViewer extends JPanel {
 	}
 	
 	
-	public void setRawImages(List<Path> fileList) {
-		templateImage.setFileList(fileList);
+	public void setRawFileModel(RawFileModel fileList) {
+		templateImage.setRawFileModel(fileList);
 	}
 	
 	public void setCorrectedImages(List<String> list) {

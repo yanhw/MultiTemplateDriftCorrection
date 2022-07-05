@@ -2,7 +2,6 @@ package dc.controller;
 
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.*;
@@ -58,6 +57,7 @@ public class Controller {
 		}
 		myView = mainFrame;
 		myView.setMovieStateModel(myMovie.getMovieStateModel());
+		myView.setRawFileModel(myMovie.getFileList());
 		myView.setTemplateTableModel(myMovie.getTemplateTableModel());
 		myView.setDriftModel(myMovie.getDriftModel());
 		myView.setDriftSectionModel(myMovie.getDriftSectionModel());
@@ -108,25 +108,15 @@ public class Controller {
 			}
 			@Override
 			public void done() {
-				List<Path> fileList = myMovie.getFileList();
-				if (fileList == null) {
-					release();
-					return;
-				}
-				if (fileList.isEmpty()) {
-					myView.updateStatus("no .png file found in " + folder);
-					release();
-					return;
-				}
-				if (fileList.size() < 2) {
-					myView.updateStatus("need at least 2 images");
+				
+				if (myMovie.getFileList().getSize() < 2) {
+					myView.updateStatus("need at least 2 png images in the folder");
 					release();
 					return;
 				}
 				// success
 				myMovie.checkState();
 				myView.setImageFileName(folder);
-				myView.setRawImages(fileList);
 				myView.updateStatus("");
 				autoSetSaveDir(folder);
 				

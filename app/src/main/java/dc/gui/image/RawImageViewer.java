@@ -8,14 +8,16 @@ import javax.swing.JSplitPane;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+
+import dc.model.RawFileModel;
 
 @SuppressWarnings("serial")
 public class RawImageViewer extends JPanel implements ChangeListener  {
@@ -23,7 +25,7 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
 	
 	protected static int NUM_FRAME;
 	private int frameNumber = 0;
-    private List<Path> imgList;
+    private RawFileModel imgList;
     private Slider movieSlider;
     private ZoomSlider zoomSlider;
 	private ImagePanel imagePanel;
@@ -120,11 +122,28 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
         });
 	}
 	
-	public void setImageList(List<Path> imgList) {
-		this.imgList = imgList;
-		NUM_FRAME = imgList.size();
-		movieSlider.setMaximum(NUM_FRAME);
-		updatePictureWithSlider(0);
+	public void setRawFileModel(RawFileModel fileList) {
+		this.imgList = fileList;
+		imgList.addListDataListener(new FileModelListener());
+	}
+	
+	private class FileModelListener implements ListDataListener {
+
+		@Override
+		public void intervalAdded(ListDataEvent e) {
+		}
+
+		@Override
+		public void intervalRemoved(ListDataEvent e) {	
+		}
+
+		@Override
+		public void contentsChanged(ListDataEvent e) {
+			NUM_FRAME = imgList.getSize();
+			movieSlider.setMaximum(NUM_FRAME);
+			updatePictureWithSlider(0);
+		}
+		
 	}
 	
 	public void updatePictureWithSlider(int frameNumber) {
@@ -138,10 +157,10 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
 	
 	/** Update the label to display the image for the current frame. */
     protected void updatePicture(int frameNumber) {
-    	if (imgList == null) {
+    	if (imgList == null || imgList.getSize() == 0) {
     		return;
     	}
-    	if (!imagePanel.updateImage(imgList.get(frameNumber).toString()));
+    	if (!imagePanel.updateImage(imgList.getElementAt(frameNumber).toString()));
     	// TODO give feedback for bad image
     }
     

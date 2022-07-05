@@ -2,7 +2,6 @@ package dc.gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -15,6 +14,7 @@ import dc.gui.image.RawImageViewer;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
 import dc.model.MovieStateModel;
+import dc.model.RawFileModel;
 import dc.model.TemplateMatchingSegmentModel;
 
 import javax.swing.JSplitPane;
@@ -125,11 +125,13 @@ public class MainFrame extends JFrame {
 		imageViewer.setTemplateTableModel(model);
 	}
 	
+	public void setRawFileModel(RawFileModel fileList) {
+		rawImageViewer.setRawFileModel(fileList);
+		imageViewer.setRawFileModel(fileList);
+	}
 
 	//////////// setting panel 
-	protected void updateStateBtns() {
-		settingPanel.setButtons();
-	}
+
 	
 	//////////// IO panel
 	public void setImageFileName(String filename) {
@@ -166,10 +168,6 @@ public class MainFrame extends JFrame {
 	}
 	
 	/////////// raw Image
-	public void setRawImages(List<Path> fileList) {
-		rawImageViewer.setImageList(fileList);
-		imageViewer.setRawImages(fileList);
-	}
 	
 	public void setRawImageFrame(int frameNumber) {
 		rawImageViewer.updatePictureWithSlider(frameNumber);

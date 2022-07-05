@@ -4,14 +4,16 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
+import dc.model.RawFileModel;
 import dc.model.TemplateMatchingSegmentModel;
 
 import java.awt.BorderLayout;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import javax.swing.JLabel;
@@ -24,7 +26,7 @@ public class TemplateImageViewer extends JPanel {
 	private JLabel textLabel;
 	
 	private TemplateMatchingSegmentModel sections;
-	private List<Path> fileList;
+	private RawFileModel fileList;
 	private Slider slider;
 	
 	private int[] ROI = {0,0,0,0};		// keep current display status to avoid unnecessary refresh
@@ -56,15 +58,15 @@ public class TemplateImageViewer extends JPanel {
 	
 	public void setTemplateTableModel(TemplateMatchingSegmentModel model) {
 		sections = model;
-		sections.addTableModelListener(new ModelListener());
+		sections.addTableModelListener(new SegmentModelListener());
 		
 	}
 	
-	public void setFileList(List<Path> fileList) {
+	public void setRawFileModel(RawFileModel fileList) {
 		this.fileList = fileList;
 	}
 	
-	private class ModelListener implements TableModelListener {
+	private class SegmentModelListener implements TableModelListener {
 
 		@Override
 		public void tableChanged(TableModelEvent e) {
@@ -72,6 +74,23 @@ public class TemplateImageViewer extends JPanel {
 				slider.setMaximum(sections.getRowCount());
 			}
 			checkUpdate();
+		}	
+	}
+	
+	@SuppressWarnings("unused")
+	private class FileModelListener implements ListDataListener {
+
+		@Override
+		public void intervalAdded(ListDataEvent e) {
+		}
+
+		@Override
+		public void intervalRemoved(ListDataEvent e) {	
+		}
+
+		@Override
+		public void contentsChanged(ListDataEvent e) {
+			
 		}
 		
 	}
@@ -120,7 +139,7 @@ public class TemplateImageViewer extends JPanel {
 	}
 	
 	private void updateDisplay(int sectionNumber) {
-		if (sections.getRowCount()==0) {
+		if (sections.getRowCount()==0 || fileList.getSize() == 0) {
 			return;
 		}
 		int start = (int) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.START_IDX);
@@ -153,7 +172,7 @@ public class TemplateImageViewer extends JPanel {
     	if (ROI == null) {
     		imagePanel.updateImage(null);
     	} else {
-    		Path path = fileList.get(frameNumber);
+    		Path path = fileList.getElementAt(frameNumber);
     		imagePanel.updateImage(path.toString());
 	    	imagePanel.setROI(ROI[0], ROI[2], ROI[1]-ROI[0], ROI[3]-ROI[2]);
 	    	

@@ -15,12 +15,12 @@ public class Movie {
 	private static final Logger logger = Logger.getLogger(Movie.class.getName());
 	
 	private String saveDir = null;
-	private List<Path> fileList;
 	
 	private ImageArrayReader imageReader;
 	private TemplateMatchingManager templateMatching;
 	private DriftManager driftManager;
 	private DriftCorrectionManager driftCorrection;
+	private RawFileModel fileList;
 	private MovieStateModel myState;
 	
 	public Movie() {
@@ -30,6 +30,7 @@ public class Movie {
 		driftManager = new DriftManager();
 		driftCorrection = new DriftCorrectionManager();
 		myState = new MovieStateModel();
+		fileList = new RawFileModel();
 		@SuppressWarnings("serial")
 		TemplateMatchingSegmentModel templateMatchingSegmentModel = new TemplateMatchingSegmentModel() {
 			@Override
@@ -60,6 +61,11 @@ public class Movie {
 	protected MovieStateModel getMovieStateModel() {
 		return myState;
 	}
+	
+	protected RawFileModel getFileList() {
+		return fileList;
+	}
+	
 	
 	protected TemplateMatchingSegmentModel getTemplateTableModel() {
 		return templateMatching.getTableModel();
@@ -98,7 +104,7 @@ public class Movie {
 	/////////////////////////////////////////////////////////////////////
 	
 	protected void setSrcDir(String folder) {
-		fileList = FileSystem.getFiles(Paths.get(folder), ".png");
+		List<Path> fileList = FileSystem.getFiles(Paths.get(folder), ".png");
 		if (fileList == null) {
 			logger.warning("invalid inputDir :" + folder);
 			return;
@@ -111,6 +117,7 @@ public class Movie {
 			logger.fine("need at least 2 frames");
 			return;
 		}
+		this.fileList.setFiles(fileList);
 		// note: initialise variables here, not in constructor, because the movie can change
 		templateMatching.init(fileList);
 		driftManager.init(fileList.size());	
@@ -126,16 +133,12 @@ public class Movie {
 		}
 	}
 	
-	protected List<Path> getFileList() {
-		return fileList;
-	}
-	
 	protected String getSaveFolder() {
 		return saveDir;
 	}
 	
 	private boolean isIOReady() {
-		if (fileList == null ||fileList.size() <= 2) {
+		if (fileList == null ||fileList.getSize() <= 2) {
 			logger.fine("need at least 2 frames");
 			return false;
 		}
@@ -160,7 +163,7 @@ public class Movie {
 	}
 	
 	protected boolean setTemplate(int frameNumber, int[] ROI) {
-		String filename = fileList.get(frameNumber).toString();
+		String filename = fileList.getElementAt(frameNumber).toString();
 		double[][] image = imageReader.read(filename);
 		Boolean res = templateMatching.setROI(frameNumber, ROI, image);
 		return res; 
@@ -269,8 +272,9 @@ public class Movie {
 	}
 
 	protected void runDriftCorrection(boolean blurFlag) {
+		assert fileList.getSize() > 0;
 		// TODO: customise ROI for output images
-		String filename = fileList.get(0).toString();
+		String filename = fileList.getElementAt(0).toString();
 		double[][] image = imageReader.read(filename);
 		int[] ROI = new int[4];
 		ROI[0] = 0;
