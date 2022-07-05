@@ -44,7 +44,7 @@ public class Movie {
 		driftManager.setTableModel(driftModel, sectionModel);
 	}
 	
-	// getters and setters for GUI
+	// getters and setters for GUI init
 	protected void setFileHandler(FileHandler fh) {
 		logger.addHandler(fh);
 		imageReader.setFileHandler(fh);
