@@ -10,6 +10,8 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.PlainDocument;
+
 import dc.gui.image.RawImageViewer;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
@@ -115,6 +117,7 @@ public class MainFrame extends JFrame {
 		this.setVisible(true);
 	}
 	
+	// model setters to be set by controller, these links data to view
 	public void setMovieStateModel(MovieStateModel model) {
 		settingPanel.addMovieStateModelListener(model);
 		imageViewer.addMovieStateModelListener(model);
@@ -129,18 +132,13 @@ public class MainFrame extends JFrame {
 		rawImageViewer.setRawFileModel(fileList);
 		imageViewer.setRawFileModel(fileList);
 	}
-
-	//////////// setting panel 
-
 	
-	//////////// IO panel
-	public void setImageFileName(String filename) {
-		settingPanel.setInputFile(filename);
+	public void setFileNameModels(PlainDocument inputFileName, PlainDocument outputFileName) {
+		settingPanel.setFileNameModels(inputFileName, outputFileName);
 	}
 	
-	public void setSaveFolder(String folderName) {
-		settingPanel.setOutputFile(folderName);
-	}
+	// model setters between view components, these sync view
+	
 	
 	//////////// template matching
 	public void setTemplateMatchingBtn(boolean enableFlag, boolean runFlag) {
@@ -183,10 +181,6 @@ public class MainFrame extends JFrame {
 	
 	////////// right image panel
 	
-//	
-//	protected void removeTMImage(int frameNumber) {
-//		imagePanel.removeTMImage();
-//	}
 	
 	public void setCorrectedImages(List<String> list) {
 		imageViewer.setCorrectedImages(list);

@@ -3,6 +3,7 @@ package dc.gui;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.PlainDocument;
 
 import dc.controller.Controller;
 import dc.model.DriftModel;
@@ -156,7 +157,7 @@ public class SettingPanel extends JPanel {
 			} else {
 				nextButton.setToolTipText("ready to view drift");
 			}
-		} else if (viewState == MovieStateModel.DRIFT_EDIT) {
+		} else if (viewState >= MovieStateModel.DRIFT_EDIT) {
 			prevButton.setToolTipText("Go back to template matching.");
 			nextButton.setToolTipText("This is the last step.");
 		} else {
@@ -167,24 +168,17 @@ public class SettingPanel extends JPanel {
 		} else {
 			prevButton.setEnabled(true);
 		}
-		if (viewState == state.getValue()) {
+		if (viewState >= state.getValue()) {
 			nextButton.setEnabled(false);
 		} else {
 			nextButton.setEnabled(true);
 		}
 	}
 	
-	
-	protected void setInputFile(String filename) {
-		assert (filename != null);
-		ioPanel.setInputFile(filename);
+	protected void setFileNameModels(PlainDocument inputFileName, PlainDocument outputFileName) {
+		ioPanel.setFileNameModels(inputFileName, outputFileName);
 	}
-	
-	protected void setOutputFile(String folderName) {
-		assert (folderName != null);
-		ioPanel.setOutputFile(folderName);
-	}
-	
+
 	protected void setTemplateTableModel(TemplateMatchingSegmentModel model) {
 		templateMatchingPanel.setTableModel(model);
 	}

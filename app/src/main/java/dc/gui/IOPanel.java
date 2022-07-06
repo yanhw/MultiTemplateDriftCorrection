@@ -16,6 +16,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
 import dc.controller.Controller;
 
@@ -47,7 +51,7 @@ public class IOPanel extends JPanel {
 		inputPanel.add(inputFilename);
 		inputBtn = new JButton("choose directory");
 		inputPanel.add(inputBtn);
-		
+
 		overwriteBox = new JCheckBox("overwrite existing files");
 		overwriteBox.setMnemonic(KeyEvent.VK_O);
 		overwriteBox.setSelected(true);
@@ -83,12 +87,36 @@ public class IOPanel extends JPanel {
 		logger.addHandler(fh);
 	}
 	
-	protected void setInputFile(String filename) {
-		inputFilename.setText(filename);
+	protected void setFileNameModels(PlainDocument inputFileName, PlainDocument outputFileName) {
+		inputFileName.addDocumentListener(new FileNameListener(this.inputFilename));
+		outputFileName.addDocumentListener(new FileNameListener(this.outputFilename));
 	}
 	
-	protected void setOutputFile(String filename) {
-		outputFilename.setText(filename);
+	private class FileNameListener implements DocumentListener {
+		private JLabel label;
+		
+		public FileNameListener(JLabel label) {
+			this.label = label;
+		}
+		
+		@Override
+		public void insertUpdate(DocumentEvent e) {
+			try {
+				PlainDocument document = (PlainDocument) e.getDocument();
+				label.setText(document.getText(0, document.getLength()));
+			} catch (BadLocationException e1) {
+				e1.printStackTrace();
+			}
+		}
+
+		@Override
+		public void removeUpdate(DocumentEvent e) {
+		}
+
+		@Override
+		public void changedUpdate(DocumentEvent e) {
+		}
+		
 	}
 	
 	private class InputBtnListener implements ActionListener {

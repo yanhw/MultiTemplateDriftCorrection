@@ -61,6 +61,7 @@ public class Controller {
 		myView.setTemplateTableModel(myMovie.getTemplateTableModel());
 		myView.setDriftModel(myMovie.getDriftModel());
 		myView.setDriftSectionModel(myMovie.getDriftSectionModel());
+		myView.setFileNameModels(myMovie.getInputDirModel(), myMovie.getSaveDirModel());
 	}
 
 	// should be called before initialising a thread
@@ -116,7 +117,6 @@ public class Controller {
 				}
 				// success
 				myMovie.checkState();
-				myView.setImageFileName(folder);
 				myView.updateStatus("");
 				autoSetSaveDir(folder);
 				
@@ -134,7 +134,7 @@ public class Controller {
 	
 	private void autoSetSaveDir(String movieFolder) {
 		assert (movieFolder != null);
-		if (myMovie.getSaveFolder() != null) {
+		if (myMovie.getSaveFolder().getLength() != 0) {
 			return;
 		}
 		File file = new File(movieFolder);
@@ -142,11 +142,8 @@ public class Controller {
 	}
 	
 	public void setSaveDir(String folder) {
-		myMovie.setSaveDir(folder);
-		
-		if (myMovie.getSaveFolder() == folder) {
+		if (myMovie.setSaveDir(folder)) {
 			myMovie.checkState();
-			myView.setSaveFolder(folder);
 		} else {
 			myView.updateStatus("it appears you cannot modify the selected folder.");
 		}

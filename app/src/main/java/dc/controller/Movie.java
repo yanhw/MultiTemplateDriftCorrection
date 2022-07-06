@@ -8,20 +8,24 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
+
 import dc.model.*;
 import dc.utils.FileSystem;
 
 public class Movie {
 	private static final Logger logger = Logger.getLogger(Movie.class.getName());
 	
-	private String saveDir = null;
-	
 	private ImageArrayReader imageReader;
 	private TemplateMatchingManager templateMatching;
 	private DriftManager driftManager;
 	private DriftCorrectionManager driftCorrection;
+	
 	private RawFileModel fileList;
 	private MovieStateModel myState;
+	private PlainDocument inputDir;
+	private PlainDocument saveDir;
 	
 	public Movie() {
 		logger.setLevel(Level.FINE);
@@ -29,8 +33,12 @@ public class Movie {
 		templateMatching = new TemplateMatchingManager();
 		driftManager = new DriftManager();
 		driftCorrection = new DriftCorrectionManager();
+		
 		myState = new MovieStateModel();
 		fileList = new RawFileModel();
+		inputDir = new PlainDocument();
+		saveDir = new PlainDocument();
+		driftCorrection.setSaveDir(saveDir);
 		@SuppressWarnings("serial")
 		TemplateMatchingSegmentModel templateMatchingSegmentModel = new TemplateMatchingSegmentModel() {
 			@Override
@@ -66,7 +74,6 @@ public class Movie {
 		return fileList;
 	}
 	
-	
 	protected TemplateMatchingSegmentModel getTemplateTableModel() {
 		return templateMatching.getTableModel();
 	}
@@ -77,6 +84,14 @@ public class Movie {
 	
 	protected DriftSectionModel getDriftSectionModel() {
 		return driftManager.getDriftSectionModel();
+	}
+	
+	protected PlainDocument getSaveDirModel() {
+		return saveDir;
+	}
+	
+	protected PlainDocument getInputDirModel() {
+		return inputDir;
 	}
 	
 	// call this method when state might be changed
@@ -118,23 +133,50 @@ public class Movie {
 			return;
 		}
 		this.fileList.setFiles(fileList);
+		try {
+			inputDir.remove(0, inputDir.getLength());
+			inputDir.insertString(0, folder, null);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
 		// note: initialise variables here, not in constructor, because the movie can change
 		templateMatching.init(fileList);
 		driftManager.init(fileList.size());	
 		driftCorrection.init(fileList);
 	}
 	
-	protected void setSaveDir(String folder) {
+	protected boolean setSaveDir(String folder) {
 		File file = new File(folder);
 		if (file.canWrite()) {
-			saveDir = folder;
+			try {
+				saveDir.remove(0, saveDir.getLength());
+				saveDir.insertString(0, folder, null);
+				return true;
+			} catch (BadLocationException e) {
+				e.printStackTrace();
+				return false;
+			}
 		} else {
 			logger.info("cannot set save folder at : " + folder);
+			return false;
 		}
 	}
 	
-	protected String getSaveFolder() {
+	protected PlainDocument getInputFolder() {
+		return inputDir;
+	}
+	
+	protected PlainDocument getSaveFolder() {
 		return saveDir;
+	}
+	
+	private String getString(PlainDocument document) {
+		try {
+			return document.getText(0, document.getLength());
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	private boolean isIOReady() {
@@ -142,7 +184,7 @@ public class Movie {
 			logger.fine("need at least 2 frames");
 			return false;
 		}
-		if (saveDir == null) {
+		if (saveDir.getLength() == 0) {
 			logger.fine("no saveDir");
 			return false;
 		}
@@ -182,14 +224,14 @@ public class Movie {
 	}
 	
 	protected void runTemplateMatching(boolean blur) {
-		templateMatching.run(saveDir, blur);
+		templateMatching.run(getString(saveDir), blur);
 	}
 	
 
 	protected void afterTemplateMatching() {
 //		logger.info("at after template matching");
 		driftManager.setDrifts(templateMatching.tempXDrift, templateMatching.tempYDrift);
-		driftManager.saveFittedDrift(saveDir);
+		driftManager.saveFittedDrift(getString(saveDir));
 		saveRawDrift();
 //		logger.info("end of after template matching");
 	}
@@ -203,7 +245,7 @@ public class Movie {
 	}
 	
 	private void saveRawDrift() {
-		driftManager.saveRawDrift(saveDir);
+		driftManager.saveRawDrift(getString(saveDir));
 	}
 	
 	private boolean isDriftReady() {
@@ -282,9 +324,9 @@ public class Movie {
 		ROI[2] = 0;
 		ROI[3] = image[0].length;
 		if (blurFlag) {
-			driftCorrection.run(saveDir, getXFittedDrift(), getYFittedDrift(), ROI);
+			driftCorrection.run(getXFittedDrift(), getYFittedDrift(), ROI);
 		} else {
-			driftCorrection.run(saveDir, getXDrift(), getYDrift(), ROI);
+			driftCorrection.run(getXDrift(), getYDrift(), ROI);
 		}
 	}
 

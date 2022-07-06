@@ -90,6 +90,7 @@ public class ImageViewer extends JPanel {
 		public void stateChanged(ChangeEvent e) {
 			MovieStateModel source = (MovieStateModel) e.getSource();
 			int state = (int)source.getValue();
+			logger.info("setting tabbedPane state: " + state);
 			switch (state) {
 				case 0:
 				case 1:
