@@ -1,15 +1,19 @@
 package dc.gui;
 
 import javax.swing.JPanel;
+import javax.swing.BoundedRangeModel;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import dc.controller.Controller;
 import dc.model.TemplateMatchingSegmentModel;
 
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+
 import java.awt.GridLayout;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -41,6 +45,7 @@ public class TemplateMatchingPanel extends JPanel {
 	private JButton loadDriftButton;
 	
 	TemplateMatchingSegmentModel model;
+	private int currentFrame = 0;
 	/**
 	 * Create the panel.
 	 */
@@ -124,7 +129,7 @@ public class TemplateMatchingPanel extends JPanel {
 		setTemplateButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				TemplateMatchingPanel.logger.info("setting template");
-				TemplateMatchingPanel.this.controller.setTemplate();
+				TemplateMatchingPanel.this.controller.setTemplate(currentFrame);
 			}
 		});
 		removeTemplateButton.addActionListener(new ActionListener() {
@@ -139,7 +144,7 @@ public class TemplateMatchingPanel extends JPanel {
 		});
 		setSectionButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				TemplateMatchingPanel.this.controller.setSegmentFrame();
+				TemplateMatchingPanel.this.controller.setSegmentFrame(currentFrame);
 			}
 		});
 		removeSectionButton.addActionListener(new ActionListener() {
@@ -184,6 +189,21 @@ public class TemplateMatchingPanel extends JPanel {
 		});
 	}
 	
+
+	protected void setRawFrameModel(BoundedRangeModel model) {
+		model.addChangeListener(new RawImageListener());
+	}
+	
+	private class RawImageListener implements ChangeListener {
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			BoundedRangeModel source = (BoundedRangeModel)e.getSource();
+	        int frameNumber = (int)source.getValue();
+	        currentFrame = frameNumber;
+		}
+		
+	}
 	
 	public void setRunBtn(boolean enableFlag, boolean runningFlag) {
 		if (enableFlag) {

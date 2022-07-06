@@ -1,5 +1,6 @@
 package dc.gui.image;
 
+import javax.swing.BoundedRangeModel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 
@@ -68,6 +69,10 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
 			logger.info("updating to image: " + frameNumber);
 			updatePicture(frameNumber);
 		}
+	}
+	
+	public BoundedRangeModel getRawFrameModel() {
+		return movieSlider.getModel();
 	}
 	
 	private void setHandlers() {

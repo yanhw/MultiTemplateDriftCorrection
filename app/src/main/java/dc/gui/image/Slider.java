@@ -44,8 +44,8 @@ public class Slider extends JPanel implements ChangeListener {
         sliderLabel = new JLabel("Frame: 0/0", JLabel.CENTER);
         sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         labelGroup.add(sliderLabel);
-        
         add(labelGroup);
+        
         prevBtn = new JButton("<");
 //        prevBtn.setMaximumSize(new Dimension(10, 10));
 //        prevBtn.setPreferredSize(new Dimension(10, 10));
@@ -57,8 +57,8 @@ public class Slider extends JPanel implements ChangeListener {
         add(nextBtn);
         nextBtn.addActionListener(new NextBtnListener());
 	}
-	
-	public void setMaximum(int numFrame) {
+
+	protected void setMaximum(int numFrame) {
 		model.setMaximum(numFrame-1);
 	}
 	
@@ -74,11 +74,15 @@ public class Slider extends JPanel implements ChangeListener {
 		imageSlider.addChangeListener(listener);
 	}
 	
+	public BoundedRangeModel getModel() {
+		return model;
+	}
+	
 //	public int getFrameNumber() {
 //		return imageSlider.getValue();
 //	}
 	
-	public void setFrameNumber(int frameNumber) {
+	protected void setFrameNumber(int frameNumber) {
 		if (frameNumber < 0 || frameNumber >= model.getMaximum()) {
 			return;
 		}

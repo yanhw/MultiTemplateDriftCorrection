@@ -12,6 +12,8 @@ import dc.model.MovieStateModel;
 import dc.model.TemplateMatchingSegmentModel;
 
 import java.awt.BorderLayout;
+
+import javax.swing.BoundedRangeModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.util.logging.FileHandler;
@@ -191,6 +193,10 @@ public class SettingPanel extends JPanel {
 		driftEditingPanel.setDriftSectionModel(sectionModel);
 	}
 	
+
+	protected void setRawFrameModel(BoundedRangeModel model) {
+		templateMatchingPanel.setRawFrameModel(model);
+	}
 	
 	protected void setDriftTableVisible(int frameNumber) {
 		driftEditingPanel.setDriftTableVisible(frameNumber);
@@ -203,6 +209,7 @@ public class SettingPanel extends JPanel {
 	public void toggleDriftCorrectionBtn(boolean flag) {
 		
 	}
+
 
 
 }

@@ -156,11 +156,10 @@ public class Controller {
 	////////////////////// template matching ////////////////////////////
 	/////////////////////////////////////////////////////////////////////
 	
-	public void setSegmentFrame() {
+	public void setSegmentFrame(int frameNumber) {
 		if (isBusy) {
 			return;
 		}
-		int frameNumber = myView.getRawFrameIndex();
 		myMovie.setSegmentFrame(frameNumber);
 		if (myMovie.templageMatchingPreRunValidation()) {
 			myView.setTemplateMatchingBtn(true, false);
@@ -181,7 +180,7 @@ public class Controller {
 		}
 	}
 	
-	public void setTemplate() {
+	public void setTemplate(int frameNumber) {
 		if (isBusy) {
 			return;
 		}
@@ -192,7 +191,6 @@ public class Controller {
 			return;
 		}
 		
-		int frameNumber = myView.getRawFrameIndex();
 		block("setting key frame, please wait...");
 		SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
 			@Override

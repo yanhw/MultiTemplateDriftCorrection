@@ -7,6 +7,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.BoundedRangeModel;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -111,6 +112,8 @@ public class MainFrame extends JFrame {
 		imageViewer.setFileHandler(fh);
 		statusPanel.setFileHandler(fh);
 		
+		addRawFrameChangeListener();
+		
 		settingPanel.setController(controller);
 		controller.setMainFrame(this);
 		
@@ -137,15 +140,6 @@ public class MainFrame extends JFrame {
 		settingPanel.setFileNameModels(inputFileName, outputFileName);
 	}
 	
-	// model setters between view components, these sync view
-	
-	
-	//////////// template matching
-	public void setTemplateMatchingBtn(boolean enableFlag, boolean runFlag) {
-		settingPanel.setTemplateMatchingBtn(enableFlag, runFlag);
-	}
-	
-	/////////// drift editing
 	public void setDriftModel(DriftModel driftModel) {
 		settingPanel.setDriftModel(driftModel);
 		imageViewer.setDriftDataModel(driftModel);
@@ -154,6 +148,20 @@ public class MainFrame extends JFrame {
 	public void setDriftSectionModel(DriftSectionModel sectionModel) {
 		settingPanel.setDriftSectionModel(sectionModel);
 	}
+	
+	// model setters between view components, these sync view
+	private void addRawFrameChangeListener() {
+		BoundedRangeModel model = rawImageViewer.getRawFrameModel();
+		settingPanel.setRawFrameModel(model);
+	}
+	
+	//////////// template matching
+	public void setTemplateMatchingBtn(boolean enableFlag, boolean runFlag) {
+		settingPanel.setTemplateMatchingBtn(enableFlag, runFlag);
+	}
+	
+	/////////// drift editing
+	
 	
 
 	public void setDriftTableVisible(int frameNumber) {
