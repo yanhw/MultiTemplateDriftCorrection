@@ -14,6 +14,7 @@ import dc.model.TemplateMatchingSegmentModel;
 import java.awt.BorderLayout;
 
 import javax.swing.BoundedRangeModel;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.util.logging.FileHandler;
@@ -185,6 +186,10 @@ public class SettingPanel extends JPanel {
 		templateMatchingPanel.setTableModel(model);
 	}
 	
+	protected void setPlotSelectionModel(DefaultListSelectionModel model) {
+		driftEditingPanel.setPlotSelectionModel(model);
+	}
+	
 	protected void setDriftModel(DriftModel driftModel) {
 		driftEditingPanel.setDriftModel(driftModel);
 	}
@@ -193,14 +198,10 @@ public class SettingPanel extends JPanel {
 		driftEditingPanel.setDriftSectionModel(sectionModel);
 	}
 	
-
 	protected void setRawFrameModel(BoundedRangeModel model) {
 		templateMatchingPanel.setRawFrameModel(model);
 	}
 	
-	protected void setDriftTableVisible(int frameNumber) {
-		driftEditingPanel.setDriftTableVisible(frameNumber);
-	}
 	
 	protected void setTemplateMatchingBtn(boolean enableFlag, boolean runFlag) {
 		templateMatchingPanel.setRunBtn(enableFlag, runFlag);

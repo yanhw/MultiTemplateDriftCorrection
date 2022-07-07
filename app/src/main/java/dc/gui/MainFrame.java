@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BoundedRangeModel;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -113,6 +114,7 @@ public class MainFrame extends JFrame {
 		statusPanel.setFileHandler(fh);
 		
 		addRawFrameChangeListener();
+		addPlotSelectionListener();
 		
 		settingPanel.setController(controller);
 		controller.setMainFrame(this);
@@ -155,33 +157,27 @@ public class MainFrame extends JFrame {
 		settingPanel.setRawFrameModel(model);
 	}
 	
+	private void addPlotSelectionListener() {
+		DefaultListSelectionModel xModel = imageViewer.getXSelectionModel();
+		DefaultListSelectionModel yModel = imageViewer.getXSelectionModel();
+		rawImageViewer.setPlotSelectionModel(xModel);
+		rawImageViewer.setPlotSelectionModel(yModel);
+		settingPanel.setPlotSelectionModel(xModel);
+		settingPanel.setPlotSelectionModel(yModel);
+	}
+	
 	//////////// template matching
 	public void setTemplateMatchingBtn(boolean enableFlag, boolean runFlag) {
 		settingPanel.setTemplateMatchingBtn(enableFlag, runFlag);
 	}
 	
-	/////////// drift editing
-	
-	
 
-	public void setDriftTableVisible(int frameNumber) {
-		settingPanel.setDriftTableVisible(frameNumber);
-	}
-	
 	////////// drift correction
 	public void toggleDriftCorrectionBtn(boolean flag) {
 		settingPanel.toggleDriftCorrectionBtn(flag);
 	}
 	
 	/////////// raw Image
-	
-	public void setRawImageFrame(int frameNumber) {
-		rawImageViewer.updatePictureWithSlider(frameNumber);
-	}
-	
-	public int getRawFrameIndex() {
-		return rawImageViewer.getFrameIndex();
-	}
 	
 	public int[] getRawROI() {
 		return rawImageViewer.getROI();

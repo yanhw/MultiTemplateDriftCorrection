@@ -1,4 +1,4 @@
-package dc.model;
+package dc.controller;
 
 import static org.junit.Assert.*;
 

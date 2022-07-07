@@ -14,7 +14,10 @@ import javax.swing.JSplitPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.InputVerifier;
 import javax.swing.JSeparator;
 import javax.swing.JCheckBox;
@@ -250,9 +253,23 @@ public class DriftEditingPanel extends JPanel {
 		driftSectionTable.setDefaultEditor(Object.class, editor);
 	}
 	
+	public void setPlotSelectionModel(DefaultListSelectionModel model) {
+		model.addListSelectionListener(new PlotListener());
+	}
+	
+	private class PlotListener implements ListSelectionListener {
+
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			if (!e.getValueIsAdjusting()) {
+				setDriftTableVisible(e.getFirstIndex());
+			}			
+		}
+		
+	}
 	
 	//https://www.codejava.net/java-se/swing/how-to-scroll-jtable-row-to-visible-area-programmatically
-	public void setDriftTableVisible(int frameNumber) {
+	private void setDriftTableVisible(int frameNumber) {
 		logger.info("changing table view to frame: "+frameNumber);
 		int columnIndex = 0;
 		boolean includeSpacing = true;

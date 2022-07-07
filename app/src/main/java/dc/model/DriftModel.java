@@ -32,6 +32,10 @@ public class DriftModel extends AbstractTableModel {
 	}
 	
 	public void initData(int movieSize) {
+		if (movieSize < 2) {
+			logger.warning("wrong movieSize: " + movieSize);
+			return;
+		}
 		dataVector = new Object[movieSize][getColumnCount()];
 		for (int i = 0; i < movieSize; i++) {
 			dataVector[i][INDEX] = i;
@@ -74,6 +78,11 @@ public class DriftModel extends AbstractTableModel {
 	
 	public void removeDrift(int frameNumber) {
 		if (frameNumber < 0 || frameNumber >= getRowCount()) {
+			logger.warning("invalid frame number: " + frameNumber);
+			return;
+		}
+		if (((Number)dataVector[frameNumber][WEIGHT_X]).doubleValue() == 0.0) {
+			logger.info("drift already removed at frame: " + frameNumber);
 			return;
 		}
 		dataVector[frameNumber][FITTED_DX] = (double)0.0;
@@ -85,6 +94,18 @@ public class DriftModel extends AbstractTableModel {
 	}
 	
 	public void setDrift(double[] value, int start, int end, int col) {
+		if (value == null) {
+			logger.info("null value");
+			return;
+		}
+		if (start < 0 || start > end || end >= getRowCount()) {
+			logger.info("bad start and end: " + start + " " + end);
+			return;
+		}
+		if (col != FITTED_DX && col != FITTED_DY) {
+			logger.info("wrong col: " + col);
+			return;
+		}
 		for (int i = start; i <= end; i++) {
 			dataVector[i][col] = value[i-start];
 		}
@@ -147,10 +168,15 @@ public class DriftModel extends AbstractTableModel {
 	// this handles only DX and DY
 	public void setValueAt(Object value, int row, int col) {
 
-		if (row >= getRowCount()) {
+		if (row >= getRowCount() || row < 0) {
+			logger.info("invalid row: " + row);
 			return;
 		}
-
+		if (col >= getColumnCount() || col < 0) {
+			logger.info("invalid col: " + col);
+			return;
+		}
+ 
 		float floatValue = 0;
 		try {
 			floatValue = Float.parseFloat(String.valueOf(value));

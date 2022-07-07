@@ -15,7 +15,7 @@ public class DriftSectionModel extends DefaultTableModel {
 	public static final int FIT = 3;	//TODO: fit option for individual section
 	public static final int DEGREE = 4;
 	
-	private static final int DEFAULTFITTINGDEGREE = 5;
+	protected static final int DEFAULTFITTINGDEGREE = 5;
 	public static final int MAXFITTINGDEGREE = 25;
 
 	
@@ -32,6 +32,9 @@ public class DriftSectionModel extends DefaultTableModel {
 	}
 	
 	public void initData(int frameNumber) {
+		if (frameNumber <= 0) {
+			return;
+		}
 		setRowCount(0);
 		addRow(new Object[] {1, 0, frameNumber-1, true, DEFAULTFITTINGDEGREE});
 	}
@@ -46,12 +49,14 @@ public class DriftSectionModel extends DefaultTableModel {
 	}
 	
 	private int getMovieSize() {
+		assert getRowCount() > 0;
 		return (int)getValueAt(getRowCount()-1, END);
 	}
 	
 	public int getRowNumber(int frameNumber) {
-		assert frameNumber >= 0;
-		assert frameNumber <= getMovieSize();
+		if (frameNumber < 0 || getRowCount()==0 || frameNumber >= getMovieSize()) {
+			return -1;
+		}
 		int i;
 		for (i=0; i < getRowCount(); i++) {
 			if ((int)getValueAt(i, END) >= frameNumber) {
@@ -63,7 +68,9 @@ public class DriftSectionModel extends DefaultTableModel {
 	}
 	
 	public void setEndFrame(int frameNumber) {
-		assert !isEndFrame(frameNumber);
+		if (isEndFrame(frameNumber)) {
+			return;
+		}
 		if (frameNumber <= 0) {
 			return;
 		}
@@ -75,7 +82,13 @@ public class DriftSectionModel extends DefaultTableModel {
 		int ending = (int)getValueAt(targetIdx, END);
 		setValueAt(frameNumber, targetIdx, END);
 		boolean flag = (boolean) getValueAt(targetIdx, FIT);
-		int degree = (int)getValueAt(targetIdx, DEGREE);
+		int degree = DEFAULTFITTINGDEGREE;
+		try {
+			degree = (int)getValueAt(targetIdx, DEGREE);
+		} catch (ClassCastException e) {
+			logger.warning("bad degree: " + getValueAt(targetIdx, DEGREE));
+		}
+		
 		insertRow(targetIdx+1, new Object[] {targetIdx+2, frameNumber, ending, flag, degree});
 		
 		logger.info("set end frame at: " + frameNumber);
@@ -83,10 +96,7 @@ public class DriftSectionModel extends DefaultTableModel {
 	
 	public void removeEndFrame(int segmentIndex) {
 		// first segment cannot be removed
-		if (segmentIndex == 0) {
-			return;
-		}
-		if (segmentIndex >= getRowCount()) {
+		if (segmentIndex <= 0 || segmentIndex >= getRowCount()) {
 			return;
 		}
 		int prevIndex = segmentIndex-1;

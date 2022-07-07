@@ -1,6 +1,7 @@
 package dc.gui.image;
 
 import javax.swing.BoundedRangeModel;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 
@@ -17,6 +18,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import dc.model.RawFileModel;
 
@@ -151,6 +154,21 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
 		
 	}
 	
+	public void setPlotSelectionModel(DefaultListSelectionModel model) {
+		model.addListSelectionListener(new PlotListener());
+	}
+	
+	private class PlotListener implements ListSelectionListener {
+
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			if (!e.getValueIsAdjusting()) {
+				updatePictureWithSlider(e.getFirstIndex());
+			}			
+		}
+		
+	}
+	
 	public void updatePictureWithSlider(int frameNumber) {
 		if (frameNumber < 0 || frameNumber >= NUM_FRAME) {
 			return;
@@ -177,7 +195,5 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
     	return imagePanel.getROI();
     }
     
-    public int getFrameIndex() {
-    	return frameNumber;
-    }
+
 }

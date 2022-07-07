@@ -25,6 +25,7 @@ import java.awt.Color;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JPanel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -41,6 +42,8 @@ public class DriftViewer extends JPanel {
 	private int rawIdx;
 	private int fittedIdx;
 	
+	private DefaultListSelectionModel selection;
+	
 	public DriftViewer(String direction) {
 		if (direction.equals("x")) {
 			rawIdx = DriftModel.DX;
@@ -55,6 +58,8 @@ public class DriftViewer extends JPanel {
         XYSeriesCollection dataset = new XYSeriesCollection();
         dataset.addSeries(rawDrift);
         dataset.addSeries(fittedDrift);
+        
+        selection = new DefaultListSelectionModel();
         
         // Create chart  
         JFreeChart chart = ChartFactory.createXYLineChart(  
@@ -85,13 +90,17 @@ public class DriftViewer extends JPanel {
         add(panel);
 	}
 	
-	public void setFileHandler(FileHandler fh) {
+	protected void setFileHandler(FileHandler fh) {
 		logger.addHandler(fh);
 	}
 	
 	
-	public void setDriftModelListener(DriftModel model) {
+	protected void setDriftModelListener(DriftModel model) {
 		model.addTableModelListener(new DriftModelListener());
+	}
+	
+	protected DefaultListSelectionModel getSelectionModel() {
+		return selection;
 	}
 	
 	private class DriftModelListener implements TableModelListener {
@@ -170,23 +179,17 @@ public class DriftViewer extends JPanel {
 //				XYDataset dataset = ((XYItemEntity)entity).getDataset();
 //				int seriesIndex = ((XYItemEntity)entity).getSeriesIndex();
 				int item = ((XYItemEntity)entity).getItem();
-
 				// You have the dataset the data point belongs to, the index of the series in that dataset of the data point, and the specific item index in the series of the data point.
 //				XYSeries series = ((XYSeriesCollection)dataset).getSeries(seriesIndex);
 //				XYDataItem xyItem = series.getDataItem(item);	
-				System.out.println(item);
-//				if (mySynchroniser != null) {
-//					logger.info("selected frame: " + item + " on drift plot.");
-//					mySynchroniser.driftPlotPointSelected(item);
-//				}
+				logger.info("selected frame: " + item + " on drift plot.");
+				selection.setLeadSelectionIndex(item);
 			}
 			
 		}
 
 		@Override
 		public void chartMouseMoved(ChartMouseEvent event) {
-			// TODO Auto-generated method stub
-			
 		}
 		
 	}

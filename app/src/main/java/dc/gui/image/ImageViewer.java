@@ -1,5 +1,6 @@
 package dc.gui.image;
 
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
@@ -71,9 +72,16 @@ public class ImageViewer extends JPanel {
 		yDriftPlot.setDriftModelListener(model);
 	}
 	
-	
 	public void setRawFileModel(RawFileModel fileList) {
 		templateImage.setRawFileModel(fileList);
+	}
+	
+	public DefaultListSelectionModel getXSelectionModel() {
+		return xDriftPlot.getSelectionModel();
+	}
+	
+	public DefaultListSelectionModel getYSelectionModel() {
+		return yDriftPlot.getSelectionModel();
 	}
 	
 	public void setCorrectedImages(List<String> list) {
