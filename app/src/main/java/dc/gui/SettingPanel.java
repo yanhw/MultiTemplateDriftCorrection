@@ -3,13 +3,13 @@ package dc.gui;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.text.PlainDocument;
 
 import dc.controller.Controller;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
 import dc.model.MovieStateModel;
 import dc.model.TemplateMatchingSegmentModel;
+import dc.model.TextModel;
 
 import java.awt.BorderLayout;
 
@@ -178,7 +178,7 @@ public class SettingPanel extends JPanel {
 		}
 	}
 	
-	protected void setFileNameModels(PlainDocument inputFileName, PlainDocument outputFileName) {
+	protected void setFileNameModels(TextModel inputFileName, TextModel outputFileName) {
 		ioPanel.setFileNameModels(inputFileName, outputFileName);
 	}
 

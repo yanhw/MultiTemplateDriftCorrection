@@ -5,6 +5,9 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.*;
+
+import javax.swing.BoundedRangeModel;
+import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.SwingWorker;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -33,11 +36,15 @@ public class Controller {
 	
 	private MainFrame myView;
 	private Movie myMovie;
+	private BoundedRangeModel myProgress;
+	private TextModel myStatus;
 	
 	public Controller() {
 		logger.setLevel(Level.FINE);
 //		logger.setUseParentHandlers(true);
-		this.myMovie = new Movie();
+		myMovie = new Movie();
+		myProgress = new DefaultBoundedRangeModel(0,1,0,100); 
+		myStatus = new TextModel();
 		// listeners are here (instead of inside DriftManager) for thread management purpose
 		DriftModel driftModel = myMovie.getDriftModel();
 		DriftSectionModel sectionModel = myMovie.getDriftSectionModel();		
@@ -62,12 +69,14 @@ public class Controller {
 		myView.setDriftModel(myMovie.getDriftModel());
 		myView.setDriftSectionModel(myMovie.getDriftSectionModel());
 		myView.setFileNameModels(myMovie.getInputDirModel(), myMovie.getSaveDirModel());
+		myView.setProgressModel(myProgress);
+		myView.setStatusModel(myStatus);
 	}
 
 	// should be called before initialising a thread
 	private void block(String message) {
 		isBusy = true;
-		myView.updateStatus(message);
+		myStatus.setText(message);
 		logger.info("blocking controller, " + message);
 	}
 	
@@ -111,13 +120,13 @@ public class Controller {
 			public void done() {
 				
 				if (myMovie.getFileList().getSize() < 2) {
-					myView.updateStatus("need at least 2 png images in the folder");
+					myStatus.setText("need at least 2 png images in the folder");
 					release();
 					return;
 				}
 				// success
 				myMovie.checkState();
-				myView.updateStatus("");
+				myStatus.setText("");
 				autoSetSaveDir(folder);
 				
 				if (myMovie.templageMatchingPreRunValidation()) {
@@ -134,7 +143,7 @@ public class Controller {
 	
 	private void autoSetSaveDir(String movieFolder) {
 		assert (movieFolder != null);
-		if (myMovie.getSaveFolder().getLength() != 0) {
+		if (myMovie.getSaveFolder().getText().length() != 0) {
 			return;
 		}
 		File file = new File(movieFolder);
@@ -145,7 +154,7 @@ public class Controller {
 		if (myMovie.setSaveDir(folder)) {
 			myMovie.checkState();
 		} else {
-			myView.updateStatus("it appears you cannot modify the selected folder.");
+			myStatus.setText("it appears you cannot modify the selected folder.");
 		}
 	}
 	
@@ -187,7 +196,7 @@ public class Controller {
 		int[] ROI = myView.getRawROI();
 		if (ROI == null) {
 			logger.info("ROI is not set");
-			myView.updateStatus("must select a region of interest!");
+			myStatus.setText("must select a region of interest!");
 			return;
 		}
 		
@@ -216,7 +225,7 @@ public class Controller {
 					return;
 				}
 				//TODO update start and end frame
-				myView.updateStatus("");
+				myStatus.setText("");
 				if (myMovie.templageMatchingPreRunValidation()) {
 					myView.setTemplateMatchingBtn(true, false);
 				} else {
@@ -246,9 +255,9 @@ public class Controller {
 			return;
 		}
 		interrupt.set(false);
-		myView.updateStatus("validating input, please wait...");
+		myStatus.setText("validating input, please wait...");
 		if (!myMovie.templageMatchingPreRunValidation()) {
-			myView.updateStatus("template validation failed, check input!");
+			myStatus.setText("template validation failed, check input!");
 			return;
 		}
 		// release only in afterTemplateMatching
@@ -292,20 +301,20 @@ public class Controller {
 			@Override
 	        protected void process(List<Integer> chunks) {
 	            int i = chunks.get(chunks.size()-1);
-	            myView.setProgress(i);
+	            myProgress.setValue(i);
 	        }
 			
 			@Override
 			public void done() {
 				if (!interrupt.get()) {
 					logger.info("finished");
-					myView.setProgress(100);
+					myProgress.setValue(100);
 					myView.setTemplateMatchingBtn(true, false);
 					afterTemplateMatching();
 				}
 				// this will be triggered when cancel button is pressed or when there is a problem
 				else {
-					myView.setProgress(100);
+					myProgress.setValue(100);
 					myView.setTemplateMatchingBtn(true, false);
 					release();
 				}
@@ -319,7 +328,7 @@ public class Controller {
 	private void cancelTemplateMatching() {
 		interrupt.set(true);
 		logger.info("template matching cancelled");
-		myView.setProgress(100);
+		myProgress.setValue(100);
 	}
 
 	private void afterTemplateMatching() {
@@ -331,7 +340,7 @@ public class Controller {
 			}
 			@Override
 			public void done() {
-				myView.updateStatus("ready to view drift");
+				myStatus.setText("ready to view drift");
 				myMovie.checkState();
 				release();
 			}
@@ -355,12 +364,12 @@ public class Controller {
 				
 				if (myMovie.getTemplateMatchingProgress() != 100) {
 					logger.info("failed to reading csv");
-					myView.updateStatus("failed to load csv file: " + filename);					
+					myStatus.setText("failed to load csv file: " + filename);					
 					release();
 					return;
 				}
 				myMovie.checkState();
-				myView.updateStatus("ready to view drift");
+				myStatus.setText("ready to view drift");
 				logger.info("finished reading csv");
 				
 				
@@ -440,7 +449,7 @@ public class Controller {
 			}
 			@Override
 			public void done() {
-				myView.updateStatus("");
+				myStatus.setText("");
 				myMovie.checkState();
 			}
 		};
@@ -506,9 +515,9 @@ public class Controller {
 			return;
 		}
 		interrupt.set(false);
-		myView.updateStatus("validating input, please wait...");
+		myStatus.setText("validating input, please wait...");
 		if (!myMovie.driftCorrectionPreRunValidation()) {
-			myView.updateStatus("drift correction failed, check input!");
+			myStatus.setText("drift correction failed, check input!");
 			return;
 		}
 		// release only in afterTemplateMatching
@@ -548,7 +557,7 @@ public class Controller {
 			@Override
 	        protected void process(List<Integer> chunks) {
 	            int i = chunks.get(chunks.size()-1);
-	            myView.setProgress(i);
+	            myProgress.setValue(i);
 	        }
 			
 			@Override
@@ -558,7 +567,7 @@ public class Controller {
 					myView.setCorrectedImages(myMovie.getSaveFiles());
 				}
 				myMovie.checkState();
-				myView.setProgress(100);
+				myProgress.setValue(100);
 				myView.toggleDriftCorrectionBtn(true);
 				release();
 
@@ -570,7 +579,7 @@ public class Controller {
 	private void cancelDriftCorrection() {
 		logger.info("drift correction cancelled");
 		stoppableWorker.cancel(true);
-		myView.setProgress(100);
+		myProgress.setValue(100);
 		
 	}
 

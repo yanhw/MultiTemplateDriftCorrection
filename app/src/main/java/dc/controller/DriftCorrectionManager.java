@@ -15,9 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
-import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
-
+import dc.model.TextModel;
 import dc.utils.FileSystem;
 
 public class DriftCorrectionManager {
@@ -29,7 +27,7 @@ public class DriftCorrectionManager {
 	private Flag interruptionFlag;
 	
 	private List<Path> fileList;
-	private PlainDocument saveDirModel;
+	private TextModel saveDirModel;
 	private List<String> saveFileList;
 	private int progress = 0;
 
@@ -56,7 +54,7 @@ public class DriftCorrectionManager {
 		interruptionFlag = interrupt;
 	}
 	
-	public void setSaveDir(PlainDocument saveDir) {
+	public void setSaveDir(TextModel saveDir) {
 		this.saveDirModel = saveDir;
 	}
 	
@@ -70,13 +68,8 @@ public class DriftCorrectionManager {
 	
 	
 	protected void run(float[] xRawDrift, float[] yRawDrift, int[] ROI) {
-		String saveDir = "";
-		try {
-			saveDir = saveDirModel.getText(0, saveDirModel.getLength());
-		} catch (BadLocationException e1) {
-			logger.severe("failed to read saveDir string");
-			return;
-		}
+		String saveDir = saveDirModel.getText();
+		
 		logger.info("DriftCorrection started running...");
 		progress = 0;
 		// setup saveDir

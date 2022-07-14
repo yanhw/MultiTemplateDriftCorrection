@@ -12,7 +12,6 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.text.PlainDocument;
 
 import dc.gui.image.RawImageViewer;
 import dc.model.DriftModel;
@@ -20,6 +19,7 @@ import dc.model.DriftSectionModel;
 import dc.model.MovieStateModel;
 import dc.model.RawFileModel;
 import dc.model.TemplateMatchingSegmentModel;
+import dc.model.TextModel;
 
 import javax.swing.JSplitPane;
 import javax.swing.JMenuBar;
@@ -138,7 +138,7 @@ public class MainFrame extends JFrame {
 		imageViewer.setRawFileModel(fileList);
 	}
 	
-	public void setFileNameModels(PlainDocument inputFileName, PlainDocument outputFileName) {
+	public void setFileNameModels(TextModel inputFileName, TextModel outputFileName) {
 		settingPanel.setFileNameModels(inputFileName, outputFileName);
 	}
 	
@@ -150,6 +150,15 @@ public class MainFrame extends JFrame {
 	public void setDriftSectionModel(DriftSectionModel sectionModel) {
 		settingPanel.setDriftSectionModel(sectionModel);
 	}
+	
+	public void setProgressModel(BoundedRangeModel model) {
+		statusPanel.setProgessBarModel(model);
+	}
+	
+	public void setStatusModel(TextModel model) {
+		statusPanel.setTextModel(model);
+	}
+
 	
 	// model setters between view components, these sync view
 	private void addRawFrameChangeListener() {
@@ -190,14 +199,4 @@ public class MainFrame extends JFrame {
 		imageViewer.setCorrectedImages(list);
 	}
 	
-	////////// status panel
-	public void updateStatus(String message) {
-		statusPanel.setStatusLabel(message);
-	}
-	
-	public void setProgress(int num) {
-		statusPanel.setProgress(num);
-	}
-
-
 }

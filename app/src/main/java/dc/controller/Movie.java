@@ -8,9 +8,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
-
 import dc.model.*;
 import dc.utils.FileSystem;
 
@@ -24,8 +21,8 @@ public class Movie {
 	
 	private RawFileModel fileList;
 	private MovieStateModel myState;
-	private PlainDocument inputDir;
-	private PlainDocument saveDir;
+	private TextModel inputDir;
+	private TextModel saveDir;
 	
 	public Movie() {
 		logger.setLevel(Level.FINE);
@@ -36,8 +33,8 @@ public class Movie {
 		
 		myState = new MovieStateModel();
 		fileList = new RawFileModel();
-		inputDir = new PlainDocument();
-		saveDir = new PlainDocument();
+		inputDir = new TextModel();
+		saveDir = new TextModel();
 		driftCorrection.setSaveDir(saveDir);
 		@SuppressWarnings("serial")
 		TemplateMatchingSegmentModel templateMatchingSegmentModel = new TemplateMatchingSegmentModel() {
@@ -86,11 +83,11 @@ public class Movie {
 		return driftManager.getDriftSectionModel();
 	}
 	
-	protected PlainDocument getSaveDirModel() {
+	protected TextModel getSaveDirModel() {
 		return saveDir;
 	}
 	
-	protected PlainDocument getInputDirModel() {
+	protected TextModel getInputDirModel() {
 		return inputDir;
 	}
 	
@@ -133,12 +130,8 @@ public class Movie {
 			return;
 		}
 		this.fileList.setFiles(fileList);
-		try {
-			inputDir.remove(0, inputDir.getLength());
-			inputDir.insertString(0, folder, null);
-		} catch (BadLocationException e) {
-			e.printStackTrace();
-		}
+		inputDir.setText(folder);
+
 		// note: initialise variables here, not in constructor, because the movie can change
 		templateMatching.init(fileList);
 		driftManager.init(fileList.size());	
@@ -148,35 +141,20 @@ public class Movie {
 	protected boolean setSaveDir(String folder) {
 		File file = new File(folder);
 		if (file.canWrite()) {
-			try {
-				saveDir.remove(0, saveDir.getLength());
-				saveDir.insertString(0, folder, null);
-				return true;
-			} catch (BadLocationException e) {
-				e.printStackTrace();
-				return false;
-			}
+			saveDir.setText(folder);
 		} else {
 			logger.info("cannot set save folder at : " + folder);
 			return false;
 		}
+		return true;
 	}
 	
-	protected PlainDocument getInputFolder() {
+	protected TextModel getInputFolder() {
 		return inputDir;
 	}
 	
-	protected PlainDocument getSaveFolder() {
+	protected TextModel getSaveFolder() {
 		return saveDir;
-	}
-	
-	private String getString(PlainDocument document) {
-		try {
-			return document.getText(0, document.getLength());
-		} catch (BadLocationException e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 	
 	private boolean isIOReady() {
@@ -184,7 +162,7 @@ public class Movie {
 			logger.fine("need at least 2 frames");
 			return false;
 		}
-		if (saveDir.getLength() == 0) {
+		if (saveDir.getText().length() == 0) {
 			logger.fine("no saveDir");
 			return false;
 		}
@@ -224,14 +202,14 @@ public class Movie {
 	}
 	
 	protected void runTemplateMatching(boolean blur) {
-		templateMatching.run(getString(saveDir), blur);
+		templateMatching.run(saveDir.getText(), blur);
 	}
 	
 
 	protected void afterTemplateMatching() {
 //		logger.info("at after template matching");
 		driftManager.setDrifts(templateMatching.tempXDrift, templateMatching.tempYDrift);
-		driftManager.saveFittedDrift(getString(saveDir));
+		driftManager.saveFittedDrift(saveDir.getText());
 		saveRawDrift();
 //		logger.info("end of after template matching");
 	}
@@ -245,7 +223,7 @@ public class Movie {
 	}
 	
 	private void saveRawDrift() {
-		driftManager.saveRawDrift(getString(saveDir));
+		driftManager.saveRawDrift(saveDir.getText());
 	}
 	
 	private boolean isDriftReady() {

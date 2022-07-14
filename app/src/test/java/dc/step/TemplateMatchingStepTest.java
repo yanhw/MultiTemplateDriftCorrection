@@ -43,8 +43,8 @@ public class TemplateMatchingStepTest {
 		myTemplateMatcher.run(data);
 		List<Integer> rowResult = myTemplateMatcher.getRowDrift();
 		List<Integer> colResult = myTemplateMatcher.getColDrift();
-		assertEquals("row error in test image 000001.png", top, (int)rowResult.get(0));
-		assertEquals("col error in test image 000001.png", left, (int)colResult.get(0));
+		assertEquals("row error in test image 000001.png", top, (int)rowResult.get(0), 1);
+		assertEquals("col error in test image 000001.png", left, (int)colResult.get(0), 1);
 	}
 
 }

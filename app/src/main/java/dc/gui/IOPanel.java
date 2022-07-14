@@ -3,6 +3,8 @@ package dc.gui;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,12 +18,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
 
 import dc.controller.Controller;
+import dc.model.TextModel;
 
 import java.awt.GridLayout;
 import java.awt.FlowLayout;
@@ -87,36 +86,23 @@ public class IOPanel extends JPanel {
 		logger.addHandler(fh);
 	}
 	
-	protected void setFileNameModels(PlainDocument inputFileName, PlainDocument outputFileName) {
-		inputFileName.addDocumentListener(new FileNameListener(this.inputFilename));
-		outputFileName.addDocumentListener(new FileNameListener(this.outputFilename));
+	protected void setFileNameModels(TextModel inputFileName, TextModel outputFileName) {
+		inputFileName.addPropertyChangeListener(new FileNameListener(this.inputFilename));
+		outputFileName.addPropertyChangeListener(new FileNameListener(this.outputFilename));
 	}
 	
-	private class FileNameListener implements DocumentListener {
+	private class FileNameListener implements PropertyChangeListener {
 		private JLabel label;
 		
 		public FileNameListener(JLabel label) {
 			this.label = label;
 		}
-		
-		@Override
-		public void insertUpdate(DocumentEvent e) {
-			try {
-				PlainDocument document = (PlainDocument) e.getDocument();
-				label.setText(document.getText(0, document.getLength()));
-			} catch (BadLocationException e1) {
-				e1.printStackTrace();
-			}
-		}
 
 		@Override
-		public void removeUpdate(DocumentEvent e) {
+		public void propertyChange(PropertyChangeEvent evt) {
+			String text = (String) evt.getNewValue();
+			label.setText(text);
 		}
-
-		@Override
-		public void changedUpdate(DocumentEvent e) {
-		}
-		
 	}
 	
 	private class InputBtnListener implements ActionListener {

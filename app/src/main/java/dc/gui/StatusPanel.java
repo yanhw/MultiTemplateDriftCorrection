@@ -6,12 +6,17 @@ import java.beans.PropertyChangeListener;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import javax.swing.BoundedRangeModel;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import dc.model.TextModel;
 
 
 @SuppressWarnings("serial")
@@ -40,42 +45,46 @@ public class StatusPanel  extends JPanel{
 		logger.addHandler(fh);
 	}
 	
-	public void setStatusLabel(String message) {
-		statusLabel.setText(message);
+	public void setProgessBarModel(BoundedRangeModel model) {
+		progressBar.setModel(model);
+		model.addChangeListener(new ProgressChangeListener());
 	}
 	
-	protected void setProgress(int progress) {
-		assert (progress >= 0);
-		logger.info("progress set to: " + progress);
-		if (progress >= 100) {
-			remove(progressBar);
-			revalidate();
-			repaint();
-			isProgressBarVisible = false;
-			statusLabel.setText("");
-			logger.fine("progress finished, hiding progress bar");
-		} else {
-			if (!isProgressBarVisible) {
-				add(progressBar);
-				isProgressBarVisible = true;
+	public void setTextModel(TextModel model) {
+		model.addPropertyChangeListener(new StatusChangeListener());
+	}
+	
+	private class ProgressChangeListener implements ChangeListener {
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			BoundedRangeModel model = (BoundedRangeModel) e.getSource();
+			int progress = model.getValue();
+			if (progress >= 100) {
+				remove(progressBar);
+				revalidate();
+				repaint();
+				isProgressBarVisible = false;
+				statusLabel.setText("");
+				logger.fine("progress finished, hiding progress bar");
+			} else {
+				if (!isProgressBarVisible) {
+					add(progressBar);
+					isProgressBarVisible = true;
+				}				
+				statusLabel.setText("processing... "+progress+"% done");
 			}
-			progressBar.setValue(progress);
-		}
-		statusLabel.setText("processing... "+progress+"% done");
+		}	
 	}
-	
-	@SuppressWarnings("unused")
-	@Deprecated
-	// not using because the thread structure in controller is too deep
-	private class ProgressBarListener implements PropertyChangeListener {
+
+	private class StatusChangeListener implements PropertyChangeListener {
+
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			if ("progress" == evt.getPropertyName()) {
-				logger.info("progress changed");
-				int progress = (Integer) evt.getNewValue();
-				StatusPanel.this.setProgress(progress);
-			} 
+			String text = (String) evt.getNewValue();
+			statusLabel.setText(text);
 		}
-	} 
+		
+	}
 
 }
