@@ -22,8 +22,6 @@ class ImagePanel extends JPanel {
 	private BufferedImage rawImage;
 	private Image image;
 	private int imgHeight, imgWidth;
-	private boolean hasROI = false;
-	private int rawTop, rawLeft, rawHeight, rawWidth;
 	private int top, left, height, width;
 	private Point first;
 	public static final double MAXZOOM = 10.0;
@@ -76,10 +74,10 @@ class ImagePanel extends JPanel {
 		imgWidth = (int) (imgWidth*zoomLevel);
 		image = rawImage.getScaledInstance(imgWidth, imgHeight, Image.SCALE_FAST);
 //		System.out.println(left + " " + top + " " + width + " " + height + " " + zoomLevel);
-		top = (int) (rawTop*zoomLevel);
-		left = (int) (rawLeft*zoomLevel);
-		height = (int) (rawHeight*zoomLevel);
-		width = (int) (rawWidth*zoomLevel);
+		top = (int) (ROI.getROI()[ROIModel.TOP]*zoomLevel);
+		left = (int) (ROI.getROI()[ROIModel.LEFT]*zoomLevel);
+		height = (int) ((ROI.getROI()[ROIModel.BOTTOM]-ROI.getROI()[ROIModel.TOP])*zoomLevel);
+		width = (int) ((ROI.getROI()[ROIModel.RIGHT]-ROI.getROI()[ROIModel.LEFT])*zoomLevel);
 	}
 	
 	protected Point getImageLocation() {
@@ -119,7 +117,6 @@ class ImagePanel extends JPanel {
 		}
 //		System.out.println("second: " + second);
 		if (first.x==second.x || first.y==second.y) {
-			hasROI = false;
 			ROI.removeROI();
 		} else {
 			top = Math.min(first.y, second.y);
@@ -132,17 +129,15 @@ class ImagePanel extends JPanel {
 			width = (Math.max(first.x, second.x)-left);			
 			height = Math.min(height, imgHeight-top);
 			width = Math.min(width, imgWidth-left);
-			rawTop = (int) (top/zoomLevel);
-			rawHeight = (int) ((height)/zoomLevel); 
-			rawLeft = (int) (left/zoomLevel);
-			rawWidth = (int) ((width)/zoomLevel);
+			int rawTop = (int) (top/zoomLevel);
+			int rawHeight = (int) ((height)/zoomLevel); 
+			int rawLeft = (int) (left/zoomLevel);
+			int rawWidth = (int) ((width)/zoomLevel);
 			
 			if (rawHeight<= 0 || rawWidth <= 0) {
-				hasROI = false;
 				ROI.removeROI();
 			} else {
-				hasROI = true;
-				int[] array = {rawTop, rawTop+rawHeight, rawLeft, rawLeft+rawWidth, ROIModel.HAS_ROI};
+				int[] array = {rawTop, rawTop+rawHeight, rawLeft, rawLeft+rawWidth};
 				ROI.setROI(array);
 			}
 			
@@ -151,14 +146,9 @@ class ImagePanel extends JPanel {
 	}
 	
 	protected void setROI(int top, int left, int height, int width) {
-		this.rawTop = top;
-		this.rawLeft = left;
-		this.rawHeight = height;
-		this.rawWidth = width;
-		scaleImage();
-		this.hasROI = true;
-		int[] array = {rawTop, rawTop+rawHeight, rawLeft, rawLeft+rawWidth, ROIModel.HAS_ROI};
+		int[] array = {top, top+height, left, left+width};
 		ROI.setROI(array);
+		scaleImage();
 		this.updateImage();
 	}
 	
@@ -168,7 +158,7 @@ class ImagePanel extends JPanel {
 		if (image != null) {
 			Point p = getImageLocation();
 			g.drawImage(image,  p.x,  p.y,  this);
-			if (hasROI) {
+			if (ROI.getFlag()) {
 				g.setColor(Color.RED);
 				Point p2 = computePanelLocation(left, top);
 //				System.out.println(p2.x + " " + p2.y);

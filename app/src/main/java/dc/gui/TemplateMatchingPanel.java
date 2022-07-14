@@ -245,16 +245,16 @@ public class TemplateMatchingPanel extends JPanel {
 
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			int[] ROI = (int[]) evt.getNewValue();
-			for (int i = 0; i < 4; i++) {
-				TemplateMatchingPanel.this.ROI[i] = ROI[i];
+			String name = evt.getPropertyName();
+			switch (name) {
+				case ROIModel.ARRAY:
+					int[] ROI = (int[]) evt.getNewValue();
+					TemplateMatchingPanel.this.ROI = ROI;
+					break;
+				case ROIModel.FLAG:
+					boolean flag = (boolean) evt.getNewValue();
+					TemplateMatchingPanel.this.hasROI = flag;
 			}
-			if (ROI[ROIModel.FLAG] == ROIModel.HAS_ROI) {
-				TemplateMatchingPanel.this.hasROI = true;
-			} else {
-				TemplateMatchingPanel.this.hasROI = false;
-			}
-			
 		}
 		
 	}
