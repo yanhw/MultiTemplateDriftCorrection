@@ -50,7 +50,7 @@ public class DriftSectionModel extends DefaultTableModel {
 	
 	private int getMovieSize() {
 		assert getRowCount() > 0;
-		return (int)getValueAt(getRowCount()-1, END);
+		return (int)getValueAt(getRowCount()-1, END)+1;
 	}
 	
 	public int getRowNumber(int frameNumber) {

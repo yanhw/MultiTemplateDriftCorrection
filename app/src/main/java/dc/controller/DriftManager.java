@@ -289,6 +289,7 @@ public class DriftManager {
 		assert directionOption == FITX || directionOption == FITY || directionOption == FITBOTH;
 		int startSection = sectionModel.getRowNumber(start);
 		int endSection = sectionModel.getRowNumber(end);
+		logger.info("starting section: " + startSection + " ending section:" + endSection);
 		for (int i = startSection; i <= endSection; i++) {
 			int startFrame = ((Number) sectionModel.getValueAt(i, DriftSectionModel.START)).intValue();
 			int endFrame = (int) sectionModel.getValueAt(i, DriftSectionModel.END);

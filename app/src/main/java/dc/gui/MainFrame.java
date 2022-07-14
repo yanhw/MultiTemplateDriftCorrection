@@ -168,7 +168,7 @@ public class MainFrame extends JFrame {
 	
 	private void addPlotSelectionListener() {
 		DefaultListSelectionModel xModel = imageViewer.getXSelectionModel();
-		DefaultListSelectionModel yModel = imageViewer.getXSelectionModel();
+		DefaultListSelectionModel yModel = imageViewer.getYSelectionModel();
 		rawImageViewer.setPlotSelectionModel(xModel);
 		rawImageViewer.setPlotSelectionModel(yModel);
 		settingPanel.setPlotSelectionModel(xModel);

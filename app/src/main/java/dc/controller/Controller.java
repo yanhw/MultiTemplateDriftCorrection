@@ -32,12 +32,13 @@ public class Controller {
 	
 	private boolean isBusy = false;							// sync lock
 	private SwingWorker<Void, Integer> stoppableWorker;		// multi-process worker for long processes
-	private BooleanModel interrupt = new BooleanModel();					// flag for stoppableWorker to stop
+	private BooleanModel interrupt = new BooleanModel();	// flag for stoppableWorker to stop
 	
-	private Movie myMovie;
+	private Movie myMovie;					// data controller
 	private BoundedRangeModel myProgress;	// this cannot take over the function of boolean model due to reaction time
-	private BooleanModel runningFlag;
-	private TextModel myStatus;
+	private BooleanModel runningFlag;		// flag for buttons that trigger long process
+											// TODO: merge this with isBusy
+	private TextModel myStatus;				// update text in status panel
 	
 	public Controller() {
 		logger.setLevel(Level.FINE);

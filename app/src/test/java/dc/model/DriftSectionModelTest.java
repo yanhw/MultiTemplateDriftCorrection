@@ -69,8 +69,9 @@ public class DriftSectionModelTest {
 		int frameNumber = 100;
 		myModel.initData(frameNumber);
 		assertEquals("first section", 0, myModel.getRowNumber(1));
+		assertEquals("first section", 0, myModel.getRowNumber(frameNumber-1));
 		assertEquals("bad frame number", -1, myModel.getRowNumber(-1));
-		assertEquals("bad frame number", -1, myModel.getRowNumber(100));
+		assertEquals("bad frame number", -1, myModel.getRowNumber(frameNumber));
 		assertEquals("bad frame number", -1, myModel.getRowNumber(1000));
 		int sectionEnd = 50;
 		myModel.setEndFrame(sectionEnd);
@@ -102,9 +103,9 @@ public class DriftSectionModelTest {
 		assertEquals("number of sections", 2, myModel.getRowCount());
 		myModel.setEndFrame(sectionEnd);
 		assertEquals("number of sections", 2, myModel.getRowCount());
-		myModel.setEndFrame(frameNumber-2);
-		assertEquals("number of sections", 2, myModel.getRowCount());
 		myModel.setEndFrame(frameNumber-1);
+		assertEquals("number of sections", 2, myModel.getRowCount());
+		myModel.setEndFrame(frameNumber);
 		assertEquals("number of sections", 2, myModel.getRowCount());
 	}
 	
