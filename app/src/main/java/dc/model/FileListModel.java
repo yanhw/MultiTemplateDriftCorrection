@@ -6,11 +6,11 @@ import java.util.List;
 import javax.swing.AbstractListModel;
 
 @SuppressWarnings("serial")
-public class RawFileModel extends AbstractListModel<Path>{
+public class FileListModel extends AbstractListModel<Path>{
 	
 	private List<Path> fileList;
 	
-	public RawFileModel() {
+	public FileListModel() {
 
 	}
 	
@@ -20,6 +20,10 @@ public class RawFileModel extends AbstractListModel<Path>{
 		}
 		this.fileList = fileList;
 		fireContentsChanged(fileList, 0, 0);
+	}
+	
+	public void clearFiles() {
+		fileList = null;
 	}
 	
 	@Override

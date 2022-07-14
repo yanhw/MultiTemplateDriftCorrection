@@ -2,7 +2,6 @@ package dc.gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,12 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import dc.gui.image.RawImageViewer;
-import dc.model.DriftModel;
-import dc.model.DriftSectionModel;
-import dc.model.MovieStateModel;
-import dc.model.RawFileModel;
-import dc.model.TemplateMatchingSegmentModel;
-import dc.model.TextModel;
+import dc.model.*;
 
 import javax.swing.JSplitPane;
 import javax.swing.JMenuBar;
@@ -115,6 +109,7 @@ public class MainFrame extends JFrame {
 		
 		addRawFrameChangeListener();
 		addPlotSelectionListener();
+		addROIListener();
 		
 		settingPanel.setController(controller);
 		controller.setMainFrame(this);
@@ -133,9 +128,10 @@ public class MainFrame extends JFrame {
 		imageViewer.setTemplateTableModel(model);
 	}
 	
-	public void setRawFileModel(RawFileModel fileList) {
-		rawImageViewer.setRawFileModel(fileList);
-		imageViewer.setRawFileModel(fileList);
+	public void setFileModels(FileListModel rawFileList, FileListModel correctedFileList) {
+		rawImageViewer.setRawFileModel(rawFileList);
+		imageViewer.setRawFileModel(rawFileList);
+		imageViewer.setDriftCorrectedFileModel(correctedFileList);
 	}
 	
 	public void setFileNameModels(TextModel inputFileName, TextModel outputFileName) {
@@ -158,7 +154,11 @@ public class MainFrame extends JFrame {
 	public void setStatusModel(TextModel model) {
 		statusPanel.setTextModel(model);
 	}
-
+	
+	public void setRunningFlagModel(BooleanModel model) {
+		settingPanel.setRunningFlagModel(model);
+	}
+	
 	
 	// model setters between view components, these sync view
 	private void addRawFrameChangeListener() {
@@ -175,28 +175,8 @@ public class MainFrame extends JFrame {
 		settingPanel.setPlotSelectionModel(yModel);
 	}
 	
-	//////////// template matching
-	public void setTemplateMatchingBtn(boolean enableFlag, boolean runFlag) {
-		settingPanel.setTemplateMatchingBtn(enableFlag, runFlag);
-	}
-	
-
-	////////// drift correction
-	public void toggleDriftCorrectionBtn(boolean flag) {
-		settingPanel.toggleDriftCorrectionBtn(flag);
-	}
-	
-	/////////// raw Image
-	
-	public int[] getRawROI() {
-		return rawImageViewer.getROI();
-	}
-	
-	////////// right image panel
-	
-	
-	public void setCorrectedImages(List<String> list) {
-		imageViewer.setCorrectedImages(list);
+	private void addROIListener() {
+		settingPanel.setROIModel(rawImageViewer.getROI());
 	}
 	
 }

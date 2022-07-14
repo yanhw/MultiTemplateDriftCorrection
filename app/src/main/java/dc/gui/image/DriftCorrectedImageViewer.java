@@ -6,13 +6,17 @@ import javax.swing.JSlider;
 import java.awt.BorderLayout;
 import javax.swing.JSplitPane;
 import java.awt.Color;
-import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+
+import dc.model.FileListModel;
+
 import javax.swing.border.EtchedBorder;
 
 @SuppressWarnings("serial")
@@ -21,7 +25,7 @@ public class DriftCorrectedImageViewer extends JPanel implements ChangeListener 
 	
 	protected static int NUM_FRAME;
 	private int frameNumber = 0;
-	private List<String> imgList;
+	private FileListModel imgList;
 	private Slider slider;
 	private ZoomSlider zoomSlider;
 	private ImagePanel imagePanel;
@@ -85,12 +89,47 @@ public class DriftCorrectedImageViewer extends JPanel implements ChangeListener 
 		}
 	}
 	
-	/** Update the label to display the image for the current frame. */
-	protected void updatePicture(int frameNumber) {
-		if (imgList == null) {
+	
+	public void setRawFileModel(FileListModel fileList) {
+		this.imgList = fileList;
+		imgList.addListDataListener(new FileModelListener());
+	}
+	
+	private class FileModelListener implements ListDataListener {
+
+		@Override
+		public void intervalAdded(ListDataEvent e) {
+		}
+
+		@Override
+		public void intervalRemoved(ListDataEvent e) {	
+		}
+
+		@Override
+		public void contentsChanged(ListDataEvent e) {
+			NUM_FRAME = imgList.getSize();
+			slider.setMaximum(NUM_FRAME);
+			updatePictureWithSlider(0);
+		}
+		
+	}
+	
+	public void updatePictureWithSlider(int frameNumber) {
+		if (frameNumber < 0 || frameNumber >= NUM_FRAME) {
 			return;
 		}
-		if (!imagePanel.updateImage(imgList.get(frameNumber)));
+		
+		updatePicture(frameNumber);
+		slider.setFrameNumber(frameNumber);
+	}
+	
+	
+	/** Update the label to display the image for the current frame. */
+	protected void updatePicture(int frameNumber) {
+		if (imgList == null || imgList.getSize() == 0) {
+			return;
+		}
+		if (!imagePanel.updateImage(imgList.getElementAt(frameNumber).toString()));
 		// TODO give feedback for bad image
 	}
 	
@@ -98,10 +137,4 @@ public class DriftCorrectedImageViewer extends JPanel implements ChangeListener 
     	imagePanel.setZoomLevel(zoomLevel);
     }
 	
-	public void setImageList(List<String> list) {
-		this.imgList = list;
-		NUM_FRAME = list.size();
-		slider.setMaximum(NUM_FRAME);
-		updatePicture(0);
-	}
 }

@@ -15,6 +15,8 @@ import java.util.concurrent.Executors;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import dc.model.BooleanModel;
+import dc.model.FileListModel;
 import dc.model.TextModel;
 import dc.utils.FileSystem;
 
@@ -24,11 +26,11 @@ public class DriftCorrectionManager {
 	private static final String padString = "000000";		// saved image file names are padded to 6 digits
 	
 	private FileHandler fh;
-	private Flag interruptionFlag;
+	private BooleanModel interruptionFlag;
 	
 	private List<Path> fileList;
 	private TextModel saveDirModel;
-	private List<String> saveFileList;
+	private FileListModel saveFileList;
 	private int progress = 0;
 
 	private int[] prevXDrift;
@@ -42,20 +44,24 @@ public class DriftCorrectionManager {
 	private List<Integer> changedList;
 	
 	public DriftCorrectionManager() {
-		
+		saveFileList = new FileListModel();
 	}
 	
-	public void setFileHandler(FileHandler fh) {
+	protected void setFileHandler(FileHandler fh) {
 		logger.addHandler(fh);
 		this.fh = fh;
 	}
 	
-	public void setInterruptionFlag(Flag interrupt) {
+	protected void setInterruptionFlag(BooleanModel interrupt) {
 		interruptionFlag = interrupt;
 	}
 	
-	public void setSaveDir(TextModel saveDir) {
+	protected void setSaveDir(TextModel saveDir) {
 		this.saveDirModel = saveDir;
+	}
+	
+	protected FileListModel getSaveListModel() {
+		return saveFileList;
 	}
 	
 	protected void init(List<Path> fileList) {
@@ -82,7 +88,7 @@ public class DriftCorrectionManager {
 			return;
 		}
 		
-		saveFileList = getSaveFileList(targetFolder, xRawDrift.length);
+		List<String> savingList = getSaveFileList(targetFolder, xRawDrift.length);
 		
 		//  find padding
 		int[] xDrift = toInteger(xRawDrift);
@@ -122,7 +128,7 @@ public class DriftCorrectionManager {
 			fileSubList.add(fileList.get(idx));
 			xSubDrift.add(xDrift[idx]);
 			ySubDrift.add(yDrift[idx]);
-			saveFileSubList.add(saveFileList.get(idx));
+			saveFileSubList.add(savingList.get(idx));
 		}
 		
 		int numThread = computeThreadSize();
@@ -206,6 +212,12 @@ public class DriftCorrectionManager {
 			prevYDrift = yDrift;
 			logger.info("drift correction master thread finished");
 		}
+		
+		List<Path> pathList = new ArrayList<Path>();
+		for (int i = 0; i < savingList.size(); i++) {
+			pathList.add(Paths.get(savingList.get(i)));
+		}
+		saveFileList.setFiles(pathList);
 		return;
 	}
 	
@@ -221,10 +233,6 @@ public class DriftCorrectionManager {
 
 	public int getProgress() {
 		return progress;
-	}
-	
-	public List<String> getSaveFiles() {
-		return saveFileList;
 	}
 	
 	

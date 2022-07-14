@@ -5,6 +5,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import dc.controller.Controller;
+import dc.gui.image.ROIModel;
+import dc.model.BooleanModel;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
 import dc.model.MovieStateModel;
@@ -202,15 +204,12 @@ public class SettingPanel extends JPanel {
 		templateMatchingPanel.setRawFrameModel(model);
 	}
 	
-	
-	protected void setTemplateMatchingBtn(boolean enableFlag, boolean runFlag) {
-		templateMatchingPanel.setRunBtn(enableFlag, runFlag);
+	public void setROIModel(ROIModel roi) {
+		templateMatchingPanel.setROIModel(roi);
 	}
 	
-	public void toggleDriftCorrectionBtn(boolean flag) {
-		
+	public void setRunningFlagModel(BooleanModel model) {
+		templateMatchingPanel.setRunningFlagModel(model);
+		driftEditingPanel.setRunningFlagModel(model);
 	}
-
-
-
 }

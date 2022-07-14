@@ -19,7 +19,7 @@ public class Movie {
 	private DriftManager driftManager;
 	private DriftCorrectionManager driftCorrection;
 	
-	private RawFileModel fileList;
+	private FileListModel fileList;
 	private MovieStateModel myState;
 	private TextModel inputDir;
 	private TextModel saveDir;
@@ -32,7 +32,7 @@ public class Movie {
 		driftCorrection = new DriftCorrectionManager();
 		
 		myState = new MovieStateModel();
-		fileList = new RawFileModel();
+		fileList = new FileListModel();
 		inputDir = new TextModel();
 		saveDir = new TextModel();
 		driftCorrection.setSaveDir(saveDir);
@@ -58,7 +58,7 @@ public class Movie {
 		driftCorrection.setFileHandler(fh);
 	}
 	
-	protected void setInterruptionFlag(Flag interrupt) {
+	protected void setInterruptionFlag(BooleanModel interrupt) {
 		templateMatching.setInterruptionFlag(interrupt);
 		driftCorrection.setInterruptionFlag(interrupt);
 	}
@@ -67,8 +67,12 @@ public class Movie {
 		return myState;
 	}
 	
-	protected RawFileModel getFileList() {
+	protected FileListModel getRawFileList() {
 		return fileList;
+	}
+	
+	protected FileListModel getCorrectedFileList() {
+		return driftCorrection.getSaveListModel();
 	}
 	
 	protected TemplateMatchingSegmentModel getTemplateTableModel() {
@@ -312,10 +316,6 @@ public class Movie {
 		return driftCorrection.getProgress();
 	}
 	
-	
-	protected List<String> getSaveFiles() {
-		return driftCorrection.getSaveFiles();
-	}
 
 	private boolean driftCorrectionDone() {
 		if (getDriftCorrectionProgress() == 100) {

@@ -29,16 +29,22 @@ class ImagePanel extends JPanel {
 	public static final double MAXZOOM = 10.0;
 	public static final double MINZOOM = 0.1;
 	private double zoomLevel = 1.0;
+	private ROIModel ROI;
 	
 	public ImagePanel() {
 		setAlignmentX(Component.CENTER_ALIGNMENT);
         setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLoweredBevelBorder(),
                 BorderFactory.createEmptyBorder(10,10,10,10)));
+        ROI = new ROIModel();
 	}
 	
 	public void setFileHandler(FileHandler fh) {
 		logger.addHandler(fh);
+	}
+	
+	public ROIModel getROI() {
+		return ROI;
 	}
 	
 	@Override
@@ -114,6 +120,7 @@ class ImagePanel extends JPanel {
 //		System.out.println("second: " + second);
 		if (first.x==second.x || first.y==second.y) {
 			hasROI = false;
+			ROI.removeROI();
 		} else {
 			top = Math.min(first.y, second.y);
 			left = Math.min(first.x, second.x);
@@ -132,8 +139,11 @@ class ImagePanel extends JPanel {
 			
 			if (rawHeight<= 0 || rawWidth <= 0) {
 				hasROI = false;
+				ROI.removeROI();
 			} else {
 				hasROI = true;
+				int[] array = {rawTop, rawTop+rawHeight, rawLeft, rawLeft+rawWidth, ROIModel.HAS_ROI};
+				ROI.setROI(array);
 			}
 			
 		}
@@ -147,6 +157,8 @@ class ImagePanel extends JPanel {
 		this.rawWidth = width;
 		scaleImage();
 		this.hasROI = true;
+		int[] array = {rawTop, rawTop+rawHeight, rawLeft, rawLeft+rawWidth, ROIModel.HAS_ROI};
+		ROI.setROI(array);
 		this.updateImage();
 	}
 	
@@ -191,13 +203,5 @@ class ImagePanel extends JPanel {
 		//???? i think this assertion should not be here, or maybe this method is not necessary
 //		assert(hasROI);
 		repaint();
-	}
-	
-	public int[] getROI() {
-		if (!hasROI) {
-			return null;
-		}
-		int[] array = {rawTop, rawTop+rawHeight, rawLeft, rawLeft+rawWidth};
-		return array;
 	}
 }

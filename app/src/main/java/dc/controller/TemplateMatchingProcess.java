@@ -5,17 +5,18 @@ import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import dc.model.BooleanModel;
 import dc.step.*;
 
 public class TemplateMatchingProcess extends Process {
 	private static final Logger logger = Logger.getLogger(TemplateMatchingProcess.class.getName());
 	private boolean blur;
-	private Flag interruptionFlag;
+	private BooleanModel interruptionFlag;
 	private FileHandler fh;
 //	private step.TemplateMatching templateMatchingStep;
 	private dc.step.TemplateMatching templateMatchingStep;
 	
-	public TemplateMatchingProcess(boolean blur, Flag interruptionFlag2) {
+	public TemplateMatchingProcess(boolean blur, BooleanModel interruptionFlag2) {
 		super(interruptionFlag2);
 		this.interruptionFlag = interruptionFlag2;
 //		System.out.println(interruptionFlag.get());

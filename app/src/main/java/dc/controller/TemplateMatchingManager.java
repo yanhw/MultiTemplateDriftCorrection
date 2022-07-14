@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import dc.model.BooleanModel;
 import dc.model.TemplateMatchingSegmentModel;
 import dc.step.GaussianImage;
 
@@ -28,7 +29,7 @@ public class TemplateMatchingManager {
 	private static final int RIGHT = 3;
 	
 	private FileHandler fh;
-	private Flag interruptionFlag;
+	private BooleanModel interruptionFlag;
 	
 	private List<Path> fileList;
 	private TemplateMatchingSegmentModel model;
@@ -55,7 +56,7 @@ public class TemplateMatchingManager {
 		gaussianFilter.setFileHandler(fh);
 	}
 
-	protected void setInterruptionFlag(Flag interrupt) {
+	protected void setInterruptionFlag(BooleanModel interrupt) {
 		interruptionFlag = interrupt;
 	}
 	

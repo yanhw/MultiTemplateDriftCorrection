@@ -9,7 +9,7 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import dc.model.RawFileModel;
+import dc.model.FileListModel;
 import dc.model.TemplateMatchingSegmentModel;
 
 import java.awt.BorderLayout;
@@ -26,7 +26,7 @@ public class TemplateImageViewer extends JPanel {
 	private JLabel textLabel;
 	
 	private TemplateMatchingSegmentModel sections;
-	private RawFileModel fileList;
+	private FileListModel fileList;
 	private Slider slider;
 	
 	private int[] ROI = {0,0,0,0};		// keep current display status to avoid unnecessary refresh
@@ -62,7 +62,7 @@ public class TemplateImageViewer extends JPanel {
 		
 	}
 	
-	public void setRawFileModel(RawFileModel fileList) {
+	public void setRawFileModel(FileListModel fileList) {
 		this.fileList = fileList;
 	}
 	

@@ -5,16 +5,17 @@ import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import dc.model.BooleanModel;
 import dc.step.*;
 
 public class DriftCorrectionProcess extends Process {
 	private static final Logger logger = Logger.getLogger(DriftCorrectionProcess.class.getName());
 	private dc.step.DriftCorrectionStep driftCorrection;
 	private SaveImage saveImage;
-	private Flag interruptionFlag;
+	private BooleanModel interruptionFlag;
 	private FileHandler fh;
 	
-	public DriftCorrectionProcess(Flag interruptionFlag2) {
+	public DriftCorrectionProcess(BooleanModel interruptionFlag2) {
 		super(interruptionFlag2);
 		this.interruptionFlag = interruptionFlag2;
 		mySteps = new LinkedList<ProcessStep>();

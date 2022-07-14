@@ -32,11 +32,11 @@ public class Controller {
 	
 	private boolean isBusy = false;							// sync lock
 	private SwingWorker<Void, Integer> stoppableWorker;		// multi-process worker for long processes
-	private Flag interrupt = new Flag();					// flag for stoppableWorker to stop
+	private BooleanModel interrupt = new BooleanModel();					// flag for stoppableWorker to stop
 	
-	private MainFrame myView;
 	private Movie myMovie;
-	private BoundedRangeModel myProgress;
+	private BoundedRangeModel myProgress;	// this cannot take over the function of boolean model due to reaction time
+	private BooleanModel runningFlag;
 	private TextModel myStatus;
 	
 	public Controller() {
@@ -45,6 +45,7 @@ public class Controller {
 		myMovie = new Movie();
 		myProgress = new DefaultBoundedRangeModel(0,1,0,100); 
 		myStatus = new TextModel();
+		runningFlag = new BooleanModel(false);
 		// listeners are here (instead of inside DriftManager) for thread management purpose
 		DriftModel driftModel = myMovie.getDriftModel();
 		DriftSectionModel sectionModel = myMovie.getDriftSectionModel();		
@@ -62,15 +63,15 @@ public class Controller {
 		if (mainFrame == null) {
 			logger.severe("recieved null mainFrame");
 		}
-		myView = mainFrame;
-		myView.setMovieStateModel(myMovie.getMovieStateModel());
-		myView.setRawFileModel(myMovie.getFileList());
-		myView.setTemplateTableModel(myMovie.getTemplateTableModel());
-		myView.setDriftModel(myMovie.getDriftModel());
-		myView.setDriftSectionModel(myMovie.getDriftSectionModel());
-		myView.setFileNameModels(myMovie.getInputDirModel(), myMovie.getSaveDirModel());
-		myView.setProgressModel(myProgress);
-		myView.setStatusModel(myStatus);
+		mainFrame.setMovieStateModel(myMovie.getMovieStateModel());
+		mainFrame.setFileModels(myMovie.getRawFileList(), myMovie.getCorrectedFileList());
+		mainFrame.setTemplateTableModel(myMovie.getTemplateTableModel());
+		mainFrame.setDriftModel(myMovie.getDriftModel());
+		mainFrame.setDriftSectionModel(myMovie.getDriftSectionModel());
+		mainFrame.setFileNameModels(myMovie.getInputDirModel(), myMovie.getSaveDirModel());
+		mainFrame.setProgressModel(myProgress);
+		mainFrame.setStatusModel(myStatus);
+		mainFrame.setRunningFlagModel(runningFlag);
 	}
 
 	// should be called before initialising a thread
@@ -119,7 +120,7 @@ public class Controller {
 			@Override
 			public void done() {
 				
-				if (myMovie.getFileList().getSize() < 2) {
+				if (myMovie.getRawFileList().getSize() < 2) {
 					myStatus.setText("need at least 2 png images in the folder");
 					release();
 					return;
@@ -129,11 +130,6 @@ public class Controller {
 				myStatus.setText("");
 				autoSetSaveDir(folder);
 				
-				if (myMovie.templageMatchingPreRunValidation()) {
-					myView.setTemplateMatchingBtn(true, false);
-				} else {
-					myView.setTemplateMatchingBtn(false, false);
-				}
 				release();
 			}
 		};
@@ -170,11 +166,6 @@ public class Controller {
 			return;
 		}
 		myMovie.setSegmentFrame(frameNumber);
-		if (myMovie.templageMatchingPreRunValidation()) {
-			myView.setTemplateMatchingBtn(true, false);
-		} else {
-			myView.setTemplateMatchingBtn(false, false);
-		}
 	}
 	
 	public void removeSegmentFrame(int segmentIndex) {
@@ -182,19 +173,13 @@ public class Controller {
 			return;
 		}
 		myMovie.removeSegmentFrame(segmentIndex);
-		if (myMovie.templageMatchingPreRunValidation()) {
-			myView.setTemplateMatchingBtn(true, false);
-		} else {
-			myView.setTemplateMatchingBtn(false, false);
-		}
 	}
 	
-	public void setTemplate(int frameNumber) {
+	public void setTemplate(int frameNumber, int[] ROI, boolean hasROI) {
 		if (isBusy) {
 			return;
 		}
-		int[] ROI = myView.getRawROI();
-		if (ROI == null) {
+		if (!hasROI) {
 			logger.info("ROI is not set");
 			myStatus.setText("must select a region of interest!");
 			return;
@@ -226,11 +211,6 @@ public class Controller {
 				}
 				//TODO update start and end frame
 				myStatus.setText("");
-				if (myMovie.templageMatchingPreRunValidation()) {
-					myView.setTemplateMatchingBtn(true, false);
-				} else {
-					myView.setTemplateMatchingBtn(false, false);
-				}
 				release();
 			}
 		};
@@ -242,11 +222,6 @@ public class Controller {
 			return;
 		}
 		myMovie.removeTemplate(targetIndex);
-		if (myMovie.templageMatchingPreRunValidation()) {
-			myView.setTemplateMatchingBtn(true, false);
-		} else {
-			myView.setTemplateMatchingBtn(false, false);
-		}
 	}
 
 	public void runTemplateMatching(boolean blur) {
@@ -263,7 +238,7 @@ public class Controller {
 		// release only in afterTemplateMatching
 		// TODO this release mechanism is bad, need to change
 		block("starting template matching...");
-		myView.setTemplateMatchingBtn(true, true);
+		runningFlag.set(true);
 		stoppableWorker = new SwingWorker<Void, Integer>() {
 			
 			@Override
@@ -309,13 +284,13 @@ public class Controller {
 				if (!interrupt.get()) {
 					logger.info("finished");
 					myProgress.setValue(100);
-					myView.setTemplateMatchingBtn(true, false);
+					runningFlag.set(false);
 					afterTemplateMatching();
 				}
 				// this will be triggered when cancel button is pressed or when there is a problem
 				else {
 					myProgress.setValue(100);
-					myView.setTemplateMatchingBtn(true, false);
+					runningFlag.set(false);
 					release();
 				}
 //				release();
@@ -524,7 +499,7 @@ public class Controller {
 		// TODO this release mechanism is bad, need to change
 		// TODO handle interruption
 		block("starting drift correction...");
-		myView.toggleDriftCorrectionBtn(false);
+		runningFlag.set(true);
 		SwingWorker<Void, Integer> stoppableWorker = new SwingWorker<Void, Integer>() {
 			@Override
 			public Void doInBackground() {
@@ -564,11 +539,10 @@ public class Controller {
 			public void done() {
 				if (!interrupt.get()) {
 					logger.info("finished");
-					myView.setCorrectedImages(myMovie.getSaveFiles());
 				}
 				myMovie.checkState();
 				myProgress.setValue(100);
-				myView.toggleDriftCorrectionBtn(true);
+				runningFlag.set(false);
 				release();
 
 			}
@@ -579,6 +553,7 @@ public class Controller {
 	private void cancelDriftCorrection() {
 		logger.info("drift correction cancelled");
 		stoppableWorker.cancel(true);
+		runningFlag.set(false);
 		myProgress.setValue(100);
 		
 	}

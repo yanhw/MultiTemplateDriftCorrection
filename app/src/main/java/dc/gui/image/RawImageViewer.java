@@ -21,7 +21,7 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import dc.model.RawFileModel;
+import dc.model.FileListModel;
 
 @SuppressWarnings("serial")
 public class RawImageViewer extends JPanel implements ChangeListener  {
@@ -29,7 +29,7 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
 	
 	protected static int NUM_FRAME;
 	private int frameNumber = 0;
-    private RawFileModel imgList;
+    private FileListModel imgList;
     private Slider movieSlider;
     private ZoomSlider zoomSlider;
 	private ImagePanel imagePanel;
@@ -77,6 +77,10 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
 	public BoundedRangeModel getRawFrameModel() {
 		return movieSlider.getModel();
 	}
+	
+    public ROIModel getROI() {
+    	return imagePanel.getROI();
+    }
 	
 	private void setHandlers() {
 		imagePanel.addMouseListener(new MouseAdapter() {
@@ -130,7 +134,7 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
         });
 	}
 	
-	public void setRawFileModel(RawFileModel fileList) {
+	public void setRawFileModel(FileListModel fileList) {
 		this.imgList = fileList;
 		imgList.addListDataListener(new FileModelListener());
 	}
@@ -191,9 +195,4 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
     	imagePanel.setZoomLevel(zoomLevel);
     }
     
-    public int[] getROI() {
-    	return imagePanel.getROI();
-    }
-    
-
 }

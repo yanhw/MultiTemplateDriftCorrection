@@ -7,8 +7,12 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 import dc.controller.Controller;
+import dc.gui.image.ROIModel;
+import dc.model.BooleanModel;
 import dc.model.TemplateMatchingSegmentModel;
 
 import javax.swing.JScrollPane;
@@ -24,6 +28,8 @@ import javax.swing.JFileChooser;
 import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,8 +50,14 @@ public class TemplateMatchingPanel extends JPanel {
 	private JButton runButton;
 	private JButton loadDriftButton;
 	
-	TemplateMatchingSegmentModel model;
+//	private TemplateMatchingSegmentModel model;
 	private int currentFrame = 0;
+	private boolean hasROI = false;
+	private int[] ROI = {0,0,0,0};
+	
+	private boolean runningFlag = false;
+	private boolean enableFlag = false;
+	
 	/**
 	 * Create the panel.
 	 */
@@ -108,7 +120,7 @@ public class TemplateMatchingPanel extends JPanel {
 	}
 	
 	public void setTableModel(TemplateMatchingSegmentModel model) {
-		this.model = model;
+//		this.model = model;
 		table.setCellSelectionEnabled(true);  
 		// don't do this. this disables selection, overwrite isCellEditable instead
 //		table.setEnabled(false);	
@@ -123,13 +135,14 @@ public class TemplateMatchingPanel extends JPanel {
 		table.removeColumn(table.getColumn("left"));
 		table.removeColumn(table.getColumn("right"));
 		setHandlers();
+		model.addTableModelListener(new DriftTableListener());
 	}
 	
 	private void setHandlers() {
 		setTemplateButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				TemplateMatchingPanel.logger.info("setting template");
-				TemplateMatchingPanel.this.controller.setTemplate(currentFrame);
+				TemplateMatchingPanel.logger.info("setting template " + hasROI);
+				TemplateMatchingPanel.this.controller.setTemplate(currentFrame, ROI, hasROI);
 			}
 		});
 		removeTemplateButton.addActionListener(new ActionListener() {
@@ -189,6 +202,25 @@ public class TemplateMatchingPanel extends JPanel {
 		});
 	}
 	
+	
+	private class DriftTableListener implements TableModelListener {
+
+		@Override
+		public void tableChanged(TableModelEvent e) {
+			TemplateMatchingSegmentModel model = (TemplateMatchingSegmentModel) table.getModel();
+			for (int i = 0; i< model.getRowCount(); i++) {
+				if (!(boolean) model.getValueAt(i, TemplateMatchingSegmentModel.HAS_TEMPLATE_IDX)) {
+					enableFlag = false;
+					TemplateMatchingPanel.this.setRunBtn();
+					return;
+				}
+			}
+			enableFlag = true;
+			TemplateMatchingPanel.this.setRunBtn();
+		}
+		
+	}
+	
 
 	protected void setRawFrameModel(BoundedRangeModel model) {
 		model.addChangeListener(new RawImageListener());
@@ -205,7 +237,45 @@ public class TemplateMatchingPanel extends JPanel {
 		
 	}
 	
-	public void setRunBtn(boolean enableFlag, boolean runningFlag) {
+	public void setROIModel(ROIModel model) {
+		model.addPropertyChangeListener(new ROIChangeListener());
+	}
+	
+	private class ROIChangeListener implements PropertyChangeListener {
+
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			int[] ROI = (int[]) evt.getNewValue();
+			for (int i = 0; i < 4; i++) {
+				TemplateMatchingPanel.this.ROI[i] = ROI[i];
+			}
+			if (ROI[ROIModel.FLAG] == ROIModel.HAS_ROI) {
+				TemplateMatchingPanel.this.hasROI = true;
+			} else {
+				TemplateMatchingPanel.this.hasROI = false;
+			}
+			
+		}
+		
+	}
+	
+	public void setRunningFlagModel(BooleanModel model) {
+		model.addPropertyChangeListener(new RunningFlagChangeListener());
+	}
+
+	private class RunningFlagChangeListener implements PropertyChangeListener {
+
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			boolean flag = (boolean) evt.getNewValue();
+			TemplateMatchingPanel.this.runningFlag = flag;
+			TemplateMatchingPanel.this.setRunBtn();
+		}
+
+	}
+	
+	
+	private void setRunBtn() {
 		if (enableFlag) {
 			runButton.setEnabled(true);
 			if (!runningFlag) {
@@ -221,5 +291,7 @@ public class TemplateMatchingPanel extends JPanel {
 			runButton.setToolTipText("need to set template for all segments before running");
 		}
 	}
+
+
 
 }

@@ -4,6 +4,8 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
@@ -26,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import dc.controller.Controller;
+import dc.model.BooleanModel;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
 
@@ -253,7 +256,7 @@ public class DriftEditingPanel extends JPanel {
 		driftSectionTable.setDefaultEditor(Object.class, editor);
 	}
 	
-	public void setPlotSelectionModel(DefaultListSelectionModel model) {
+	protected void setPlotSelectionModel(DefaultListSelectionModel model) {
 		model.addListSelectionListener(new PlotListener());
 	}
 	
@@ -275,5 +278,24 @@ public class DriftEditingPanel extends JPanel {
 		boolean includeSpacing = true;
 		Rectangle cellRect = driftTable.getCellRect(frameNumber, columnIndex, includeSpacing);
 		driftTable.scrollRectToVisible(cellRect);
+	}
+
+
+	protected void setRunningFlagModel(BooleanModel model) {
+		model.addPropertyChangeListener(new RunningFlagChangeListener());
+	}
+	
+	private class RunningFlagChangeListener implements PropertyChangeListener {
+
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			boolean flag = (boolean) evt.getNewValue();
+			if (flag) {
+				DriftEditingPanel.this.runButton.setEnabled(false);
+			} else {
+				DriftEditingPanel.this.runButton.setEnabled(true);
+			}
+		}
+		
 	}
 }

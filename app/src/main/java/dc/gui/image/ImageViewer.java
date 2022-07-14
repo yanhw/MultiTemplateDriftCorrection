@@ -8,11 +8,10 @@ import javax.swing.event.ChangeListener;
 
 import dc.model.DriftModel;
 import dc.model.MovieStateModel;
-import dc.model.RawFileModel;
+import dc.model.FileListModel;
 import dc.model.TemplateMatchingSegmentModel;
 
 import java.awt.BorderLayout;
-import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -72,8 +71,12 @@ public class ImageViewer extends JPanel {
 		yDriftPlot.setDriftModelListener(model);
 	}
 	
-	public void setRawFileModel(RawFileModel fileList) {
+	public void setRawFileModel(FileListModel fileList) {
 		templateImage.setRawFileModel(fileList);
+	}
+	
+	public void setDriftCorrectedFileModel(FileListModel fileList) {
+		correctedImage.setRawFileModel(fileList);
 	}
 	
 	public DefaultListSelectionModel getXSelectionModel() {
@@ -82,10 +85,6 @@ public class ImageViewer extends JPanel {
 	
 	public DefaultListSelectionModel getYSelectionModel() {
 		return yDriftPlot.getSelectionModel();
-	}
-	
-	public void setCorrectedImages(List<String> list) {
-		correctedImage.setImageList(list);
 	}
 	
 	public void addMovieStateModelListener(MovieStateModel model) {

@@ -3,6 +3,7 @@ package dc.controller;
 import java.util.LinkedList;
 import java.util.logging.*;
 
+import dc.model.BooleanModel;
 import dc.step.OutputProcessStep;
 import dc.step.ProcessStep;
 
@@ -14,13 +15,13 @@ public abstract class Process {
 //	private LinkedList<ProcessStep> outputSteps;
 	protected LinkedList<Integer> outputStepIndex;
 	private static final Logger logger = Logger.getLogger(Process.class.getName());
-	private Flag interruptionFlag;
+	private BooleanModel interruptionFlag;
 	
 //	public Process() {
 //		interruptionFlag = false;
 //	}
 	
-	public Process(Flag interruptionFlag2) {
+	public Process(BooleanModel interruptionFlag2) {
 		this.interruptionFlag = interruptionFlag2;
 	}
 	
