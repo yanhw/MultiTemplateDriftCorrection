@@ -37,7 +37,7 @@ public class Slider extends JPanel implements ChangeListener {
         Font font = new Font("Serif", Font.ITALIC, 15);
         imageSlider.setFont(font);
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        setPreferredSize(new Dimension(200, 40));
+        setPreferredSize(new Dimension(200, 30));
         
         JPanel labelGroup = new JPanel();
         labelGroup.setLayout(new BoxLayout(labelGroup, BoxLayout.X_AXIS));
@@ -55,7 +55,12 @@ public class Slider extends JPanel implements ChangeListener {
         addChangeListener(this);
         nextBtn = new JButton(">");
         add(nextBtn);
+        //https://stackoverflow.com/questions/2425387/making-boxlayout-move-components-to-top-while-stacking-left-to-right
         nextBtn.addActionListener(new NextBtnListener());
+        labelGroup.setAlignmentY(JPanel.TOP_ALIGNMENT);
+        prevBtn.setAlignmentY(JPanel.TOP_ALIGNMENT);
+        imageSlider.setAlignmentY(JPanel.TOP_ALIGNMENT);
+        nextBtn.setAlignmentY(JPanel.TOP_ALIGNMENT);
 	}
 
 	protected void setMaximum(int numFrame) {

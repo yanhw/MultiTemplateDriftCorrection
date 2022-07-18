@@ -177,6 +177,7 @@ public class MainFrame extends JFrame {
 	
 	private void addROIListener() {
 		settingPanel.setROIModel(rawImageViewer.getROI());
+		statusPanel.setROIModel(rawImageViewer.getROI());
 	}
 	
 }

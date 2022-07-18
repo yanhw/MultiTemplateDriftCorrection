@@ -6,13 +6,13 @@ import java.awt.Font;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoundedRangeModel;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.GridLayout;
 
 /*
  * use together with ImagePanel
@@ -36,7 +36,7 @@ public class ZoomSlider extends JPanel implements ChangeListener {
 		
 		sliderLabel = new JLabel("Zoom level: "+STEPS[defaultStep], JLabel.CENTER);
         sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        setPreferredSize(new Dimension(200, 16));
+        setPreferredSize(new Dimension(200, 30));
         
         //Create the slider.
         model = new DefaultBoundedRangeModel(defaultStep, 1, 0, NUM_STEP-1);
@@ -48,10 +48,12 @@ public class ZoomSlider extends JPanel implements ChangeListener {
         		BorderFactory.createEmptyBorder(0,0,10,0));
         Font font = new Font("Serif", Font.ITALIC, 15);
         slider.setFont(font);
-        setLayout(new GridLayout(0, 2, 0, 0));
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         
         add(sliderLabel);
         add(slider);
+        sliderLabel.setAlignmentY(JPanel.TOP_ALIGNMENT);
+        slider.setAlignmentY(JPanel.TOP_ALIGNMENT);
         addChangeListener(this);
 	}
 	

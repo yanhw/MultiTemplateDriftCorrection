@@ -149,6 +149,7 @@ public class Controller {
 	
 	public void setSaveDir(String folder) {
 		if (myMovie.setSaveDir(folder)) {
+			myStatus.setText("data will be saved at: " + folder);
 			myMovie.checkState();
 		} else {
 			myStatus.setText("it appears you cannot modify the selected folder.");
@@ -199,19 +200,19 @@ public class Controller {
 				try {
 					res = get();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+					logger.warning("interrupted! failed to set ROI");
 					e.printStackTrace();
 				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
+					logger.severe("execution exception! failed to set ROI");
 					e.printStackTrace();
 				}
 				if (!res) {
 					logger.warning("failed to set ROI");
+					myStatus.setText("failed to set template at frame " + frameNumber);
 					release();
 					return;
 				}
-				//TODO update start and end frame
-				myStatus.setText("");
+				myStatus.setText("new template set at frame " + frameNumber);
 				release();
 			}
 		};
@@ -292,6 +293,8 @@ public class Controller {
 				else {
 					myProgress.setValue(100);
 					runningFlag.set(false);
+					logger.info("exiting template matching due to interruption");
+					myStatus.setText("template matching stopped");
 					release();
 				}
 //				release();
@@ -304,6 +307,7 @@ public class Controller {
 	private void cancelTemplateMatching() {
 		interrupt.set(true);
 		logger.info("template matching cancelled");
+		myStatus.setText("stopping...");
 		myProgress.setValue(100);
 	}
 
@@ -527,7 +531,7 @@ public class Controller {
 					progress = myMovie.getDriftCorrectionProgress();
 				}
 				publish(100);
-				return null;     
+				return null;
 			}
 			
 			@Override
@@ -539,6 +543,7 @@ public class Controller {
 			@Override
 			public void done() {
 				if (!interrupt.get()) {
+					myStatus.setText("drift correction finished");
 					logger.info("finished");
 				}
 				myMovie.checkState();

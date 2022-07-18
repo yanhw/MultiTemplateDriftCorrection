@@ -165,6 +165,9 @@ class ImagePanel extends JPanel {
 //				System.out.println(left + " " + top + " " + width + " " + height);
 				g.drawRect(p2.x, p2.y, width, height);
 			}
+		} else {
+			g.setColor(getBackground());
+			g.drawRect(0,0,imgHeight, imgWidth);
 		}
 	}
 	
@@ -175,7 +178,7 @@ class ImagePanel extends JPanel {
 			try {
 	    		rawImage = ImageIO.read(new File(filename));
 			} catch(IOException e) {
-				logger.severe("failed to open image:" + filename);
+				logger.warning("failed to open image:" + filename);
 			}		
 			scaleImage();
 		}
@@ -185,7 +188,6 @@ class ImagePanel extends JPanel {
 			return true;
 		}
 		return false;
-		//TODO: show something different if failed to open image
 	}
 	
 	private void updateImage() {

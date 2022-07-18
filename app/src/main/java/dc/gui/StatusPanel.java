@@ -16,6 +16,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import dc.gui.image.ROIModel;
 import dc.model.TextModel;
 
 
@@ -37,21 +38,24 @@ public class StatusPanel  extends JPanel{
 		progressBar.setValue(0);
 		progressBar.setStringPainted(true);
 		add(statusLabel);
-//		add(progressBar);
-		
+	
 	}
 	
-	public void setFileHandler(FileHandler fh) {
+	protected void setFileHandler(FileHandler fh) {
 		logger.addHandler(fh);
 	}
 	
-	public void setProgessBarModel(BoundedRangeModel model) {
+	protected void setProgessBarModel(BoundedRangeModel model) {
 		progressBar.setModel(model);
 		model.addChangeListener(new ProgressChangeListener());
 	}
 	
-	public void setTextModel(TextModel model) {
+	protected void setTextModel(TextModel model) {
 		model.addPropertyChangeListener(new StatusChangeListener());
+	}
+	
+	protected void setROIModel(ROIModel model) {
+		model.addPropertyChangeListener(new ROIChangeListener());
 	}
 	
 	private class ProgressChangeListener implements ChangeListener {
@@ -86,5 +90,23 @@ public class StatusPanel  extends JPanel{
 		}
 		
 	}
+	
+	private class ROIChangeListener implements PropertyChangeListener {
 
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			String type = evt.getPropertyName();
+			if (type == ROIModel.FLAG) {
+				boolean flag = (boolean) evt.getNewValue();
+				if (!flag) {
+					statusLabel.setText("");
+				}
+			} else {
+				int[] ROI = (int[]) evt.getNewValue();
+				statusLabel.setText("top=" + ROI[ROIModel.TOP] + ", bottom=" + ROI[ROIModel.BOTTOM] 
+									+" left=" + ROI[ROIModel.LEFT] + ", right=" + ROI[ROIModel.RIGHT]);
+			}
+		}
+		
+	}
 }

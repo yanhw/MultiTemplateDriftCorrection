@@ -103,7 +103,7 @@ public class TemplateImageViewer extends JPanel {
 			if (!source.getValueIsAdjusting()) {
 				int sectionNumber = (int)source.getValue();
 				logger.info("updating to template image: " + sectionNumber);
-				updateDisplay(sectionNumber);
+				checkUpdate();
 			}
 		}
 		
@@ -111,7 +111,10 @@ public class TemplateImageViewer extends JPanel {
 	
 	private void checkUpdate() {
 		int sliderValue = slider.getValue();
-		
+		if (sections.getRowCount() <= sliderValue) {
+			logger.info("no image to display");
+			return;
+		}
 		int start = (int) sections.getValueAt(sliderValue, TemplateMatchingSegmentModel.START_IDX);
 		int end = (int) sections.getValueAt(sliderValue, TemplateMatchingSegmentModel.END_IDX);
 		int keyframe = (int) sections.getValueAt(sliderValue, TemplateMatchingSegmentModel.KEY_IDX);
@@ -127,6 +130,9 @@ public class TemplateImageViewer extends JPanel {
 				sameImage = false;
 			}
 		}
+		if (!hasROI) {
+			ROI = null;
+		}
 		if (curr != keyframe || this.hasROI != hasROI) {
 			sameImage = false;
 		}
@@ -136,22 +142,6 @@ public class TemplateImageViewer extends JPanel {
 		if (!sameImage) {
 			setImage(keyframe, ROI);
 		}
-	}
-	
-	private void updateDisplay(int sectionNumber) {
-		if (sections.getRowCount()==0 || fileList.getSize() == 0) {
-			return;
-		}
-		int start = (int) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.START_IDX);
-		int end = (int) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.END_IDX);
-		int keyframe = (int) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.KEY_IDX);
-		boolean hasROI = (boolean) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.HAS_TEMPLATE_IDX);
-		int[] ROI = {(int) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.TOP),
-				(int) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.BOTTOM),
-				(int) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.LEFT),
-				(int) sections.getValueAt(sectionNumber, TemplateMatchingSegmentModel.RIGHT)};
-		updateLabel(start, end, keyframe, hasROI);
-		setImage(keyframe, ROI);
 	}
 	
 	private void updateLabel(int start, int end, int key, boolean hasROI) {
@@ -176,7 +166,7 @@ public class TemplateImageViewer extends JPanel {
     		imagePanel.updateImage(path.toString());
 	    	imagePanel.setROI(ROI[0], ROI[2], ROI[1]-ROI[0], ROI[3]-ROI[2]);
 	    	
-	    	logger.info("displaying " + frameNumber + " " + path.toString() + " "+ ROI);
+	    	logger.info("displaying " + frameNumber + " " + path.toString());
     	}
     	
     }

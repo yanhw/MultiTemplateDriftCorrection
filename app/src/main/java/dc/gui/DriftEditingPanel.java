@@ -144,6 +144,7 @@ public class DriftEditingPanel extends JPanel {
 		driftTable.removeColumn(driftTable.getColumn("fitted dy"));
 		driftTable.removeColumn(driftTable.getColumn("weight x"));
 		driftTable.removeColumn(driftTable.getColumn("weight y"));
+		driftTable.getTableHeader().setReorderingAllowed(false);
 		// https://stackoverflow.com/questions/13508851/validate-a-tables-cell-using-editors
 		final InputVerifier iv = new InputVerifier() {
 
@@ -200,7 +201,7 @@ public class DriftEditingPanel extends JPanel {
 	protected void setDriftSectionModel(DriftSectionModel sectionModel) {
 		driftSectionTable.setModel(sectionModel);
 		driftSectionTable.removeColumn(driftSectionTable.getColumn("fit"));
-		
+		driftSectionTable.getTableHeader().setReorderingAllowed(false);
 		final InputVerifier iv = new InputVerifier() {
 
 		    @Override

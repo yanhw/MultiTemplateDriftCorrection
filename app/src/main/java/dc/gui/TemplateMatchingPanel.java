@@ -134,6 +134,7 @@ public class TemplateMatchingPanel extends JPanel {
 		table.removeColumn(table.getColumn("bottom"));
 		table.removeColumn(table.getColumn("left"));
 		table.removeColumn(table.getColumn("right"));
+		table.getTableHeader().setReorderingAllowed(false);
 		setHandlers();
 		model.addTableModelListener(new DriftTableListener());
 	}
