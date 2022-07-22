@@ -46,12 +46,22 @@ public class TemplateMatchingSegmentModel extends DefaultTableModel{
 	}
 	
 	public void init(int movieSize) {
+		System.out.println(getMovieSize());
+		if (movieSize < 2) {
+			logger.info("invalid movie size: " + movieSize);
+			return;
+		}
 		setRowCount(0);
+//		for (int i = getRowCount() - 1; i >= 0; i--) {
+//		    removeRow(i);
+//		}
 		templates.clear();
 		blurredTemplates.clear();
 		addRow(new Object[] {1, 0, movieSize-1, 0, false, 0,0,0,0});
 		templates.add(null);
 		blurredTemplates.add(null);
+		logger.info("init new movie with " + movieSize + " frames");
+		assert getRowCount() == 1;
 	}
 	
 	public boolean isEndFrame(int frameNumber) {
@@ -64,7 +74,11 @@ public class TemplateMatchingSegmentModel extends DefaultTableModel{
 	}
 	
 	private int getMovieSize() {
-		return (int)getValueAt(getRowCount()-1, END_IDX);
+		if (getRowCount() == 0) {
+			logger.warning("movie not inited");
+			return -1;
+		}
+		return (int)getValueAt(getRowCount()-1, END_IDX)+1;
 	}
 	
 	private int getRowNumber(int frameNumber) {

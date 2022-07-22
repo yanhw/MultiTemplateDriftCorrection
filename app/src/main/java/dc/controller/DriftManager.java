@@ -218,9 +218,7 @@ public class DriftManager {
 		return drift;
 	}
 	
-	protected boolean isReady() {
-		return true;
-	}
+
 	
 	//////////////////// drift section///////////////////////
 	

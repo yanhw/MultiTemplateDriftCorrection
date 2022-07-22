@@ -115,6 +115,10 @@ public class TemplateImageViewer extends JPanel {
 			logger.info("no image to display");
 			return;
 		}
+		if (sliderValue < 0) {
+			logger.info("intermidiate state");
+			return;
+		}
 		int start = (int) sections.getValueAt(sliderValue, TemplateMatchingSegmentModel.START_IDX);
 		int end = (int) sections.getValueAt(sliderValue, TemplateMatchingSegmentModel.END_IDX);
 		int keyframe = (int) sections.getValueAt(sliderValue, TemplateMatchingSegmentModel.KEY_IDX);
@@ -136,6 +140,7 @@ public class TemplateImageViewer extends JPanel {
 		if (curr != keyframe || this.hasROI != hasROI) {
 			sameImage = false;
 		}
+		logger.info("update result: sameLabel: " + sameLabel + " sameImage: " + sameImage);
 		if (!sameLabel) {
 			updateLabel(start, end, keyframe, hasROI);
 		}

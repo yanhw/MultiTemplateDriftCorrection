@@ -96,20 +96,19 @@ public class Movie {
 	}
 	
 	// call this method when state might be changed
-	@SuppressWarnings("static-access")
-	protected void checkState() {
+	private void checkState() {
 		if (!isIOReady()) {
 			logger.info("state set to: INIT");
-			myState.setValue(myState.INIT);
+			myState.setValue(MovieStateModel.INIT);
 		} else if (!isDriftReady()) {
 			logger.info("state set to: TEMPLATE_MATCHING");
-			myState.setValue(myState.TEMPLATE_MATCHING);
+			myState.setValue(MovieStateModel.TEMPLATE_MATCHING);
 		} else if (!driftCorrectionDone()) {
 			logger.info("state set to: DRIFT_EDIT");
-			myState.setValue(myState.DRIFT_EDIT);
+			myState.setValue(MovieStateModel.DRIFT_EDIT);
 		} else {
 			logger.info("state set to: DRIFT_CORRECTION");
-			myState.setValue(myState.DRIFT_CORRECTION);
+			myState.setValue(MovieStateModel.DRIFT_CORRECTION);
 		}
 	}
 	
@@ -133,6 +132,7 @@ public class Movie {
 			logger.fine("need at least 2 frames");
 			return;
 		}
+		logger.fine("setting new folder and init the movie");
 		this.fileList.setFiles(fileList);
 		inputDir.setText(folder);
 
@@ -140,6 +140,7 @@ public class Movie {
 		templateMatching.init(fileList);
 		driftManager.init(fileList.size());	
 		driftCorrection.init(fileList);
+		checkState();
 	}
 	
 	protected boolean setSaveDir(String folder) {
@@ -150,6 +151,7 @@ public class Movie {
 			logger.info("cannot set save folder at : " + folder);
 			return false;
 		}
+		checkState();
 		return true;
 	}
 	
@@ -215,16 +217,14 @@ public class Movie {
 		driftManager.setDrifts(templateMatching.tempXDrift, templateMatching.tempYDrift);
 		driftManager.saveFittedDrift(saveDir.getText());
 		saveRawDrift();
+		checkState();
 //		logger.info("end of after template matching");
 	}
 	
 	protected int getTemplateMatchingProgress() {
 		return templateMatching.getProgress();
 	}
-	
-	private void setTemplateMatchingProgress(int num) {
-		templateMatching.setProgress(num);
-	}
+
 	
 	private void saveRawDrift() {
 		driftManager.saveRawDrift(saveDir.getText());
@@ -236,7 +236,7 @@ public class Movie {
 	
 	protected void setDriftCsv(String filename) {
 		if (driftManager.setDrifts(filename)) {
-			setTemplateMatchingProgress(100);
+			checkState();
 		}	
 	}
 	
@@ -289,7 +289,7 @@ public class Movie {
 	/////////////////////////////////////////////////////////////////////
 	
 	protected boolean driftCorrectionPreRunValidation() {
-		if (driftManager.isReady()) {
+		if (driftManager.isDriftReady()) {
 			return true;
 		}
 		return false;
@@ -316,6 +316,9 @@ public class Movie {
 		return driftCorrection.getProgress();
 	}
 	
+	protected void afterDriftCorrection() {
+		checkState();
+	}
 
 	private boolean driftCorrectionDone() {
 		if (getDriftCorrectionProgress() == 100) {

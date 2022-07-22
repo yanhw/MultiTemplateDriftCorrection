@@ -37,7 +37,7 @@ public class Controller {
 	private Movie myMovie;					// data controller
 	private BoundedRangeModel myProgress;	// this cannot take over the function of boolean model due to reaction time
 	private BooleanModel runningFlag;		// flag for buttons that trigger long process
-											// TODO: merge this with isBusy
+											// TODO: check if can merge this with isBusy
 	private TextModel myStatus;				// update text in status panel
 	
 	public Controller() {
@@ -127,8 +127,7 @@ public class Controller {
 					return;
 				}
 				// success
-				myMovie.checkState();
-				myStatus.setText("");
+				myStatus.setText("please select templates in the input image sequence");
 				autoSetSaveDir(folder);
 				
 				release();
@@ -150,7 +149,6 @@ public class Controller {
 	public void setSaveDir(String folder) {
 		if (myMovie.setSaveDir(folder)) {
 			myStatus.setText("data will be saved at: " + folder);
-			myMovie.checkState();
 		} else {
 			myStatus.setText("it appears you cannot modify the selected folder.");
 		}
@@ -264,7 +262,6 @@ public class Controller {
 //						System.out.println(interrupt);
 						Thread.sleep(500);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					publish(progress);
@@ -321,7 +318,6 @@ public class Controller {
 			@Override
 			public void done() {
 				myStatus.setText("ready to view drift");
-				myMovie.checkState();
 				release();
 			}
 		};
@@ -348,7 +344,6 @@ public class Controller {
 					release();
 					return;
 				}
-				myMovie.checkState();
 				myStatus.setText("ready to view drift");
 				logger.info("finished reading csv");
 				
@@ -430,7 +425,6 @@ public class Controller {
 			@Override
 			public void done() {
 				myStatus.setText("");
-				myMovie.checkState();
 			}
 		};
 		worker.execute();
@@ -524,7 +518,6 @@ public class Controller {
 					try {
 						Thread.sleep(500);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					publish(progress);
@@ -546,7 +539,7 @@ public class Controller {
 					myStatus.setText("drift correction finished");
 					logger.info("finished");
 				}
-				myMovie.checkState();
+				myMovie.afterDriftCorrection();
 				myProgress.setValue(100);
 				runningFlag.set(false);
 				release();
