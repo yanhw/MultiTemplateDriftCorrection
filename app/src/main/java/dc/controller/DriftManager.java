@@ -32,7 +32,6 @@ public class DriftManager {
 
 	private DriftModel driftModel;
 	private DriftSectionModel sectionModel;
-	
 	private boolean isDriftReady;
 	
 	public DriftManager() {

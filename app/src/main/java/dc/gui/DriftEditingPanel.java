@@ -292,9 +292,9 @@ public class DriftEditingPanel extends JPanel {
 		public void propertyChange(PropertyChangeEvent evt) {
 			boolean flag = (boolean) evt.getNewValue();
 			if (flag) {
-				DriftEditingPanel.this.runButton.setEnabled(false);
+				DriftEditingPanel.this.runButton.setText("Stop Drift Correction");
 			} else {
-				DriftEditingPanel.this.runButton.setEnabled(true);
+				DriftEditingPanel.this.runButton.setText("Run Drift Correction");
 			}
 		}
 		

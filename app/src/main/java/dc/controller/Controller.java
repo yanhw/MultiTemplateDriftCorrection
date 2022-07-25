@@ -2,7 +2,6 @@ package dc.controller;
 
 
 import java.io.File;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.*;
 
@@ -31,11 +30,9 @@ public class Controller {
 	private static final Logger logger = Logger.getLogger(Controller.class.getName());
 	
 	private boolean isBusy = false;							// sync lock
-	private SwingWorker<Void, Integer> stoppableWorker;		// multi-process worker for long processes
 	private BooleanModel interrupt = new BooleanModel();	// flag for stoppableWorker to stop
 	
 	private Movie myMovie;					// data controller
-	private BoundedRangeModel myProgress;	// this cannot take over the function of boolean model due to reaction time
 	private BooleanModel runningFlag;		// flag for buttons that trigger long process
 											// TODO: check if can merge this with isBusy
 	private TextModel myStatus;				// update text in status panel
@@ -44,7 +41,6 @@ public class Controller {
 		logger.setLevel(Level.FINE);
 //		logger.setUseParentHandlers(true);
 		myMovie = new Movie();
-		myProgress = new DefaultBoundedRangeModel(0,1,0,100); 
 		myStatus = new TextModel();
 		runningFlag = new BooleanModel(false);
 		// listeners are here (instead of inside DriftManager) for thread management purpose
@@ -52,7 +48,6 @@ public class Controller {
 		DriftSectionModel sectionModel = myMovie.getDriftSectionModel();		
 		driftModel.addTableModelListener(new DriftModelListener());
 		sectionModel.addTableModelListener(new DriftSectionModelListener());
-		myMovie.setInterruptionFlag(interrupt);
 	}
 	
 	public void setFileHandler(FileHandler fh) {
@@ -70,6 +65,9 @@ public class Controller {
 		mainFrame.setDriftModel(myMovie.getDriftModel());
 		mainFrame.setDriftSectionModel(myMovie.getDriftSectionModel());
 		mainFrame.setFileNameModels(myMovie.getInputDirModel(), myMovie.getSaveDirModel());
+		
+		BoundedRangeModel myProgress = new DefaultBoundedRangeModel(0,1,0,100); 
+		myMovie.setGUIHelper(interrupt, myProgress);
 		mainFrame.setProgressModel(myProgress);
 		mainFrame.setStatusModel(myStatus);
 		mainFrame.setRunningFlagModel(runningFlag);
@@ -115,7 +113,6 @@ public class Controller {
 			@Override
 			public Void doInBackground() {	 		
 				myMovie.setSrcDir(folder);
-
 				return null;     
 			}
 			@Override
@@ -236,65 +233,30 @@ public class Controller {
 			return;
 		}
 		// release only in afterTemplateMatching
-		// TODO this release mechanism is bad, need to change
 		block("starting template matching...");
 		runningFlag.set(true);
-		stoppableWorker = new SwingWorker<Void, Integer>() {
+		SwingWorker<Void, Void> stoppableWorker = new SwingWorker<Void, Void>() {
 			
 			@Override
-			public Void doInBackground() {
-				publish(0);
-				
-				// TODO: this thread is bad, need to find more straight forward way to update progress
-				Thread temp = new Thread() {
-				    public void run() {
-				    	myMovie.runTemplateMatching(blur);
-				    }  
-				};
-
-				temp.start();
-				
-//				myMovie.runTemplateMatching(blur);
-				int progress = myMovie.getTemplateMatchingProgress();
-//				System.out.println(progress);
-				while (progress != 100) {
-					try {
-//						System.out.println(interrupt);
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					publish(progress);
-					logger.info("progress set to: "+progress);
-					progress = myMovie.getTemplateMatchingProgress();
-				}
-				publish(100);
+			public Void doInBackground() {		
+				myMovie.runTemplateMatching(blur);
 				return null;     
 			}
-			
-			@Override
-	        protected void process(List<Integer> chunks) {
-	            int i = chunks.get(chunks.size()-1);
-	            myProgress.setValue(i);
-	        }
 			
 			@Override
 			public void done() {
 				if (!interrupt.get()) {
 					logger.info("finished");
-					myProgress.setValue(100);
 					runningFlag.set(false);
 					afterTemplateMatching();
 				}
 				// this will be triggered when cancel button is pressed or when there is a problem
 				else {
-					myProgress.setValue(100);
 					runningFlag.set(false);
 					logger.info("exiting template matching due to interruption");
 					myStatus.setText("template matching stopped");
 					release();
 				}
-//				release();
 			}
 		};
 
@@ -305,7 +267,6 @@ public class Controller {
 		interrupt.set(true);
 		logger.info("template matching cancelled");
 		myStatus.setText("stopping...");
-		myProgress.setValue(100);
 	}
 
 	private void afterTemplateMatching() {
@@ -329,24 +290,32 @@ public class Controller {
 			return;
 		}
 		block("reading drift from file: " + filename);
-		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+		SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
 			@Override
-			public Void doInBackground() {
-				myMovie.setDriftCsv(filename);
-				return null;     
+			public Boolean doInBackground() {
+				Boolean res = myMovie.setDriftCsv(filename);
+				return res;     
 			}
 			@Override
 			public void done() {
-				
-				if (myMovie.getTemplateMatchingProgress() != 100) {
+				boolean res = false;
+				try {
+					res = get();
+				} catch (InterruptedException e) {
+					logger.warning("interrupted! failed to read drift from csv");
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					logger.severe("execution exception! failed to read drift from csv");
+					e.printStackTrace();
+				}
+				if (!res) {
 					logger.info("failed to reading csv");
 					myStatus.setText("failed to load csv file: " + filename);					
 					release();
 					return;
 				}
 				myStatus.setText("ready to view drift");
-				logger.info("finished reading csv");
-				
+				logger.info("finished reading csv");			
 				
 				release();
 			}
@@ -473,10 +442,6 @@ public class Controller {
 		}
 		myMovie.removeCuttingPoint(sectionIndex);
 	}
-	
-
-	///////////////// plot////////////////////
-
 
 
 	/////////////////////////////////////////////////////////////////////
@@ -495,43 +460,14 @@ public class Controller {
 			return;
 		}
 		// release only in afterTemplateMatching
-		// TODO this release mechanism is bad, need to change
-		// TODO handle interruption
 		block("starting drift correction...");
 		runningFlag.set(true);
-		SwingWorker<Void, Integer> stoppableWorker = new SwingWorker<Void, Integer>() {
+		SwingWorker<Void, Void> stoppableWorker = new SwingWorker<Void, Void>() {
 			@Override
 			public Void doInBackground() {
-				publish(0);
-				
-				// TODO: this thread is bad, need to find more straight forward way to update progress
-				Thread temp = new Thread() {
-				    public void run() {
-				    	myMovie.runDriftCorrection(blurFlag);
-				    }  
-				};
-
-				temp.start();
-				
-				int progress = myMovie.getDriftCorrectionProgress();
-				while (progress != 100) {
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					publish(progress);
-					progress = myMovie.getDriftCorrectionProgress();
-				}
-				publish(100);
+				myMovie.runDriftCorrection(blurFlag);
 				return null;
 			}
-			
-			@Override
-	        protected void process(List<Integer> chunks) {
-	            int i = chunks.get(chunks.size()-1);
-	            myProgress.setValue(i);
-	        }
 			
 			@Override
 			public void done() {
@@ -540,7 +476,6 @@ public class Controller {
 					logger.info("finished");
 				}
 				myMovie.afterDriftCorrection();
-				myProgress.setValue(100);
 				runningFlag.set(false);
 				release();
 
@@ -551,9 +486,8 @@ public class Controller {
 
 	private void cancelDriftCorrection() {
 		logger.info("drift correction cancelled");
-		stoppableWorker.cancel(true);
+		interrupt.set(true);
 		runningFlag.set(false);
-		myProgress.setValue(100);
 		
 	}
 

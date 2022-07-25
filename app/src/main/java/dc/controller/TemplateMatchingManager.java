@@ -15,6 +15,9 @@ import java.util.concurrent.Executors;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import javax.swing.BoundedRangeModel;
+import javax.swing.DefaultBoundedRangeModel;
+
 import dc.model.BooleanModel;
 import dc.model.TemplateMatchingSegmentModel;
 import dc.step.GaussianImage;
@@ -30,6 +33,7 @@ public class TemplateMatchingManager {
 	
 	private FileHandler fh;
 	private BooleanModel interruptionFlag;
+	private BoundedRangeModel progress;
 	
 	private List<Path> fileList;
 	private TemplateMatchingSegmentModel model;
@@ -39,15 +43,12 @@ public class TemplateMatchingManager {
 	protected float[] tempYDrift;
 	//TODO monitor the changes and template match only changed sections
 	
-	/*
-	 *  progress monitors if template matching is done.
-	 *  it is changed by SwingWorker when performing template matching
-	 *  it is set to 100 if external csv file is used
-	 */
-	private int progress = 0;
+	
 	
 	public TemplateMatchingManager() {
 		this.gaussianFilter = new GaussianImage(5,3);
+		interruptionFlag = new BooleanModel();
+		progress = new DefaultBoundedRangeModel(0,1,0,100);
 	}
 	
 	protected void setFileHandler(FileHandler fh) {
@@ -60,6 +61,10 @@ public class TemplateMatchingManager {
 		interruptionFlag = interrupt;
 	}
 	
+	protected void setProgressModel(BoundedRangeModel progress) {
+		this.progress = progress;
+	}
+	
 	protected void setTableModel(TemplateMatchingSegmentModel model) {
 		this.model = model;
 	}
@@ -70,7 +75,6 @@ public class TemplateMatchingManager {
 	
 	protected void init(List<Path> fileList) {
 		this.fileList = fileList;
-		progress = 0;
 		model.init(fileList.size());
 		tempXDrift = new float[fileList.size()];
 		tempYDrift = new float[fileList.size()];
@@ -156,7 +160,7 @@ public class TemplateMatchingManager {
 	protected void run(String saveDir, boolean blur) {
 		logger.info("TemplateMatching started running...");
 		logger.info("blur image: " + blur);
-		progress = 0;
+		progress.setValue(0);
 		List<Integer> templateXList = new LinkedList<Integer>();
 		List<Integer> templateYList = new LinkedList<Integer>();
 		List<Integer> startingIdx = new LinkedList<Integer>();
@@ -252,17 +256,18 @@ public class TemplateMatchingManager {
 			}
 			while (latch.getCount()>0) {
 //				System.out.println("progress: "+(100*(fileList.size()-latch.getCount()+done)/total) + " total: "+total+" count: " + latch.getCount()+ " done: " + done);
-				progress = (int) (100*(fileList.size()-latch.getCount()+done)/total);
+				progress.setValue((int) (100*(fileList.size()-latch.getCount()+done)/total));
 //				setProgress(prog)
 				try {
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
 					logger.info("process interrupted");
+					progress.setValue(100);
 					e.printStackTrace();
 				}
 			}
 			if (interruptionFlag.get()) {
-				progress = 100;
+				progress.setValue(100);
 				pool.shutdown();
 				logger.info("process interrupted");
 				return;
@@ -289,7 +294,7 @@ public class TemplateMatchingManager {
 			done += fileList.size();
 			pool.shutdown();
 		}
-		progress = 100;
+		progress.setValue(100);
 		assert (tempXDrift[0] == 0);
 		assert (tempYDrift[0] == 0);
 		logger.info("template matching master thread finished");
@@ -299,10 +304,6 @@ public class TemplateMatchingManager {
 	
 	protected boolean templageMatchingPreRunValidation() {
 		return model.isReady();
-	}
-	
-	protected int getProgress() {
-		return progress;
 	}
 	
 	// for template matching process, total frame number might be less that movie size
@@ -321,11 +322,4 @@ public class TemplateMatchingManager {
 		return size;
 	}
 	
-	// this method is used when external csv drift file is loaded
-	protected void setProgress(int num) {
-		assert(num >= 0);
-		assert(num <= 100);
-		logger.info("setting progress to " + num);
-		this.progress = num;
-	}
 }

@@ -8,6 +8,8 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.BoundedRangeModel;
+
 import dc.model.*;
 import dc.utils.FileSystem;
 
@@ -58,9 +60,10 @@ public class Movie {
 		driftCorrection.setFileHandler(fh);
 	}
 	
-	protected void setInterruptionFlag(BooleanModel interrupt) {
+	protected void setGUIHelper(BooleanModel interrupt, BoundedRangeModel progress) {
 		templateMatching.setInterruptionFlag(interrupt);
 		driftCorrection.setInterruptionFlag(interrupt);
+		templateMatching.setProgressModel(progress);
 	}
 	
 	protected MovieStateModel getMovieStateModel() {
@@ -165,14 +168,13 @@ public class Movie {
 	
 	private boolean isIOReady() {
 		if (fileList == null ||fileList.getSize() <= 2) {
-			logger.fine("need at least 2 frames");
+			logger.fine("need a movie with at least 2 frames");
 			return false;
 		}
 		if (saveDir.getText().length() == 0) {
 			logger.fine("no saveDir");
 			return false;
 		}
-		
 		return true;
 	}
 
@@ -199,15 +201,12 @@ public class Movie {
 		templateMatching.removeROI(targetIndex);
 	}
 
-//	protected MovieSegment getMovieSegment(int frameNumber) {
-//		return templateMatching.getSegment(frameNumber);
-//	}
-
 	protected boolean templageMatchingPreRunValidation() {
 		return templateMatching.templageMatchingPreRunValidation();
 	}
 	
 	protected void runTemplateMatching(boolean blur) {
+		assert templageMatchingPreRunValidation();
 		templateMatching.run(saveDir.getText(), blur);
 	}
 	
@@ -221,11 +220,6 @@ public class Movie {
 //		logger.info("end of after template matching");
 	}
 	
-	protected int getTemplateMatchingProgress() {
-		return templateMatching.getProgress();
-	}
-
-	
 	private void saveRawDrift() {
 		driftManager.saveRawDrift(saveDir.getText());
 	}
@@ -234,10 +228,12 @@ public class Movie {
 		return driftManager.isDriftReady();
 	}
 	
-	protected void setDriftCsv(String filename) {
+	protected boolean setDriftCsv(String filename) {
 		if (driftManager.setDrifts(filename)) {
 			checkState();
+			return true;
 		}	
+		return false;
 	}
 	
 	/////////////////////////////////////////////////////////////////////
@@ -312,16 +308,13 @@ public class Movie {
 		}
 	}
 
-	protected int getDriftCorrectionProgress() {
-		return driftCorrection.getProgress();
-	}
 	
 	protected void afterDriftCorrection() {
 		checkState();
 	}
 
 	private boolean driftCorrectionDone() {
-		if (getDriftCorrectionProgress() == 100) {
+		if (driftCorrection.isDone()) {
 			return true;
 		}
 		return false;

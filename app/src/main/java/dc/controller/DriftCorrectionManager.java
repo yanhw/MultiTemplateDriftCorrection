@@ -15,6 +15,9 @@ import java.util.concurrent.Executors;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import javax.swing.BoundedRangeModel;
+import javax.swing.DefaultBoundedRangeModel;
+
 import dc.model.BooleanModel;
 import dc.model.FileListModel;
 import dc.model.TextModel;
@@ -31,7 +34,7 @@ public class DriftCorrectionManager {
 	private List<Path> fileList;
 	private TextModel saveDirModel;
 	private FileListModel saveFileList;
-	private int progress = 0;
+	private BoundedRangeModel progress;
 
 	private int[] prevXDrift;
 	private int[] prevYDrift;
@@ -45,6 +48,8 @@ public class DriftCorrectionManager {
 	
 	public DriftCorrectionManager() {
 		saveFileList = new FileListModel();
+		interruptionFlag = new BooleanModel();
+		progress = new DefaultBoundedRangeModel(0,1,0,100);
 	}
 	
 	protected void setFileHandler(FileHandler fh) {
@@ -54,6 +59,10 @@ public class DriftCorrectionManager {
 	
 	protected void setInterruptionFlag(BooleanModel interrupt) {
 		interruptionFlag = interrupt;
+	}
+	
+	protected void setProgressModel(BoundedRangeModel progress) {
+		this.progress = progress;
 	}
 	
 	protected void setSaveDir(TextModel saveDir) {
@@ -67,9 +76,9 @@ public class DriftCorrectionManager {
 	protected void init(List<Path> fileList) {
 		this.fileList = fileList;
 		this.changedList = new LinkedList<Integer>();
+		saveFileList.clearFiles();
 		prevXDrift = null;
 		prevYDrift = null;
-		progress = 0;
 	}
 	
 	
@@ -77,7 +86,7 @@ public class DriftCorrectionManager {
 		String saveDir = saveDirModel.getText();
 		
 		logger.info("DriftCorrection started running...");
-		progress = 0;
+		progress.setValue(0);
 		// setup saveDir
 		String targetFolder = FileSystem.joinPath(saveDir, saveFolderName);
 		Path path = Paths.get(targetFolder);
@@ -115,7 +124,7 @@ public class DriftCorrectionManager {
 		checkChangedFrames(xDrift, yDrift, top, bottom, left, right);
 		if (changedList.size() == 0) {
 			logger.info("no changes from previous setting");
-			progress = 100;
+			progress.setValue(100);
 			return;
 		} else {
 			logger.info("number of frames to process:" + changedList.size());
@@ -191,18 +200,19 @@ public class DriftCorrectionManager {
 		}
 		while (latch.getCount()>0) {
 			//System.out.println((100*(fileList.size()-latch.getCount()+done)/total) + " total: "+total+" count: " + latch.getCount()+ " done: " + done);
-			progress = (int) (100*(fileSubList.size()-latch.getCount())/total);
+			progress.setValue((int) (100*(fileSubList.size()-latch.getCount())/total));
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
+				progress.setValue(100);
 				e.printStackTrace();
 			}
 		}
 		
 		// clean up and update attributes
 		pool.shutdown();
-		progress = 100;
+		progress.setValue(100);
 		if (!interruptionFlag.get()) {
 			prevLeft = left;
 			prevRight = right;
@@ -229,10 +239,6 @@ public class DriftCorrectionManager {
 			result.add(FileSystem.joinPath(saveDir, filename));
 		}
 		return result;
-	}
-
-	public int getProgress() {
-		return progress;
 	}
 	
 	
@@ -268,6 +274,13 @@ public class DriftCorrectionManager {
 		int size = Runtime.getRuntime().availableProcessors();
 		size = Math.min(size, MAX_WORKER);
 		return size;
+	}
+
+	public boolean isDone() {
+		if (saveFileList.getSize() != 0) {
+			return true;
+		}
+		return false;
 	}
 	
 }
