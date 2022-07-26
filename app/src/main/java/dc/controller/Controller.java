@@ -3,7 +3,9 @@ package dc.controller;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
@@ -12,7 +14,10 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import dc.gui.MainFrame;
-import dc.model.*;
+import dc.model.BooleanModel;
+import dc.model.DriftModel;
+import dc.model.DriftSectionModel;
+import dc.model.TextModel;
 
 /*
  * This class receives request from gui, and passes it to Movie class. Thread management is handled here. Other classes in this package can be assumed to be
@@ -68,6 +73,20 @@ public class Controller {
 		mainFrame.setProgressModel(myProgress);
 		mainFrame.setStatusModel(myStatus);
 		mainFrame.setRunningFlagModel(runningFlag);
+	}
+	
+	public void clearSession() {
+		block("reseting...");
+		if (runningFlag.get()) {
+			interrupt.set(true);
+		}
+		
+		myMovie.reset();
+		
+		interrupt.set(false);
+		runningFlag.set(false);
+		release();
+		myStatus.setText("session reseted. please choose image sequence");
 	}
 
 	// should be called before initialising a thread

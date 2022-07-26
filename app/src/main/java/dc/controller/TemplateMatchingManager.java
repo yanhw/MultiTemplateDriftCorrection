@@ -80,6 +80,13 @@ public class TemplateMatchingManager {
 		tempYDrift = new float[fileList.size()];
 	}
 	
+	protected void reset() {
+		this.fileList = null;
+		tempXDrift = null;
+		tempYDrift = null;
+		model.clear();
+	}
+	
 	protected void setSegmentFrame(int frameNumber) {
 		if (frameNumber <= 0) {
 			return;

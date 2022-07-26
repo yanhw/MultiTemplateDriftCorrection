@@ -64,6 +64,12 @@ public class TemplateMatchingSegmentModel extends DefaultTableModel{
 		assert getRowCount() == 1;
 	}
 	
+	public void clear() {
+		setRowCount(0);
+		templates.clear();
+		blurredTemplates.clear();
+	}
+	
 	public boolean isEndFrame(int frameNumber) {
 		for (int i = 0; i < getRowCount(); i++) {
 			if ((int)getValueAt(i, END_IDX) == frameNumber) {

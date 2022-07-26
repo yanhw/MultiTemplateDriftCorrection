@@ -1,7 +1,10 @@
 package dc.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,20 +12,24 @@ import java.util.logging.Logger;
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
-import dc.gui.image.RawImageViewer;
-import dc.model.*;
-
-import javax.swing.JSplitPane;
-import javax.swing.JMenuBar;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.border.EmptyBorder;
 
 import dc.controller.Controller;
 import dc.gui.image.ImageViewer;
-import java.awt.Dimension;
+import dc.gui.image.RawImageViewer;
+import dc.model.BooleanModel;
+import dc.model.DriftModel;
+import dc.model.DriftSectionModel;
+import dc.model.FileListModel;
+import dc.model.MovieStateModel;
+import dc.model.TemplateMatchingSegmentModel;
+import dc.model.TextModel;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
@@ -113,6 +120,17 @@ public class MainFrame extends JFrame {
 		
 		settingPanel.setController(controller);
 		controller.setMainFrame(this);
+		
+		clearAllItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int reply = JOptionPane.showOptionDialog(rootPane, "Clear current session? All unsaved data will be lost!",
+						"Clear Session", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+						null, null, null);
+				if (reply == JOptionPane.OK_OPTION) {
+					controller.clearSession();
+				}
+			}
+		});
 		
 		this.setVisible(true);
 	}

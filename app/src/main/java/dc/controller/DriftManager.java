@@ -65,7 +65,11 @@ public class DriftManager {
 		sectionModel.initData(numFrame);
 	}
 	
-	
+	protected void reset() {
+		this.isDriftReady = false;
+		driftModel.clear();
+		sectionModel.clear();
+	}
 	
 ////////////////////set drift///////////////////////
 	

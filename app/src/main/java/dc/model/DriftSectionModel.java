@@ -39,6 +39,11 @@ public class DriftSectionModel extends DefaultTableModel {
 		addRow(new Object[] {1, 0, frameNumber-1, DEFAULTFITTINGDEGREE, true});
 	}
 	
+
+	public void clear() {
+		setRowCount(0);
+	}
+	
 	public boolean isEndFrame(int frameNumber) {
 		for (int i = 0; i < getRowCount(); i++) {
 			if ((int)getValueAt(i, END) == frameNumber) {

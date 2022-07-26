@@ -81,6 +81,13 @@ public class DriftCorrectionManager {
 		prevYDrift = null;
 	}
 	
+	protected void reset() {
+		fileList = null;
+		changedList = null;
+		saveFileList.clearFiles();
+		prevXDrift = null;
+		prevYDrift = null;
+	}
 	
 	protected void run(float[] xRawDrift, float[] yRawDrift, int[] ROI) {
 		String saveDir = saveDirModel.getText();

@@ -49,6 +49,13 @@ public class DriftModel extends AbstractTableModel {
 		fireTableRowsInserted(0, getRowCount()-1);
 	}
 	
+
+	public void clear() {
+		int numRow = getRowCount();
+		dataVector = null;
+		fireTableRowsDeleted(0, numRow-1);
+	}
+	
 	public void setData(float[] xDrift, float[] yDrift) {
 		if (xDrift == null && yDrift == null) {
 			logger.info("setting null array as drift");
@@ -208,4 +215,5 @@ public class DriftModel extends AbstractTableModel {
 		fireTableCellUpdated(row, col);
 
 	}
+
 }
