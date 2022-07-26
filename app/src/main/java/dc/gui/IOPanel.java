@@ -2,15 +2,26 @@ package dc.gui;
 
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,7 +55,7 @@ public class IOPanel extends JPanel {
 		JPanel inputPanel = new JPanel();
 		inputPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		inputBtn = new JButton("choose directory");
-		inputBtn.setToolTipText("choose the image sequence");
+		inputBtn.setToolTipText("choose the image sequence or drag folder here");
 		inputPanel.add(inputBtn);
 		JLabel inputLabel = new JLabel("image directory:", JLabel.LEFT);
 		inputPanel.add(inputLabel);
@@ -83,6 +94,9 @@ public class IOPanel extends JPanel {
 	private void setHandlers() {
 		inputBtn.addActionListener(new InputBtnListener());
 		outputBtn.addActionListener(new OutputBtnListener());
+		
+		@SuppressWarnings("unused")
+		DropTarget dt = new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, new InputDropTargetListener(), true);
 	}
 	
 	public void setFileHandler(FileHandler fh) {
@@ -152,4 +166,73 @@ public class IOPanel extends JPanel {
 			}	// end of APPROVAL_OPTION
 		}	// end of method
 	}	// end of class
+	
+	private class InputDropTargetListener implements DropTargetListener {
+		
+		@SuppressWarnings("rawtypes")
+		@Override
+		public void dragEnter(DropTargetDragEvent dtde) {
+			boolean flag = false;
+			Transferable t = dtde.getTransferable();
+			if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+				try {
+                    Object td = t.getTransferData(DataFlavor.javaFileListFlavor);
+                    if (td instanceof List && ((List) td).size() == 1) {
+                    	Object value = ((List) td).get(0);
+	                    if (value instanceof File) {
+	                    	File file = (File) value;
+	                        if (file.isDirectory()) {
+	                        	flag = true;
+	                        }
+                    	}
+                    }
+                } catch (UnsupportedFlavorException | IOException ex) {
+                    ex.printStackTrace();
+                }
+			}
+			if (flag) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY);
+            } else {
+                dtde.rejectDrag();
+            }
+            repaint();
+		}
+
+		@Override
+		public void dragOver(DropTargetDragEvent dtde) {
+		}
+
+		@Override
+		public void dropActionChanged(DropTargetDragEvent dtde) {
+		}
+
+		@Override
+		public void dragExit(DropTargetEvent dte) {
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public void drop(DropTargetDropEvent dtde) {
+			dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+			Transferable t = dtde.getTransferable();
+			if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+				try {
+                    Object td = t.getTransferData(DataFlavor.javaFileListFlavor);
+                    if (td instanceof List && ((List) td).size() == 1) {
+                    	Object value = ((List) td).get(0);
+	                    if (value instanceof File) {
+	                    	File file = (File) value;
+	                        String name = file.getPath();
+	                        if (file.isDirectory()) {
+	                        	IOPanel.this.controller.setSrcDir(name);
+	                        }
+                    	}
+                    }
+                } catch (UnsupportedFlavorException | IOException ex) {
+                    ex.printStackTrace();
+                }
+			}
+		}
+		
+	}
 }

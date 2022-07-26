@@ -1,8 +1,37 @@
 package dc.gui;
 
-import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+
 import javax.swing.BoundedRangeModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
@@ -14,27 +43,6 @@ import dc.controller.Controller;
 import dc.gui.image.ROIModel;
 import dc.model.BooleanModel;
 import dc.model.TemplateMatchingSegmentModel;
-
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-
-import java.awt.GridLayout;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-
-import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.awt.event.ActionEvent;
 
 @SuppressWarnings("serial")
 public class TemplateMatchingPanel extends JPanel {
@@ -105,7 +113,7 @@ public class TemplateMatchingPanel extends JPanel {
 		panel.add(runButton);
 		
 		loadDriftButton = new JButton("Load Drift");
-		loadDriftButton.setToolTipText("Load drift infomation from existing csv file");
+		loadDriftButton.setToolTipText("Load drift infomation from existing csv file. Click to choose file or drag a file here");
 		panel.add(loadDriftButton);
 
 	}
@@ -201,6 +209,9 @@ public class TemplateMatchingPanel extends JPanel {
 				
 			}
 		});
+		
+		@SuppressWarnings("unused")
+		DropTarget dt = new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, new CsvDropTargetListener(), true);
 	}
 	
 	
@@ -294,5 +305,73 @@ public class TemplateMatchingPanel extends JPanel {
 	}
 
 
+	private class CsvDropTargetListener implements DropTargetListener {
+			
+		@SuppressWarnings("rawtypes")
+		@Override
+		public void dragEnter(DropTargetDragEvent dtde) {
+			boolean flag = false;
+			Transferable t = dtde.getTransferable();
+			if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+				try {
+                    Object td = t.getTransferData(DataFlavor.javaFileListFlavor);
+                    if (td instanceof List && ((List) td).size() == 1) {
+                    	Object value = ((List) td).get(0);
+	                    if (value instanceof File) {
+	                    	File file = (File) value;
+	                        String name = file.getName();
+	                        if (name.endsWith(".csv")) {
+	                        	flag = true;
+	                        }
+                    	}
+                    }
+                } catch (UnsupportedFlavorException | IOException ex) {
+                    ex.printStackTrace();
+                }
+			}
+			if (flag) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY);
+            } else {
+                dtde.rejectDrag();
+            }
+            repaint();
+		}
 
+		@Override
+		public void dragOver(DropTargetDragEvent dtde) {
+		}
+
+		@Override
+		public void dropActionChanged(DropTargetDragEvent dtde) {
+		}
+
+		@Override
+		public void dragExit(DropTargetEvent dte) {
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public void drop(DropTargetDropEvent dtde) {
+			dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+			Transferable t = dtde.getTransferable();
+			if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+				try {
+                    Object td = t.getTransferData(DataFlavor.javaFileListFlavor);
+                    if (td instanceof List && ((List) td).size() == 1) {
+                    	Object value = ((List) td).get(0);
+	                    if (value instanceof File) {
+	                    	File file = (File) value;
+	                        String name = file.getPath();
+	                        if (name.endsWith(".csv")) {
+	                        	TemplateMatchingPanel.this.controller.setDriftCsv(name);
+	                        }
+                    	}
+                    }
+                } catch (UnsupportedFlavorException | IOException ex) {
+                    ex.printStackTrace();
+                }
+			}
+		}
+		
+	}
 }

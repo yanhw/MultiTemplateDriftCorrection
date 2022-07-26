@@ -7,13 +7,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoint;
-
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
 
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
@@ -281,6 +280,8 @@ public class DriftManager {
 //	}
 //	
 	
+	// fit a section of drift. start and end are not assumed to be segment start and end,
+	// since fit should be done for whole segments, segment start and end are used.
 	protected void fitDrift(int start, int end, int directionOption) {
 		assert start >= 0 && start <= end && end < driftModel.getRowCount();
 		assert directionOption == FITX || directionOption == FITY || directionOption == FITBOTH;
