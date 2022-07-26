@@ -4,18 +4,23 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 
 import javax.swing.JSplitPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.DefaultCellEditor;
@@ -24,6 +29,7 @@ import javax.swing.InputVerifier;
 import javax.swing.JSeparator;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -55,18 +61,27 @@ public class DriftEditingPanel extends JPanel {
 		JSplitPane splitPane = new JSplitPane();
 		add(splitPane, BorderLayout.CENTER);
 		
+		JPanel leftGroup = new JPanel();
+		leftGroup.setLayout(new BorderLayout(0, 0));
+		leftGroup.add(new JLabel("detected drift"), BorderLayout.NORTH);
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setPreferredSize(new Dimension(400, 200));
 		scrollPane.setMaximumSize(new Dimension(400, 250));
-		splitPane.setLeftComponent(scrollPane);
-		
+		leftGroup.add(scrollPane, BorderLayout.CENTER);
+		splitPane.setLeftComponent(leftGroup);
+
 		driftTable = new JTable();
 		scrollPane.setViewportView(driftTable);
 		
+		JPanel rightGroup = new JPanel();
+		rightGroup.setLayout(new BorderLayout(0, 0));
+		rightGroup.add(new JLabel("drift sections for fitting"), BorderLayout.NORTH);
 		JScrollPane scrollPane_1 = new JScrollPane();
 		scrollPane_1.setPreferredSize(new Dimension(400, 200));
 		scrollPane_1.setMaximumSize(new Dimension(400, 250));
-		splitPane.setRightComponent(scrollPane_1);
+		rightGroup.add(scrollPane_1, BorderLayout.CENTER);
+		splitPane.setRightComponent(rightGroup);
+		
 		
 		driftSectionTable = new JTable();
 		scrollPane_1.setViewportView(driftSectionTable);
@@ -145,6 +160,7 @@ public class DriftEditingPanel extends JPanel {
 		driftTable.removeColumn(driftTable.getColumn("weight x"));
 		driftTable.removeColumn(driftTable.getColumn("weight y"));
 		driftTable.getTableHeader().setReorderingAllowed(false);
+		
 		// https://stackoverflow.com/questions/13508851/validate-a-tables-cell-using-editors
 		final InputVerifier iv = new InputVerifier() {
 
@@ -194,14 +210,30 @@ public class DriftEditingPanel extends JPanel {
 		    }
 
 		};
-
 		driftTable.setDefaultEditor(Object.class, editor);
+		
+		ListSelectionModel select= driftTable.getSelectionModel();
+        select.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        driftTable.addMouseMotionListener(new MouseAdapter() {
+        	@Override
+        	public void mouseMoved(MouseEvent e) {
+        		Point panelPoint = e.getPoint();
+        		int col = driftTable.columnAtPoint(panelPoint);
+        		if (col == DriftModel.DX || col == DriftModel.DY) {
+        			driftTable.setCursor(new Cursor(Cursor.TEXT_CURSOR));
+        		} else {
+        			driftTable.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        		}
+        	}
+        });
 	}
 	
 	protected void setDriftSectionModel(DriftSectionModel sectionModel) {
 		driftSectionTable.setModel(sectionModel);
 		driftSectionTable.removeColumn(driftSectionTable.getColumn("fit"));
 		driftSectionTable.getTableHeader().setReorderingAllowed(false);
+		
 		final InputVerifier iv = new InputVerifier() {
 
 		    @Override
@@ -253,8 +285,22 @@ public class DriftEditingPanel extends JPanel {
 		    }
 
 		};
-
 		driftSectionTable.setDefaultEditor(Object.class, editor);
+		ListSelectionModel select= driftSectionTable.getSelectionModel();
+        select.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        driftSectionTable.addMouseMotionListener(new MouseAdapter() {
+        	@Override
+        	public void mouseMoved(MouseEvent e) {
+        		Point panelPoint = e.getPoint();
+        		int col = driftSectionTable.columnAtPoint(panelPoint);
+        		if (col == DriftSectionModel.DEGREE) {
+        			driftSectionTable.setCursor(new Cursor(Cursor.TEXT_CURSOR));
+        		} else {
+        			driftSectionTable.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        		}
+        	}
+        });
 	}
 	
 	protected void setPlotSelectionModel(DefaultListSelectionModel model) {

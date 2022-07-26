@@ -52,6 +52,9 @@ public class ImageViewer extends JPanel {
 		tabbedPane.addTab("Drift Corrected Image", null, correctedImage, null);
 		tabbedPane.setEnabledAt(1, false);
 		tabbedPane.setEnabledAt(2, false);
+		tabbedPane.setToolTipTextAt(0, "templates for different segments are shown here");
+		tabbedPane.setToolTipTextAt(1, "detected drift will be plotted here");
+		tabbedPane.setToolTipTextAt(2, "drift corrected images will be shown here");
 	}
 	
 	public void setFileHandler(FileHandler fh) {
@@ -105,18 +108,27 @@ public class ImageViewer extends JPanel {
 					tabbedPane.setEnabledAt(1, false);
 					tabbedPane.setEnabledAt(2, false);
 					tabbedPane.setSelectedIndex(0);
+					tabbedPane.setToolTipTextAt(0, "templates for different segments are shown here");
+					tabbedPane.setToolTipTextAt(1, "detected drift will be plotted here");
+					tabbedPane.setToolTipTextAt(2, "drift corrected images will be shown here");
 					break;
 				case 2:
 					tabbedPane.setEnabledAt(0, true);
 					tabbedPane.setEnabledAt(1, true);
 					tabbedPane.setEnabledAt(2, false);
 					tabbedPane.setSelectedIndex(1);
+					tabbedPane.setToolTipTextAt(0, "templates for different segments are shown here");
+					tabbedPane.setToolTipTextAt(1, "detected drift is plotted here");
+					tabbedPane.setToolTipTextAt(2, "drift corrected images will be shown here");
 					break;
 				case 3:
 					tabbedPane.setEnabledAt(0, true);
 					tabbedPane.setEnabledAt(1, true);
 					tabbedPane.setEnabledAt(2, true);
 					tabbedPane.setSelectedIndex(2);
+					tabbedPane.setToolTipTextAt(0, "templates for different segments are shown here");
+					tabbedPane.setToolTipTextAt(1, "detected drift is plotted here");
+					tabbedPane.setToolTipTextAt(2, "drift corrected images are shown here");
 			}
 		}
 		

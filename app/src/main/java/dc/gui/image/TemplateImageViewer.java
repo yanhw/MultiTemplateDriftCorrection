@@ -169,6 +169,21 @@ public class TemplateImageViewer extends JPanel {
     	} else {
     		Path path = fileList.getElementAt(frameNumber);
     		imagePanel.updateImage(path.toString());
+    		int panelHeight = imagePanel.getHeight();
+    		int panelWidth = imagePanel.getWidth();
+    		int imgHeight = imagePanel.getImageHeight();
+    		int imgWidth = imagePanel.getImageWidth();
+    		double heightRatio = ((double) panelHeight)/imgHeight;
+    		double widthRatio = ((double) panelWidth)/imgWidth;
+    		double ratio = 1.0;
+    		if (heightRatio < 1.0 || widthRatio < 1.0) {
+    			ratio = Math.min(widthRatio, heightRatio); 			
+    		} else {
+    			ratio = Math.max(widthRatio, heightRatio);
+    		}
+    		ratio = Math.max(ratio, ImagePanel.MINZOOM);
+    		ratio = Math.min(ratio, ImagePanel.MAXZOOM);
+    		imagePanel.setZoomLevel(ratio);
 	    	imagePanel.setROI(ROI[0], ROI[2], ROI[1]-ROI[0], ROI[3]-ROI[2]);
 	    	
 	    	logger.info("displaying " + frameNumber + " " + path.toString());

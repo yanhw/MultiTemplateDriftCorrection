@@ -289,12 +289,12 @@ public class DriftManager {
 		logger.info("starting section: " + startSection + " ending section:" + endSection);
 		for (int i = startSection; i <= endSection; i++) {
 			int startFrame = ((Number) sectionModel.getValueAt(i, DriftSectionModel.START)).intValue();
-			int endFrame = (int) sectionModel.getValueAt(i, DriftSectionModel.END);
+			int endFrame = ((Number) sectionModel.getValueAt(i, DriftSectionModel.END)).intValue();
 			if (endFrame == startFrame) {
 				logger.warning("1 frame section: " + startFrame + " " + i);
 				continue;
 			}
-			int degree = (int) sectionModel.getValueAt(i, DriftSectionModel.DEGREE);
+			int degree = ((Number) sectionModel.getValueAt(i, DriftSectionModel.DEGREE)).intValue();
 			fitDrift(degree, startFrame, endFrame, directionOption);
 		}
 	}
@@ -302,10 +302,11 @@ public class DriftManager {
 	
 	// fit a segment
 	private void fitDrift(int degree, int start, int end, int directionOption) {
+		logger.info("fitting drift for segment " + start + " to " + end + " with degree " + degree);
 		assert degree > 0 && degree <= DriftSectionModel.MAXFITTINGDEGREE;
 		assert start >= 0 && start < end && end < driftModel.getRowCount();
 		assert directionOption == FITX || directionOption == FITY || directionOption == FITBOTH;
-		logger.info("fitting drift for segment " + start + " to " + end + " with degree " + degree);
+		
 		double[] fitted;
 		double diff;
 		if (directionOption == FITX || directionOption == FITBOTH) {

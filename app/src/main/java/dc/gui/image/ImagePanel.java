@@ -196,4 +196,12 @@ class ImagePanel extends JPanel {
 //		assert(hasROI);
 		repaint();
 	}
+	
+	protected int getImageHeight() {
+		return rawImage.getHeight();
+	}
+	
+	protected int getImageWidth() {
+		return rawImage.getWidth();
+	}
 }

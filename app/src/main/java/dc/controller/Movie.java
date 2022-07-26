@@ -13,6 +13,11 @@ import javax.swing.BoundedRangeModel;
 import dc.model.*;
 import dc.utils.FileSystem;
 
+/*
+ *  This is centre controller for data model. It manages interaction and data flow between
+ *  template matching, drift editing and drift correction.
+ */
+
 public class Movie {
 	private static final Logger logger = Logger.getLogger(Movie.class.getName());
 	

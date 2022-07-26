@@ -12,8 +12,8 @@ public class DriftSectionModel extends DefaultTableModel {
 	public static final int INDEX = 0;
 	public static final int START = 1;
 	public static final int END = 2;
-	public static final int FIT = 3;	//TODO: fit option for individual section
-	public static final int DEGREE = 4;
+	public static final int DEGREE = 3;
+	public static final int FIT = 4;	//TODO: fit option for individual section
 	
 	protected static final int DEFAULTFITTINGDEGREE = 5;
 	public static final int MAXFITTINGDEGREE = 25;
@@ -23,8 +23,8 @@ public class DriftSectionModel extends DefaultTableModel {
 		addColumn("index");
 		addColumn("starting frame");
 		addColumn("ending frame");
-		addColumn("fit");
 		addColumn("fit degree");
+		addColumn("fit");
 	}
 	
 	public void initialise(FileHandler fh) {
@@ -36,7 +36,7 @@ public class DriftSectionModel extends DefaultTableModel {
 			return;
 		}
 		setRowCount(0);
-		addRow(new Object[] {1, 0, frameNumber-1, true, DEFAULTFITTINGDEGREE});
+		addRow(new Object[] {1, 0, frameNumber-1, DEFAULTFITTINGDEGREE, true});
 	}
 	
 	public boolean isEndFrame(int frameNumber) {
@@ -89,7 +89,7 @@ public class DriftSectionModel extends DefaultTableModel {
 			logger.warning("bad degree: " + getValueAt(targetIdx, DEGREE));
 		}
 		
-		insertRow(targetIdx+1, new Object[] {targetIdx+2, frameNumber, ending, flag, degree});
+		insertRow(targetIdx+1, new Object[] {targetIdx+2, frameNumber, ending, degree, flag});
 		
 		logger.info("set end frame at: " + frameNumber);
 	}
@@ -104,6 +104,21 @@ public class DriftSectionModel extends DefaultTableModel {
 		setValueAt(ending, prevIndex, END);
 		removeRow(segmentIndex);
 	}
+	
+	@Override
+    public Class<?> getColumnClass(int column) {
+        switch (column) {
+            case INDEX:
+            case START:
+            case END:
+            case DEGREE:
+                return Integer.class;
+            case FIT:
+                return Boolean.class;
+            default:
+                return null;
+        }
+    }
 	
 	@Override
 	public boolean isCellEditable(int row, int column) {

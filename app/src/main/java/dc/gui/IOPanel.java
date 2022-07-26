@@ -1,5 +1,7 @@
 package dc.gui;
 
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -22,9 +24,6 @@ import javax.swing.JPanel;
 import dc.controller.Controller;
 import dc.model.TextModel;
 
-import java.awt.GridLayout;
-import java.awt.FlowLayout;
-
 @SuppressWarnings("serial")
 public class IOPanel extends JPanel {
 	private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
@@ -43,13 +42,14 @@ public class IOPanel extends JPanel {
 		
 		// input
 		JPanel inputPanel = new JPanel();
-		inputPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		inputPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+		inputBtn = new JButton("choose directory");
+		inputBtn.setToolTipText("choose the image sequence");
+		inputPanel.add(inputBtn);
 		JLabel inputLabel = new JLabel("image directory:", JLabel.LEFT);
 		inputPanel.add(inputLabel);
 		inputFilename = new JLabel();
 		inputPanel.add(inputFilename);
-		inputBtn = new JButton("choose directory");
-		inputPanel.add(inputBtn);
 
 		overwriteBox = new JCheckBox("overwrite existing files");
 		overwriteBox.setMnemonic(KeyEvent.VK_O);
@@ -58,14 +58,17 @@ public class IOPanel extends JPanel {
 		
 		// output
 		JPanel outputPanel = new JPanel();
+		outputPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+		outputBtn = new JButton("choose directory");
+		outputBtn.setToolTipText("choose the saving location");
+		outputPanel.add(outputBtn);
 		JLabel outputLabel = new JLabel("output directory:", JLabel.LEFT);
 		outputPanel.add(outputLabel);
 		outputFilename = new JLabel();
 		outputPanel.add(outputFilename);
-		outputBtn = new JButton("choose directory");
 		
 		setLayout(new GridLayout(0, 1, 0, 0));
-		outputPanel.add(outputBtn);
+		
 		add(inputPanel);
 		add(outputPanel);
 		//TODO: overwrite warning

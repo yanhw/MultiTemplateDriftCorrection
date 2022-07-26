@@ -15,12 +15,9 @@ import dc.gui.MainFrame;
 import dc.model.*;
 
 /*
- * This class serves as central controller for the app
- * Thread management is handled here. Other classes in this package can be assumed to be
+ * This class receives request from gui, and passes it to Movie class. Thread management is handled here. Other classes in this package can be assumed to be
  * thread safe.
- * Return type of all public methods should be void, use MainFrame to update gui
- * Exception: models for JTable are updated directly by the class that stores relevant data,
- * (hence bypass the MainFrame route)
+ * Return type of all public methods should be void, use model listeners to update gui
  * 
  * commented methods are kept for future non-GUI version
  * 

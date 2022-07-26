@@ -1,6 +1,7 @@
 package dc.gui.image;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 
 import java.awt.BorderLayout;
@@ -48,7 +49,9 @@ public class DriftCorrectedImageViewer extends JPanel implements ChangeListener 
 		splitPane.setLeftComponent(zoomSlider);
 		
 		imagePanel = new ImagePanel();
-		add(imagePanel, BorderLayout.CENTER);
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setViewportView(imagePanel);
+		add(scrollPane, BorderLayout.CENTER);
 		
 		setHandlers();
 	}
@@ -135,6 +138,7 @@ public class DriftCorrectedImageViewer extends JPanel implements ChangeListener 
 	
 	protected void updateZoomLevel(double zoomLevel) {
     	imagePanel.setZoomLevel(zoomLevel);
+    	imagePanel.revalidate();
     }
 	
 }
