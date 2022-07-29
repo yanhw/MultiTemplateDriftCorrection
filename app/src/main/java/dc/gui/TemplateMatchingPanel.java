@@ -29,6 +29,7 @@ import javax.swing.BoundedRangeModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.JLayer;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -57,6 +58,8 @@ public class TemplateMatchingPanel extends JPanel {
 	private JCheckBox blurCheckBox;
 	private JButton runButton;
 	private JButton loadDriftButton;
+	private DnDLayerUI layerUI;
+	private JLayer<JPanel> myLayer;
 	
 //	private TemplateMatchingSegmentModel model;
 	private int currentFrame = 0;
@@ -115,7 +118,13 @@ public class TemplateMatchingPanel extends JPanel {
 		loadDriftButton = new JButton("Load Drift");
 		loadDriftButton.setToolTipText("Load drift infomation from existing csv file. Click to choose file or drag a file here");
 		panel.add(loadDriftButton);
-
+		
+		layerUI = new DnDLayerUI();
+		myLayer = new JLayer<JPanel>(this, layerUI);
+	}
+	
+	protected JLayer<JPanel> wrapLayer() {
+		return myLayer;
 	}
 	
 	protected void setController(Controller controller) {
@@ -331,10 +340,13 @@ public class TemplateMatchingPanel extends JPanel {
 			}
 			if (flag) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY);
+                layerUI.setIsDragging(true);
             } else {
                 dtde.rejectDrag();
+                layerUI.setIsDragging(false);
             }
             repaint();
+            myLayer.repaint();
 		}
 
 		@Override
@@ -347,6 +359,8 @@ public class TemplateMatchingPanel extends JPanel {
 
 		@Override
 		public void dragExit(DropTargetEvent dte) {
+			layerUI.setIsDragging(false);
+			myLayer.repaint();
 		}
 
 		@SuppressWarnings("rawtypes")
@@ -371,6 +385,8 @@ public class TemplateMatchingPanel extends JPanel {
                     ex.printStackTrace();
                 }
 			}
+			layerUI.setIsDragging(false);
+			myLayer.repaint();
 		}
 		
 	}

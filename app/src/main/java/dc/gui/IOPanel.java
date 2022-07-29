@@ -30,6 +30,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JLayer;
 import javax.swing.JPanel;
 
 import dc.controller.Controller;
@@ -45,12 +46,13 @@ public class IOPanel extends JPanel {
 	private JButton inputBtn;
 	private JButton outputBtn;
 	private JCheckBox overwriteBox;
-	
+	private DnDLayerUI layerUI;
+	private JLayer<JPanel> myLayer;
 	
 	public IOPanel() {
 		logger.setLevel(Level.FINE);
 		fileChooser = new JFileChooser();
-		
+
 		// input
 		JPanel inputPanel = new JPanel();
 		inputPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
@@ -84,6 +86,13 @@ public class IOPanel extends JPanel {
 		add(outputPanel);
 		//TODO: overwrite warning
 //		add(overwriteBox);
+		
+		layerUI = new DnDLayerUI();
+		myLayer = new JLayer<JPanel>(this, layerUI);
+	}
+	
+	protected JLayer<JPanel> wrapLayer() {
+		return myLayer;
 	}
 	
 	protected void setController(Controller controller) {
@@ -192,10 +201,13 @@ public class IOPanel extends JPanel {
 			}
 			if (flag) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY);
+                layerUI.setIsDragging(true);
             } else {
-                dtde.rejectDrag();
+            	dtde.rejectDrag();
+            	layerUI.setIsDragging(false);
             }
             repaint();
+            myLayer.repaint();
 		}
 
 		@Override
@@ -208,6 +220,8 @@ public class IOPanel extends JPanel {
 
 		@Override
 		public void dragExit(DropTargetEvent dte) {
+			layerUI.setIsDragging(false);
+			myLayer.repaint();
 		}
 
 		@SuppressWarnings("rawtypes")
@@ -232,6 +246,8 @@ public class IOPanel extends JPanel {
                     ex.printStackTrace();
                 }
 			}
+			layerUI.setIsDragging(false);
+			myLayer.repaint();
 		}
 		
 	}

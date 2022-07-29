@@ -1,5 +1,16 @@
 package dc.gui;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+
+import javax.swing.BoundedRangeModel;
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.JButton;
+import javax.swing.JLayer;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -13,17 +24,6 @@ import dc.model.MovieStateModel;
 import dc.model.TemplateMatchingSegmentModel;
 import dc.model.TextModel;
 
-import java.awt.BorderLayout;
-
-import javax.swing.BoundedRangeModel;
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.awt.event.ActionEvent;
-import java.awt.FlowLayout;
-
 @SuppressWarnings("serial")
 public class SettingPanel extends JPanel {
 	private static final Logger logger = Logger.getLogger(SettingPanel.class.getName());
@@ -35,6 +35,8 @@ public class SettingPanel extends JPanel {
 	private IOPanel ioPanel;
 	private TemplateMatchingPanel templateMatchingPanel;
 	private DriftEditingPanel driftEditingPanel;
+	private JLayer<JPanel> ioLayer;
+	private JLayer<JPanel> templateMatchingLayer;
 	private int viewState;
 //	private DriftCorrectionPanel driftCorrectionPanel;
 	
@@ -62,7 +64,10 @@ public class SettingPanel extends JPanel {
 		ioPanel = new IOPanel();
 		templateMatchingPanel = new TemplateMatchingPanel();
 		driftEditingPanel = new DriftEditingPanel();
-		stepPanel.add(ioPanel);
+
+		ioLayer = ioPanel.wrapLayer();
+		templateMatchingLayer = templateMatchingPanel.wrapLayer();
+		stepPanel.add(ioLayer);
 	}
 	
 	
@@ -133,9 +138,9 @@ public class SettingPanel extends JPanel {
 	private void updateView() {
 		stepPanel.removeAll();
 		if (viewState == MovieStateModel.INIT) {
-			stepPanel.add(ioPanel);
+			stepPanel.add(ioLayer);
 		} else if (viewState == MovieStateModel.TEMPLATE_MATCHING) {
-			stepPanel.add(templateMatchingPanel);
+			stepPanel.add(templateMatchingLayer);
 		} else {
 			stepPanel.add(driftEditingPanel);
 		}
