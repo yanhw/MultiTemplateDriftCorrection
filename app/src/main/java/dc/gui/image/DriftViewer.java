@@ -140,7 +140,7 @@ public class DriftViewer extends JPanel {
 						int start = e.getFirstRow();
 						int end = e.getLastRow();
 						for (int i = start; i <= end; i++) {
-							logger.info("add " + i + " " + model.getValueAt(i, fittedIdx));
+//							logger.info("add " + i + " " + model.getValueAt(i, fittedIdx));
 							fittedDrift.add(i, (Number) model.getValueAt(i, fittedIdx));
 						}
 						break;
@@ -153,7 +153,7 @@ public class DriftViewer extends JPanel {
 						logger.info("delete " + start1 + " " + end1);
 						fittedDrift.delete(start1, end1);
 						for (int i = start1; i <= end1; i++) {
-							logger.info("update " + i + " " + model.getValueAt(i, fittedIdx));
+//							logger.info("update " + i + " " + model.getValueAt(i, fittedIdx));
 //							fittedDrift.remove((Number) i);
 							fittedDrift.add(i, (Number) model.getValueAt(i, fittedIdx));
 						}
@@ -193,5 +193,15 @@ public class DriftViewer extends JPanel {
 		}
 		
 	}
-
+	
+	
+	// getters for debugging
+	@Deprecated
+	protected XYSeries getRawDrift() {
+		return rawDrift;
+	}
+	@Deprecated
+	protected XYSeries getFittedDrift() {
+		return fittedDrift;
+	}
 }

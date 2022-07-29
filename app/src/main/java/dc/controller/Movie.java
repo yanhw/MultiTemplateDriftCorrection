@@ -123,8 +123,8 @@ public class Movie {
 
 	protected void reset() {
 		fileList.clearFiles();
-		saveDir.setText(null);
-		inputDir.setText(null);
+		saveDir.setText("");
+		inputDir.setText("");
 		templateMatching.reset();
 		driftManager.reset();
 		driftCorrection.reset();

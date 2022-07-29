@@ -36,6 +36,7 @@ public class DriftModel extends AbstractTableModel {
 			logger.warning("wrong movieSize: " + movieSize);
 			return;
 		}
+		clear();
 		dataVector = new Object[movieSize][getColumnCount()];
 		for (int i = 0; i < movieSize; i++) {
 			dataVector[i][INDEX] = i;
@@ -51,8 +52,13 @@ public class DriftModel extends AbstractTableModel {
 	
 
 	public void clear() {
+		if (dataVector == null) {
+			return;
+		}
 		int numRow = getRowCount();
 		dataVector = null;
+//		TableModelEvent e = new TableModelEvent(this, 0, numRow-1);
+//		fireTableChanged(e);
 		fireTableRowsDeleted(0, numRow-1);
 	}
 	
@@ -113,6 +119,10 @@ public class DriftModel extends AbstractTableModel {
 			logger.info("wrong col: " + col);
 			return;
 		}
+		if (value.length != end-start+1) {
+			logger.info("inconsistent input, array size: " + value.length + " start and end: " + start + " " + end);
+			return;
+		}
 		for (int i = start; i <= end; i++) {
 			dataVector[i][col] = value[i-start];
 		}
@@ -167,6 +177,9 @@ public class DriftModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
+		if (dataVector == null) {
+			return null;
+		}
 		return dataVector[rowIndex][columnIndex];
 	}
 

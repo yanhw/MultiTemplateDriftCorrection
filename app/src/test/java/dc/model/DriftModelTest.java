@@ -24,7 +24,7 @@ public class DriftModelTest {
 		int frameNumber = 10;
 		myModel.initData(frameNumber);
 		assertEquals("row count", frameNumber, myModel.getRowCount());
-		assertEquals("single event", 1, myListener.count);
+		assertEquals("1 event", 1, myListener.count);
 		assertEquals("all rows", 0, myListener.firstRow);
 		assertEquals("all rows", frameNumber-1, myListener.lastRow);
 		assertEquals("all col", TableModelEvent.ALL_COLUMNS, myListener.col);
@@ -81,6 +81,16 @@ public class DriftModelTest {
 	}
 	
 	@Test
+	public void testClear() {
+		int frameNumber = 10;
+		myModel.initData(frameNumber);
+		myListener.resetCount();
+		myModel.clear();
+		assertEquals("single event", 1, myListener.count);
+		assertEquals("no element", 0, myModel.getRowCount());
+	}
+	
+	@Test
 	public void testRemoveDrift() {
 		int frameNumber = 10;
 		myModel.initData(frameNumber);
@@ -107,6 +117,47 @@ public class DriftModelTest {
 		myModel.removeDrift(frameNumber);
 		myListener.resetCount();
 		myModel.removeDrift(frameNumber);
+		assertEquals("no event", 0, myListener.count);
+	}
+	
+	@Test
+	public void testSetDrift() {
+		int frameNumber = 10;
+		myModel.initData(frameNumber);
+		myListener.resetCount();
+		int start = 3, end = 7, col = DriftModel.FITTED_DX;
+		double[] value = dummyArrayDouble(end-start+1);
+		myModel.setDrift(value, start, end, col);
+		assertEquals("one event", 1, myListener.count);
+		assertEquals("first row", start, myListener.firstRow);
+		assertEquals("last row", end, myListener.lastRow);
+		assertEquals("col", col, myListener.col);
+		assertEquals("UPDATE event", TableModelEvent.UPDATE, myListener.type);
+		for (int i = start; i <=end; i++) {
+			assertEquals("updated value", value[i-start], ((Number)myModel.getValueAt(i, col)).doubleValue(), 0.001);
+		}
+	}
+	
+	@Test
+	public void testSetDriftFail() {
+		int frameNumber = 10;
+		myModel.initData(frameNumber);
+		myListener.resetCount();
+		int start = 3, end = 7, col = DriftModel.FITTED_DX;
+		double[] value = dummyArrayDouble(end-start+1);
+		myModel.setDrift(value, -1, end, col);
+		assertEquals("no event", 0, myListener.count);
+		myModel.setDrift(value, start, frameNumber+2, col);
+		assertEquals("no event", 0, myListener.count);
+		myModel.setDrift(value, start, start-1, col);
+		assertEquals("no event", 0, myListener.count);
+		myModel.setDrift(value, start, end+1, col);
+		assertEquals("no event", 0, myListener.count);
+		myModel.setDrift(null, start, end, col);
+		assertEquals("no event", 0, myListener.count);
+		myModel.setDrift(value, start, end, DriftModel.DX);
+		assertEquals("no event", 0, myListener.count);
+		myModel.setDrift(value, start, end, DriftModel.WEIGHT_X);
 		assertEquals("no event", 0, myListener.count);
 	}
 	
@@ -154,6 +205,14 @@ public class DriftModelTest {
 		float[] array = new float[size];
 		for (int i = 0; i < size; i++) {
 			array[i] = (float) i;
+		}
+		return array;
+	}
+	
+	private double[] dummyArrayDouble(int size) {
+		double[] array = new double[size];
+		for (int i = 0; i < size; i++) {
+			array[i] = (double) i;
 		}
 		return array;
 	}
