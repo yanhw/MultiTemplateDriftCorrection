@@ -113,10 +113,12 @@ public class TemplateImageViewer extends JPanel {
 		int sliderValue = slider.getValue();
 		if (sections.getRowCount() <= sliderValue) {
 			logger.info("no image to display");
+			updateLabel(0,0,-1, false);
+			setImage(0,null);
 			return;
 		}
 		if (sliderValue < 0) {
-			logger.info("intermidiate state");
+			logger.warning("intermidiate state");
 			return;
 		}
 		int start = (int) sections.getValueAt(sliderValue, TemplateMatchingSegmentModel.START_IDX);
@@ -150,6 +152,9 @@ public class TemplateImageViewer extends JPanel {
 	}
 	
 	private void updateLabel(int start, int end, int key, boolean hasROI) {
+		if (key == -1) {
+			textLabel.setText("Templates will be displayed here.");
+		}
 		if (hasROI) {
 			textLabel.setText("template at frame number " + key + " for movie at frame " 
 			    	+ start + " to " + end);
@@ -181,8 +186,8 @@ public class TemplateImageViewer extends JPanel {
     		} else {
     			ratio = Math.max(widthRatio, heightRatio);
     		}
-    		ratio = Math.max(ratio, ImagePanel.MINZOOM);
-    		ratio = Math.min(ratio, ImagePanel.MAXZOOM);
+    		ratio = Math.max(ratio, ZoomSlider.STEPS[0]);
+    		ratio = Math.min(ratio, ZoomSlider.STEPS[ZoomSlider.STEPS.length-1]);
     		imagePanel.setZoomLevel(ratio);
 	    	imagePanel.setROI(ROI[0], ROI[2], ROI[1]-ROI[0], ROI[3]-ROI[2]);
 	    	

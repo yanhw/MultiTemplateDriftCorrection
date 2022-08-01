@@ -1,21 +1,19 @@
 package dc.gui.image;
 
-import javax.swing.BoundedRangeModel;
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-
 import java.awt.BorderLayout;
 import java.awt.Cursor;
-
-import javax.swing.JSplitPane;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import javax.swing.BoundedRangeModel;
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JSplitPane;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -180,9 +178,6 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
 	}
 	
 	public void updatePictureWithSlider(int frameNumber) {
-		if (frameNumber < 0 || frameNumber >= NUM_FRAME) {
-			return;
-		}
 		
 		updatePicture(frameNumber);
 		movieSlider.setFrameNumber(frameNumber);
@@ -190,7 +185,8 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
 	
 	/** Update the label to display the image for the current frame. */
     protected void updatePicture(int frameNumber) {
-    	if (imgList == null || imgList.getSize() == 0) {
+    	if (imgList == null || imgList.getSize() == 0 || frameNumber >= imgList.getSize()) {
+    		imagePanel.updateImage(null);
     		return;
     	}
     	if (!imagePanel.updateImage(imgList.getElementAt(frameNumber).toString()));

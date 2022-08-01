@@ -61,10 +61,16 @@ public class Slider extends JPanel implements ChangeListener {
         prevBtn.setAlignmentY(JPanel.TOP_ALIGNMENT);
         imageSlider.setAlignmentY(JPanel.TOP_ALIGNMENT);
         nextBtn.setAlignmentY(JPanel.TOP_ALIGNMENT);
+        imageSlider.setEnabled(false);
 	}
 
 	protected void setMaximum(int numFrame) {
-		model.setMaximum(numFrame-1);
+		model.setMaximum(Math.max(0, numFrame-1));
+		if (numFrame <=1) {
+			imageSlider.setEnabled(false);
+		} else {
+			imageSlider.setEnabled(true);
+		}
 	}
 	
 	public int getFrameNumber() {
@@ -92,7 +98,6 @@ public class Slider extends JPanel implements ChangeListener {
 			return;
 		}
 		model.setValue(frameNumber);
-//		sliderLabel.setText("Frame: "+(frameNumber)+"/"+model.getMaximum());
 	}
 	
 	@Override

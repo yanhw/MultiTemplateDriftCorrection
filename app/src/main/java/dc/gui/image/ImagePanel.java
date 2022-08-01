@@ -19,15 +19,11 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 class ImagePanel extends JPanel {
 	private static final Logger logger = Logger.getLogger(ImagePanel.class.getName());
-	private BufferedImage rawImage;
-	private Image image;
-	private int imgHeight, imgWidth;
-	private int top, left, height, width;
-	private Point first;
-	public static final double MAXZOOM = 10.0;
-	public static final double MINZOOM = 0.1;
-	private double zoomLevel = 1.0;
-	private ROIModel ROI;
+	private BufferedImage rawImage;				// raw image to display, this can be null
+	private Image image;						// scaled version of the image
+	private Point first;						// ref point for ROI selection
+	private double zoomLevel = 1.0;				// current scale ratio
+	private ROIModel ROI;						// ROI model, which notifies listeners
 	
 	public ImagePanel() {
 		setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -41,57 +37,134 @@ class ImagePanel extends JPanel {
 		logger.addHandler(fh);
 	}
 	
-	public ROIModel getROI() {
+	protected ROIModel getROI() {
+		assert ROI != null;
 		return ROI;
 	}
 	
+	// necessary to override this method for scroll bars to function properly
 	@Override
 	public Dimension getPreferredSize() {
 		if (image == null) {
 			return super.getPreferredSize();
 		}
-		return new Dimension(imgWidth, imgHeight);
+		return new Dimension((int)(getImageWidth()*zoomLevel), (int)(getImageHeight()*zoomLevel));
 	}
 	
+	////////////////////////////////////////////////////////////
+	// set image to display
+	////////////////////////////////////////////////////////////
+	
+	protected boolean updateImage(String filename) {
+		if (filename == null) {
+			rawImage = null;
+			image = null;
+			ROI.removeROI();
+			logger.info("setting null image");
+		} else {
+			try {
+	    		rawImage = ImageIO.read(new File(filename));
+			} catch(IOException e) {
+				logger.warning("failed to open image:" + filename);
+			}			
+		}
+		scaleImage();
+		repaint();
+		return (image != null);
+	}
+	
+	protected int getImageHeight() {
+		return rawImage.getHeight();
+	}
+	
+	protected int getImageWidth() {
+		return rawImage.getWidth();
+	}
+	////////////////////////////////////////////////////////////////////
+	// custom drawing
+	////////////////////////////////////////////////////////////////////
+	
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		if (image != null) {
+			Point p = getImageLocation();
+			g.drawImage(image,  p.x,  p.y,  this);
+			if (ROI.getFlag()) {
+				g.setColor(Color.RED);
+				Point p2 = computePanelLocation(getROILeft(), getROITop());
+				//System.out.println(p2.x + " " + p2.y);
+				g.drawRect(p2.x, p2.y, getROIWidth(), getROIHeight());
+			}
+		} else {
+			g.setColor(getBackground());
+			g.fillRect(0,0,getHeight(), getWidth());
+		}
+	}
+	///////////////////////////////////////////////////////////////////////
+	// zoom image
+	///////////////////////////////////////////////////////////////////////
+	
 	protected void setZoomLevel(double newLevel) {
-		assert (newLevel >= MINZOOM);
-		assert (newLevel <= MAXZOOM);
+		if ((newLevel < ZoomSlider.STEPS[0]) || (newLevel > ZoomSlider.STEPS[ZoomSlider.STEPS.length-1])) {
+			logger.warning("bad zoom level: " + newLevel);
+			return;
+		}
 		if (newLevel == zoomLevel) {
 			return;
 		}
 		zoomLevel = newLevel;
 		if (rawImage == null) {
 			return;
+		} else {
+			scaleImage();
 		}
-		scaleImage();
-		updateImage();
+		repaint();
 	}
 	
 	private void scaleImage() {
-		imgHeight = rawImage.getHeight();
-		imgWidth = rawImage.getWidth();
-		imgHeight = (int) (imgHeight*zoomLevel);
-		imgWidth = (int) (imgWidth*zoomLevel);
+		if (rawImage == null) {
+			return;
+		}
+		int imgHeight = (int) (rawImage.getHeight()*zoomLevel);
+		int imgWidth = (int) (rawImage.getWidth()*zoomLevel);
 		image = rawImage.getScaledInstance(imgWidth, imgHeight, Image.SCALE_FAST);
-//		System.out.println(left + " " + top + " " + width + " " + height + " " + zoomLevel);
-		top = (int) (ROI.getROI()[ROIModel.TOP]*zoomLevel);
-		left = (int) (ROI.getROI()[ROIModel.LEFT]*zoomLevel);
-		height = (int) ((ROI.getROI()[ROIModel.BOTTOM]-ROI.getROI()[ROIModel.TOP])*zoomLevel);
-		width = (int) ((ROI.getROI()[ROIModel.RIGHT]-ROI.getROI()[ROIModel.LEFT])*zoomLevel);
 	}
 	
-	protected Point getImageLocation() {
+	// the following getters returns scaled version of ROI
+	private int getROITop() {
+		return (int) (ROI.getROI()[ROIModel.TOP]*zoomLevel);
+	}
+	
+	private int getROILeft() {
+		return (int) (ROI.getROI()[ROIModel.LEFT]*zoomLevel);
+	}
+	
+	private int getROIHeight() {
+		return (int) ((ROI.getROI()[ROIModel.BOTTOM]-ROI.getROI()[ROIModel.TOP])*zoomLevel);
+	}
+	
+	private int getROIWidth() {
+		return (int) ((ROI.getROI()[ROIModel.RIGHT]-ROI.getROI()[ROIModel.LEFT])*zoomLevel);
+	}
+	
+	
+	/////////////////////////////////////////////////////////////////////
+	// ROI selection
+	/////////////////////////////////////////////////////////////////////
+	// helper method for getPixelLocation
+	private Point getImageLocation() {
 		Point p = null;
 		if (image != null) {
-			int x = (getWidth() - imgWidth)/2;
-			int y = (getHeight() - imgHeight)/2;
+			int x = (getWidth() - rawImage.getWidth())/2;
+			int y = (getHeight() - rawImage.getHeight())/2;
 			p = new Point(x, y);
 //			System.out.println("getImageLocation"+p.x + " " + p.y);
 		}
 		return p;
 	}
 	
-	public Point getPixelLocation(Point p) {
+	protected Point getPixelLocation(Point p) {
 		Point imageLocation = getImageLocation();
 		if (imageLocation != null) {
 			Point pixelLocation = new Point(p.x-imageLocation.x, p.y-imageLocation.y);
@@ -106,12 +179,12 @@ class ImagePanel extends JPanel {
 		return panelLocation;
 	}
 	
-	public void setPoint(Point first) {
+	protected void setPoint(Point first) {
 		this.first = first;
 //		System.out.println("first: " + first);
 	}
 	
-	public void setSecPoint(Point second) {
+	protected void setSecPoint(Point second) {
 		if (image == null) {
 			return;
 		}
@@ -119,16 +192,16 @@ class ImagePanel extends JPanel {
 		if (first.x==second.x || first.y==second.y) {
 			ROI.removeROI();
 		} else {
-			top = Math.min(first.y, second.y);
-			left = Math.min(first.x, second.x);
+			int top = Math.min(first.y, second.y);
+			int left = Math.min(first.x, second.x);
 			// restrict points, they must be inside the image
 			top = Math.max(top, 0);
 			left = Math.max(left, 0);
 
-			height = (Math.max(first.y, second.y)-top);
-			width = (Math.max(first.x, second.x)-left);			
-			height = Math.min(height, imgHeight-top);
-			width = Math.min(width, imgWidth-left);
+			int height = (Math.max(first.y, second.y)-top);
+			int width = (Math.max(first.x, second.x)-left);			
+			height = Math.min(height, rawImage.getHeight()-top);
+			width = Math.min(width, rawImage.getWidth()-left);
 			int rawTop = (int) (top/zoomLevel);
 			int rawHeight = (int) ((height)/zoomLevel); 
 			int rawLeft = (int) (left/zoomLevel);
@@ -142,66 +215,13 @@ class ImagePanel extends JPanel {
 			}
 			
 		}
-		updateImage();
+		repaint();
 	}
 	
 	protected void setROI(int top, int left, int height, int width) {
 		int[] array = {top, top+height, left, left+width};
 		ROI.setROI(array);
 		scaleImage();
-		this.updateImage();
-	}
-	
-	@Override
-	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		if (image != null) {
-			Point p = getImageLocation();
-			g.drawImage(image,  p.x,  p.y,  this);
-			if (ROI.getFlag()) {
-				g.setColor(Color.RED);
-				Point p2 = computePanelLocation(left, top);
-//				System.out.println(p2.x + " " + p2.y);
-//				System.out.println(left + " " + top + " " + width + " " + height);
-				g.drawRect(p2.x, p2.y, width, height);
-			}
-		} else {
-			g.setColor(getBackground());
-			g.drawRect(0,0,imgHeight, imgWidth);
-		}
-	}
-	
-	public boolean updateImage(String filename) {
-		if (filename == null) {
-			rawImage = null;
-		} else {
-			try {
-	    		rawImage = ImageIO.read(new File(filename));
-			} catch(IOException e) {
-				logger.warning("failed to open image:" + filename);
-			}		
-			scaleImage();
-		}
 		repaint();
-		if (image != null) {
-			
-			return true;
-		}
-		return false;
-	}
-	
-	private void updateImage() {
-		//TODO
-		//???? i think this assertion should not be here, or maybe this method is not necessary
-//		assert(hasROI);
-		repaint();
-	}
-	
-	protected int getImageHeight() {
-		return rawImage.getHeight();
-	}
-	
-	protected int getImageWidth() {
-		return rawImage.getWidth();
 	}
 }

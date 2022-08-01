@@ -30,6 +30,9 @@ public class ROIModel {
 	}
 	
 	public void removeROI() {
+		if (flag== false) {
+			return;
+		}
 		flag = false;
 //		logger.info("ROI changed to: " + ROI[0] + " " + ROI[1] + " " + ROI[2] + " " + ROI[3] + " " + ROI[4]);
 		support.firePropertyChange(FLAG, null, flag);

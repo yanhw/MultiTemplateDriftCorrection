@@ -5,6 +5,12 @@ import java.util.List;
 
 import javax.swing.AbstractListModel;
 
+/*
+ * using abstract model for better control of listener behaver.
+ * since the file list is not expected to change for the same movie,
+ * the only expected event should be contentsChanged,
+ * which implies the entire list is changed.
+ */
 @SuppressWarnings("serial")
 public class FileListModel extends AbstractListModel<Path>{
 	
@@ -24,6 +30,7 @@ public class FileListModel extends AbstractListModel<Path>{
 	
 	public void clearFiles() {
 		fileList = null;
+		fireContentsChanged(this, 0, 0);
 	}
 	
 	@Override
