@@ -36,6 +36,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.jfree/jfreechart
 	implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.0'
     
+    // https://mvnrepository.com/artifact/com.formdev/flatlaf
+	runtimeOnly group: 'com.formdev', name: 'flatlaf', version: '0.20'
+    
 }
 
 application {

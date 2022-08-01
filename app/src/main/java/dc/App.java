@@ -4,6 +4,9 @@
 package dc;
 
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+
+import com.formdev.flatlaf.FlatLightLaf;
 
 import static dc.utils.Constants.CBIS_HOME_DIR;
 import static dc.utils.Constants.VERSION;
@@ -58,6 +61,13 @@ public class App {
 		logger.info("starting the program...");
 		logger.info("running at: " + currDir);
 		logger.info("number of processors: " + Runtime.getRuntime().availableProcessors());
+		
+		// set look and feel
+		try {
+		    UIManager.setLookAndFeel( new FlatLightLaf() );
+		} catch( Exception ex ) {
+		    System.err.println( "Failed to initialize LaF" );
+		}
 		
 		Controller controller = new Controller();
 		controller.setFileHandler(fh);
