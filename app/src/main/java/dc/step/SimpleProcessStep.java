@@ -3,8 +3,6 @@ package dc.step;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
-import dc.controller.ImageData;
-
 public abstract class SimpleProcessStep implements ProcessStep {
 	protected String name = "simple process step";
 	protected static final Logger logger = Logger.getLogger(SimpleProcessStep.class.getName());

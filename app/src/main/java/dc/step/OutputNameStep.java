@@ -2,17 +2,15 @@ package dc.step;
 
 import java.util.logging.*;
 
-import dc.controller.ImageData;
 
-
-public abstract class OutputProcessStep implements ProcessStep {
-	private static final Logger logger = Logger.getLogger(OutputProcessStep.class.getName());
+public abstract class OutputNameStep implements ProcessStep {
+	private static final Logger logger = Logger.getLogger(OutputNameStep.class.getName());
 	protected String name = "output process step";
 
 	
 	protected ImageData myImage;
 	
-	public OutputProcessStep() {
+	public OutputNameStep() {
 		
 	}
 	

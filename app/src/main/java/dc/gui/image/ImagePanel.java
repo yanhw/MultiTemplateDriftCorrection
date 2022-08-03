@@ -48,7 +48,7 @@ class ImagePanel extends JPanel {
 		if (image == null) {
 			return super.getPreferredSize();
 		}
-		return new Dimension((int)(getImageWidth()*zoomLevel), (int)(getImageHeight()*zoomLevel));
+		return new Dimension(getScaledImageWidth(), getScaledImageHeight());
 	}
 	
 	////////////////////////////////////////////////////////////
@@ -79,6 +79,14 @@ class ImagePanel extends JPanel {
 	
 	protected int getImageWidth() {
 		return rawImage.getWidth();
+	}
+	
+	protected int getScaledImageHeight() {
+		return (int)(rawImage.getHeight()*zoomLevel);
+	}
+	
+	protected int getScaledImageWidth() {
+		return (int)(rawImage.getWidth()*zoomLevel);
 	}
 	////////////////////////////////////////////////////////////////////
 	// custom drawing
@@ -126,8 +134,8 @@ class ImagePanel extends JPanel {
 		if (rawImage == null) {
 			return;
 		}
-		int imgHeight = (int) (rawImage.getHeight()*zoomLevel);
-		int imgWidth = (int) (rawImage.getWidth()*zoomLevel);
+		int imgHeight = getScaledImageHeight();
+		int imgWidth = getScaledImageWidth();
 		image = rawImage.getScaledInstance(imgWidth, imgHeight, Image.SCALE_FAST);
 	}
 	
@@ -156,8 +164,8 @@ class ImagePanel extends JPanel {
 	private Point getImageLocation() {
 		Point p = null;
 		if (image != null) {
-			int x = (getWidth() - rawImage.getWidth())/2;
-			int y = (getHeight() - rawImage.getHeight())/2;
+			int x = (getWidth() - getScaledImageHeight())/2;
+			int y = (getHeight() - getScaledImageHeight())/2;
 			p = new Point(x, y);
 //			System.out.println("getImageLocation"+p.x + " " + p.y);
 		}
@@ -200,8 +208,8 @@ class ImagePanel extends JPanel {
 
 			int height = (Math.max(first.y, second.y)-top);
 			int width = (Math.max(first.x, second.x)-left);			
-			height = Math.min(height, rawImage.getHeight()-top);
-			width = Math.min(width, rawImage.getWidth()-left);
+			height = Math.min(height, getScaledImageHeight()-top);
+			width = Math.min(width, getScaledImageWidth()-left);
 			int rawTop = (int) (top/zoomLevel);
 			int rawHeight = (int) ((height)/zoomLevel); 
 			int rawLeft = (int) (left/zoomLevel);

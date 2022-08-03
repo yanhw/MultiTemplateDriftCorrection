@@ -1,6 +1,5 @@
 package dc.controller;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -19,17 +18,18 @@ public class TemplateMatchingProcess extends Process {
 	public TemplateMatchingProcess(boolean blur, BooleanModel interruptionFlag2) {
 		super(interruptionFlag2);
 		this.interruptionFlag = interruptionFlag2;
-//		System.out.println(interruptionFlag.get());
 		this.blur = blur;
-		mySteps = new LinkedList<ProcessStep>();
-		outputStepIndex = new LinkedList<Integer>();
-		mySteps.add(new dc.step.ImageReader("png"));
+		//read image
+		addStep(new dc.step.ImageReader("png"));
+		//check dimension
+		addStep(new CheckDimension());
+		//gaussian blur
 		if (blur) {
-			mySteps.add(new dc.step.GaussianImage(5, 3));
+			addStep(new dc.step.GaussianImage(5, 3));
 		}
-//		templateMatchingStep = new step.TemplateMatching();
+		//template matching
 		templateMatchingStep = new dc.step.TemplateMatching();
-		mySteps.add(templateMatchingStep);
+		addStep(templateMatchingStep);
 	}
 	
 	public void setFileHandler(FileHandler fh) {

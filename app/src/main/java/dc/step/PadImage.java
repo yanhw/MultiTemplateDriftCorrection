@@ -1,7 +1,5 @@
 package dc.step;
 
-import dc.controller.ImageData;
-
 public class PadImage extends SimpleProcessStep{
 	
 	

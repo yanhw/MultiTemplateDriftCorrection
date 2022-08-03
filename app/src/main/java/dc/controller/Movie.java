@@ -69,6 +69,7 @@ public class Movie {
 		templateMatching.setInterruptionFlag(interrupt);
 		driftCorrection.setInterruptionFlag(interrupt);
 		templateMatching.setProgressModel(progress);
+		driftCorrection.setProgressModel(progress);
 	}
 	
 	protected MovieStateModel getMovieStateModel() {

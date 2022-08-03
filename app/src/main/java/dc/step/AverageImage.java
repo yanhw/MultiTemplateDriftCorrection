@@ -4,8 +4,6 @@ import java.util.logging.*;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 
-import dc.controller.ImageData;
-
 public class AverageImage implements ProcessStep {
 	private static final String name = "averaging: ";
 	private static final Logger logger = Logger.getLogger(AverageImage.class.getName());

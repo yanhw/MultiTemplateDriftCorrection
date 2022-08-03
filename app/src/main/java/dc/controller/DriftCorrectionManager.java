@@ -188,8 +188,7 @@ public class DriftCorrectionManager {
 		}
 
 		for (int j = 0; j < numActiveThread; j++) {
-			((DriftCorrectionProcess)processPool.get(j)).initDriftCorrection(xDriftList.get(j), yDriftList.get(j), saveFileListList.get(j), top, bottom, left, right, ROI);
-			processPool.get(j).initialise(targetFolder, procStartingIdxList[j]);
+			((DriftCorrectionProcess)processPool.get(j)).initDriftCorrection(xDriftList.get(j), yDriftList.get(j), saveFileListList.get(j), top, bottom, left, right, ROI, targetFolder, procStartingIdxList[j]);
 		}
 
 		// countDownLatch to track progress
@@ -206,12 +205,10 @@ public class DriftCorrectionManager {
 			pool.execute(workers[j]);
 		}
 		while (latch.getCount()>0) {
-			//System.out.println((100*(fileList.size()-latch.getCount()+done)/total) + " total: "+total+" count: " + latch.getCount()+ " done: " + done);
 			progress.setValue((int) (100*(fileSubList.size()-latch.getCount())/total));
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				progress.setValue(100);
 				e.printStackTrace();
 			}
@@ -227,15 +224,13 @@ public class DriftCorrectionManager {
 			prevBottom = bottom;
 			prevXDrift = xDrift;
 			prevYDrift = yDrift;
+			List<Path> pathList = new ArrayList<Path>();
+			for (int i = 0; i < savingList.size(); i++) {
+				pathList.add(Paths.get(savingList.get(i)));
+			}
+			saveFileList.setFiles(pathList);
 			logger.info("drift correction master thread finished");
 		}
-		
-		List<Path> pathList = new ArrayList<Path>();
-		for (int i = 0; i < savingList.size(); i++) {
-			pathList.add(Paths.get(savingList.get(i)));
-		}
-		saveFileList.setFiles(pathList);
-		return;
 	}
 	
 	private List<String> getSaveFileList(String saveDir, int length) {

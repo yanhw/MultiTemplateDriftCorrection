@@ -1,10 +1,11 @@
-package dc.controller;
+package dc.step;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 
 // wrapper class for input and output variable of a process step
 public class ImageData {
 	private String inputString;
+	private String outputString;
 	private Mat image;
 
 	public ImageData(String inputString){
@@ -21,6 +22,14 @@ public class ImageData {
 	
 	public void setString(String string) {
 		inputString = string;
+	}
+	
+	public void setOutputString(String string) {
+		outputString = string;
+	}
+	
+	public String getOutputString() {
+		return outputString;
 	}
 	
 	public void setImage(Mat image) {

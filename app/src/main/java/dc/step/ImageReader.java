@@ -5,12 +5,10 @@ import java.util.logging.Logger;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 
-import dc.controller.ImageData;
-
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 import static org.bytedeco.opencv.global.opencv_core.CV_32F;
 
-public class ImageReader implements ProcessStep{
+public class ImageReader extends InterruptableStep{
 	private String name = "image reader";
 	private static final Logger logger = Logger.getLogger(ImageReader.class.getName());
 	private String format;
@@ -30,7 +28,6 @@ public class ImageReader implements ProcessStep{
 	
 	@Override
 	public void initialise() {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -49,7 +46,10 @@ public class ImageReader implements ProcessStep{
 		}
 		Mat image = imread(filename,0); //CV_LOAD_IMAGE_GRAYSCALE = 0
 		image.convertTo(image, CV_32F);
-
+		if (image.empty()) {
+			logger.severe("interrupt the process");
+			interrupt();
+		}
 		input.setImage(image);
 		return input;
 	}

@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import dc.controller.ImageData;
+import dc.step.ImageData;
 
 
 public class ImageDataTest {
