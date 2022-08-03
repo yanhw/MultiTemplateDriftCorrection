@@ -38,7 +38,7 @@ public class Controller {
 	private BooleanModel runningFlag;		// flag for buttons that trigger long process
 											// TODO: check if can merge this with isBusy
 	private TextModel myStatus;				// update text in status panel
-	
+
 	public Controller() {
 		logger.setLevel(Level.FINE);
 //		logger.setUseParentHandlers(true);
@@ -68,10 +68,12 @@ public class Controller {
 		mainFrame.setDriftSectionModel(myMovie.getDriftSectionModel());
 		mainFrame.setFileNameModels(myMovie.getInputDirModel(), myMovie.getSaveDirModel());
 		
+		TextModel myWarning = new TextModel();
 		BoundedRangeModel myProgress = new DefaultBoundedRangeModel(0,1,0,100); 
-		myMovie.setGUIHelper(interrupt, myProgress);
+		myMovie.setGUIHelper(interrupt, myProgress, myWarning);
 		mainFrame.setProgressModel(myProgress);
 		mainFrame.setStatusModel(myStatus);
+		mainFrame.setWarningModel(myWarning);
 		mainFrame.setRunningFlagModel(runningFlag);
 	}
 	

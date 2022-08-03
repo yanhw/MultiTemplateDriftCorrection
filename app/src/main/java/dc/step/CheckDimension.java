@@ -29,7 +29,11 @@ public class CheckDimension extends InterruptableStep {
 			height = imgHeight;
 			width = imgWidth;
 		} else if (height != imgHeight || width != imgWidth) {
-			logger.severe("interrupt the process");
+			message = "All images should have the same dimension.\n"
+					+ "detected dimension of the image sequence: height=" + height + ", width=" + width + "\n"
+					+ "detected dimension of image " + input.getString() + ": height=" + imgHeight + ", width=" + imgWidth + "\n"
+					+ "Terminating the process. Please check input images";
+			logger.severe(message);
 			interrupt();
 		}
 		return input;

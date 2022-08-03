@@ -30,6 +30,7 @@ public class Movie {
 	private MovieStateModel myState;
 	private TextModel inputDir;
 	private TextModel saveDir;
+	private TextModel myWarning;
 	
 	public Movie() {
 		logger.setLevel(Level.FINE);
@@ -65,11 +66,15 @@ public class Movie {
 		driftCorrection.setFileHandler(fh);
 	}
 	
-	protected void setGUIHelper(BooleanModel interrupt, BoundedRangeModel progress) {
+	protected void setGUIHelper(BooleanModel interrupt, BoundedRangeModel progress, TextModel myWarning) {
+		this.myWarning = myWarning;
 		templateMatching.setInterruptionFlag(interrupt);
 		driftCorrection.setInterruptionFlag(interrupt);
 		templateMatching.setProgressModel(progress);
 		driftCorrection.setProgressModel(progress);
+		templateMatching.setWarningModel(myWarning);
+		driftManager.setWarningModel(myWarning);
+		driftCorrection.setWarningModel(myWarning);
 	}
 	
 	protected MovieStateModel getMovieStateModel() {
@@ -131,6 +136,13 @@ public class Movie {
 		driftCorrection.reset();
 		checkState();
 	}
+	
+	private void logWarning(String message) {
+		if (myWarning != null) {
+			myWarning.setText(message);
+		}
+		logger.info(message);	//info because this is well handled
+	}
 	/////////////////////////////////////////////////////////////////////
 	///////////////////////////// IO state //////////////////////////////
 	/////////////////////////////////////////////////////////////////////
@@ -138,15 +150,15 @@ public class Movie {
 	protected void setSrcDir(String folder) {
 		List<Path> fileList = FileSystem.getFiles(Paths.get(folder), ".png");
 		if (fileList == null) {
-			logger.warning("invalid inputDir :" + folder);
+			logWarning("invalid inputDir :" + folder);
 			return;
 		}
 		if (fileList.isEmpty()) {
-			logger.fine("no files found in :" + folder);
+			logWarning("no image files found in :" + folder);
 			return;
 		}
 		if (fileList.size() < 2) {
-			logger.fine("need at least 2 frames");
+			logWarning("input folder must have at least 2 images");
 			return;
 		}
 		logger.fine("setting new folder and init the movie");
@@ -165,7 +177,8 @@ public class Movie {
 		if (file.canWrite()) {
 			saveDir.setText(folder);
 		} else {
-			logger.info("cannot set save folder at : " + folder);
+			logWarning("Cannot set save folder at : " + folder +".\n"
+					+ "It appears you cannot modify this folder");
 			return false;
 		}
 		checkState();

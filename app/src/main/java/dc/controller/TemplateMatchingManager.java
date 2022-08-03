@@ -20,6 +20,7 @@ import javax.swing.DefaultBoundedRangeModel;
 
 import dc.model.BooleanModel;
 import dc.model.TemplateMatchingSegmentModel;
+import dc.model.TextModel;
 import dc.step.GaussianImage;
 
 public class TemplateMatchingManager {
@@ -34,6 +35,7 @@ public class TemplateMatchingManager {
 	private FileHandler fh;
 	private BooleanModel interruptionFlag;
 	private BoundedRangeModel progress;
+	private TextModel myWarning;
 	
 	private List<Path> fileList;
 	private TemplateMatchingSegmentModel model;
@@ -42,7 +44,6 @@ public class TemplateMatchingManager {
 	protected float[] tempXDrift;
 	protected float[] tempYDrift;
 	//TODO monitor the changes and template match only changed sections
-	
 	
 	
 	public TemplateMatchingManager() {
@@ -65,12 +66,23 @@ public class TemplateMatchingManager {
 		this.progress = progress;
 	}
 	
+	protected void setWarningModel(TextModel myWarning) {
+		this.myWarning = myWarning;
+	}
+	
 	protected void setTableModel(TemplateMatchingSegmentModel model) {
 		this.model = model;
 	}
 	
 	protected TemplateMatchingSegmentModel getTableModel() {
 		return model;
+	}
+	
+	private void logWarning(String message) {
+		if (myWarning != null) {
+			myWarning.setText(message);
+		}
+		logger.info(message);
 	}
 	
 	protected void init(List<Path> fileList) {
@@ -202,7 +214,10 @@ public class TemplateMatchingManager {
 			Files.createDirectories(path);
 			logger.info(saveDir + " is created");
 		} catch (IOException e) {
-			logger.severe("failed to create saveDir");
+			String message = "Failed to create save directory at: " + saveDir + "\n"
+					+ "Template matching is cancelled.\n"
+					+ "Please make sure save directory is valid.";
+			logWarning(message);
 			return;
 		}
 		
@@ -275,6 +290,16 @@ public class TemplateMatchingManager {
 			}
 			if (interruptionFlag.get()) {
 				progress.setValue(100);
+				String message = null;
+				for (int j = 0; j < numActiveThread; j++) {
+					String processMessage = processPool.get(j).getMessage();
+					if (processMessage != null) {
+						message = processMessage;
+					}
+				}
+				if (message != null) {
+					logWarning(message);
+				}
 				pool.shutdown();
 				logger.info("process interrupted");
 				return;
@@ -304,7 +329,7 @@ public class TemplateMatchingManager {
 		progress.setValue(100);
 		assert (tempXDrift[0] == 0);
 		assert (tempYDrift[0] == 0);
-		logger.info("template matching master thread finished");
+		logger.info("template matching master thread finished normally");
 		return;
 	}
 	

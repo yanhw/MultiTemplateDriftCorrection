@@ -16,6 +16,7 @@ import org.apache.commons.math3.fitting.WeightedObservedPoint;
 
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
+import dc.model.TextModel;
 import dc.utils.FileSystem;
 
 /* 
@@ -32,6 +33,7 @@ public class DriftManager {
 	private DriftModel driftModel;
 	private DriftSectionModel sectionModel;
 	private boolean isDriftReady;
+	private TextModel myWarning;
 	
 	public DriftManager() {
 		
@@ -40,6 +42,10 @@ public class DriftManager {
 	public void setFileHandler(FileHandler fh) {
 		logger.addHandler(fh);
 		
+	}
+	
+	protected void setWarningModel(TextModel myWarning) {
+		this.myWarning = myWarning;
 	}
 	
 	protected void setTableModel(DriftModel driftModel, DriftSectionModel sectionModel) {
@@ -55,6 +61,13 @@ public class DriftManager {
 	
 	protected DriftSectionModel getDriftSectionModel() {
 		return sectionModel;
+	}
+	
+	private void logWarning(String message) {
+		if (myWarning != null) {
+			myWarning.setText(message);
+		}
+		logger.info(message);
 	}
 	
 	// initialise variables here because the movie can change
@@ -86,23 +99,30 @@ public class DriftManager {
 	 */
 	protected boolean setDrifts(String filename) {
 		if (filename == null) {
-			logger.info("null input");
+			String message = "Failed to get filename of input csv file";
+	    	logWarning(message);
 			return false;
 		}
 		if (!filename.endsWith(".csv")) {
-			logger.info("wrong format: " + filename);
+			String message = "wrong file format: " + filename + "\n"
+					+ "Only csv files are accepted";
+	    	logWarning(message);
 			return false;
 		}
 		float[] tempX = new float[driftModel.getRowCount()];
 		float[] tempY = new float[driftModel.getRowCount()];
 		try (Scanner scanner = new Scanner(new File(filename));) {
 		    if (!scanner.hasNextLine()) {
-		    	logger.info("empty file!");
+		    	String message = "The csv file " + filename + " is empty!";
+		    	logWarning(message);
 		    	return false;
 		    }
 		    String firstLine = scanner.nextLine();
 		    if (!firstLine.equals("Slice,dX,dY")) {
-		    	logger.info("invalid csv file header: " + firstLine);
+		    	String message = "invalid csv file header!\n"
+		    			+ "expected: Slice,dX,dY" + "\n"
+		    			+ "recieved: "+ firstLine;
+		    	logWarning(message);
 		    	return false;
 		    }
 		    int idx = 0;
@@ -110,12 +130,14 @@ public class DriftManager {
 		    	String data = scanner.nextLine();
 		    	StringTokenizer tokenizer = new StringTokenizer(data, ",");
 		    	if (tokenizer.countTokens() != 3) {
-		    		logger.info("invalid format at line " + idx + " : " + data);
+		    		String message = "invalid format at line " + idx + " : " + data;
+			    	logWarning(message);
 		    		return false;
 		    	}
 		    	int targetIdx = Integer.parseInt(tokenizer.nextToken());
 		    	if (targetIdx != idx) {
-		    		logger.info("line mismatch, expecting: " + idx + ", actual:" + targetIdx);
+		    		String message = "line mismatch, expecting: " + idx + ", actual:" + targetIdx;
+			    	logWarning(message);
 		    		return false;
 		    	}
 		    	tempX[idx] = Float.parseFloat(tokenizer.nextToken());
@@ -125,7 +147,8 @@ public class DriftManager {
 		    }
 			logger.info("last line recorded: " + idx);
 		} catch (FileNotFoundException e) {
-			logger.info(filename + " is not found");
+			String message = filename + " is not found";
+	    	logWarning(message);
 			e.printStackTrace();
 			return false;
 		}
@@ -238,7 +261,8 @@ public class DriftManager {
 	
 	protected void removeCuttingPoint(int sectionIndex) {
 		if (sectionModel.getRowCount() == 1) {
-			logger.info("must have at least 1 section");
+			String message = "There must be at least 1 section";
+	    	logWarning(message);
 			return;
 		}
 		//TODO: when sectionIndex == 0, set to 1?
@@ -391,6 +415,8 @@ public class DriftManager {
 			logger.fine("created: " + filename);
 		} catch (FileNotFoundException  e) {
 			logger.severe("failed to write to " + filename);
+			myWarning.setText("failed to save drift to" + filename + "\n"
+					+ "The specified save location might be invalid, please check.");
 		}
 	}
 

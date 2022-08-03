@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -136,6 +138,20 @@ public class MainFrame extends JFrame {
 	}
 	
 	// model setters to be set by controller, these links data to view
+	public void setWarningModel(TextModel model) {
+		model.addPropertyChangeListener(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				String text = (String) evt.getNewValue();
+				if (text != "") {
+					JOptionPane.showMessageDialog(rootPane, text);
+					TextModel model = (TextModel) evt.getSource();
+					model.setText("");
+				}
+			}
+		});
+	}
+	
 	public void setMovieStateModel(MovieStateModel model) {
 		settingPanel.addMovieStateModelListener(model);
 		imageViewer.addMovieStateModelListener(model);

@@ -17,19 +17,26 @@ public class CheckFileExist extends InterruptableStep {
 	public ImageData run(ImageData input) {
 		if (input == null) {
 			logger.severe("empty input imageData");
+			message = "Something is wrong... Input data is null... Terminating the process";
 			interrupt();
+			logger.severe(message);
 			return input;
 		}
 		String filename = input.getOutputString();
 		if (filename == null) {
-			logger.severe("empty output filename");
+			message = "Something is worng! \n"
+					+ "Output filname for the image " + input.getString() + " is not found.\n"
+					+ "Terminating the process";
 			interrupt();
+			logger.severe(message);
 			return input;
 		}
 		File f = new File(filename);
 		if (!f.isFile()) {
-			logger.severe("file not created: " + filename);
+			message = "Failed to create the output file " + filename + "\n"
+					+ "Terminating the process";
 			interrupt();
+			logger.severe(message);
 		}
 		return input;
 	}

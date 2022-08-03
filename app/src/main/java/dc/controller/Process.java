@@ -30,6 +30,7 @@ public abstract class Process {
 	protected LinkedList<Integer> interruptableStepIndex;
 	protected LinkedList<Integer> outputStepIndex;
 	private BooleanModel interruptionFlag = new BooleanModel();
+	private String message = null;
 	
 	// this flag is used to stop the process. it can be replaced by 
 	// a common flag that is shared with gui.
@@ -51,7 +52,9 @@ public abstract class Process {
 		}
 		for (Integer idx: interruptableStepIndex) {
 			((InterruptableStep) mySteps.get(idx)).setInterruptionFlag(interruptionFlag);
+			((InterruptableStep) mySteps.get(idx)).resetMessage();
 		}
+		message = null;
 		for (Integer idx: outputStepIndex) {
 			((OutputNameStep) mySteps.get(idx)).initialise(outputDir, startingIdx);
 		}
@@ -70,13 +73,19 @@ public abstract class Process {
 	public void run(String inputFileName) {
 		logger.fine("worker thread started");
 		ImageData myData = new ImageData(inputFileName);
-		for (ProcessStep myProcess: mySteps) {
-//			System.out.println(interruptionFlag.get());
+		for (ProcessStep myStep: mySteps) {
+			myData = myStep.run(myData);
+			// interruptionFlag can change in interruptableStep, or due to external interruption
 			if (interruptionFlag.get()) {
 				logger.info("process is interrupted");
+				if (myStep instanceof InterruptableStep) {
+					String message = ((InterruptableStep) myStep).getMessage();
+					if (message != null) {
+						this.message = message;
+					}
+				}		
 				break;
 			}
-			myData = myProcess.run(myData);
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {}
@@ -91,4 +100,7 @@ public abstract class Process {
 	
 	public abstract String getInputType();
 	
+	public String getMessage() {
+		return message;
+	}
 }

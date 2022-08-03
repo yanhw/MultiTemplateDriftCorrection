@@ -35,6 +35,7 @@ public class DriftCorrectionManager {
 	private TextModel saveDirModel;
 	private FileListModel saveFileList;
 	private BoundedRangeModel progress;
+	private TextModel myWarning;
 
 	private int[] prevXDrift;
 	private int[] prevYDrift;
@@ -65,12 +66,23 @@ public class DriftCorrectionManager {
 		this.progress = progress;
 	}
 	
+	protected void setWarningModel(TextModel myWarning) {
+		this.myWarning = myWarning;
+	}
+	
 	protected void setSaveDir(TextModel saveDir) {
 		this.saveDirModel = saveDir;
 	}
 	
 	protected FileListModel getSaveListModel() {
 		return saveFileList;
+	}
+	
+	private void logWarning(String message) {
+		if (myWarning != null) {
+			myWarning.setText(message);
+		}
+		logger.info(message);
 	}
 	
 	protected void init(List<Path> fileList) {
@@ -214,9 +226,7 @@ public class DriftCorrectionManager {
 			}
 		}
 		
-		// clean up and update attributes
-		pool.shutdown();
-		progress.setValue(100);
+		// clean up and update attributes	
 		if (!interruptionFlag.get()) {
 			prevLeft = left;
 			prevRight = right;
@@ -230,7 +240,20 @@ public class DriftCorrectionManager {
 			}
 			saveFileList.setFiles(pathList);
 			logger.info("drift correction master thread finished");
+		} else {
+			String message = null;
+			for (int j = 0; j < numActiveThread; j++) {
+				String processMessage = processPool.get(j).getMessage();
+				if (processMessage != null) {
+					message = processMessage;
+				}
+			}
+			if (message != null) {
+				logWarning(message);
+			}
 		}
+		pool.shutdown();
+		progress.setValue(100);
 	}
 	
 	private List<String> getSaveFileList(String saveDir, int length) {

@@ -47,7 +47,9 @@ public class ImageReader extends InterruptableStep{
 		Mat image = imread(filename,0); //CV_LOAD_IMAGE_GRAYSCALE = 0
 		image.convertTo(image, CV_32F);
 		if (image.empty()) {
-			logger.severe("interrupt the process");
+			message = "failed to read the image " + filename + "\n"
+					+ "Terminating the process. Please check input images.";
+			logger.severe(message);
 			interrupt();
 		}
 		input.setImage(image);
