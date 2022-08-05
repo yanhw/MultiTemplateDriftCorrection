@@ -122,7 +122,7 @@ public class Controller {
 	///////////////////////////// IO state //////////////////////////////
 	/////////////////////////////////////////////////////////////////////
 	
-	public void setSrcDir(String folder) {
+	public void setSrcDir(String folder, String filetype) {
 		if (isBusy) {
 			return;
 		}
@@ -130,7 +130,7 @@ public class Controller {
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 			@Override
 			public Void doInBackground() {	 		
-				myMovie.setSrcDir(folder);
+				myMovie.setSrcDir(folder, filetype);
 				return null;     
 			}
 			@Override
@@ -466,7 +466,7 @@ public class Controller {
 	////////////////////// Drift correction ////////////////////////////
 	/////////////////////////////////////////////////////////////////////
 	
-	public void runDriftCorrection(boolean blurFlag) {
+	public void runDriftCorrection(boolean blurFlag, boolean overwriteFlag) {
 		if (isBusy) {
 			cancelDriftCorrection();
 			return;
@@ -483,7 +483,7 @@ public class Controller {
 		SwingWorker<Void, Void> stoppableWorker = new SwingWorker<Void, Void>() {
 			@Override
 			public Void doInBackground() {
-				myMovie.runDriftCorrection(blurFlag);
+				myMovie.runDriftCorrection(blurFlag, overwriteFlag);
 				return null;
 			}
 			

@@ -8,10 +8,12 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import javax.swing.BoundedRangeModel;
+import javax.swing.ButtonModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JLayer;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -68,6 +70,8 @@ public class SettingPanel extends JPanel {
 		ioLayer = ioPanel.wrapLayer();
 		templateMatchingLayer = templateMatchingPanel.wrapLayer();
 		stepPanel.add(ioLayer);
+		
+		setOverwriteModel();
 	}
 	
 	
@@ -180,7 +184,7 @@ public class SettingPanel extends JPanel {
 		}
 		if (viewState >= state.getValue()) {
 			nextButton.setEnabled(false);
-		} else {
+		} else if (viewState != MovieStateModel.DRIFT_EDIT){
 			nextButton.setEnabled(true);
 		}
 	}
@@ -216,5 +220,12 @@ public class SettingPanel extends JPanel {
 	public void setRunningFlagModel(BooleanModel model) {
 		templateMatchingPanel.setRunningFlagModel(model);
 		driftEditingPanel.setRunningFlagModel(model);
+	}
+	
+	private void setOverwriteModel() {
+		ButtonModel model = new JToggleButton.ToggleButtonModel();
+		model.setSelected(true);
+		ioPanel.setOverwriteModel(model);
+		driftEditingPanel.setOverwriteModel(model);
 	}
 }

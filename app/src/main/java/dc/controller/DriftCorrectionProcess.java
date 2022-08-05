@@ -12,11 +12,13 @@ public class DriftCorrectionProcess extends Process {
 	private dc.step.DriftCorrectionStep driftCorrection;
 	private ComputeFileName outputFileName;
 	private BooleanModel interruptionFlag;
+	private boolean overwriteFlag;
 	private FileHandler fh;
 	
-	public DriftCorrectionProcess(BooleanModel interruptionFlag2) {
+	public DriftCorrectionProcess(BooleanModel interruptionFlag2, boolean overwriteFlag) {
 		super(interruptionFlag2);
 		this.interruptionFlag = interruptionFlag2;
+		this.overwriteFlag = overwriteFlag;
 		//read image
 		addStep(new dc.step.ImageReader("png"));
 		//check dimension
@@ -27,6 +29,10 @@ public class DriftCorrectionProcess extends Process {
 		//compute filename
 		outputFileName = new ComputeFileName();
 		addStep(outputFileName);
+		//if necessary, check overwrite
+		if (!overwriteFlag) {
+			addStep(new CheckFileNotExist());
+		}
 		//save image
 		addStep(new SaveImage());
 		//check image is saved
@@ -44,7 +50,7 @@ public class DriftCorrectionProcess extends Process {
 
 	@Override
 	public Process copy() {
-		DriftCorrectionProcess newProcess = new DriftCorrectionProcess(interruptionFlag);
+		DriftCorrectionProcess newProcess = new DriftCorrectionProcess(interruptionFlag, overwriteFlag);
 		newProcess.setFileHandler(fh);
 		return newProcess;
 	}

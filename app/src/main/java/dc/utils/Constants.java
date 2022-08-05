@@ -5,7 +5,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCOEFF;
 public final class Constants {
 	public static final String CBIS_ROOT_DIR = "/gpfs0/scratch/utkur/";
 	public static final String CBIS_HOME_DIR = "/gpfs0/home/";
-	public static final String[] INPUT_FORMAT = {"dm3", "dm4", "png"};
+	public static final String[] INPUT_FORMAT = {"png", "jpeg", "jpg", "bmp"};
 	public static final String VERSION = "0.2.0";
 	public static final String VERSION_CHECK_FILE = "/gpfs0/home/hongwei/codes/DriftCorrection/curr_version.txt";
 	

@@ -23,6 +23,7 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.ButtonModel;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.InputVerifier;
@@ -50,6 +51,7 @@ public class DriftEditingPanel extends JPanel {
 	private JButton addCuttingPointButton;
 	private JButton removeCuttingPointButton;
 	private JCheckBox fittingBox;
+	private JCheckBox overwriteBox;
 	private JButton runButton;
 	
 	/**
@@ -105,6 +107,10 @@ public class DriftEditingPanel extends JPanel {
 		fittingBox.setToolTipText("if selected, fitted drift will be used for drift correction. Otherwise, raw drift will be used.");
 		buttonPanel.add(fittingBox);
 		
+		overwriteBox = new JCheckBox("overwrite exiting files");
+		overwriteBox.setToolTipText("if selected, existing files in the speficied save directory might be overwrited");
+		buttonPanel.add(overwriteBox);
+		
 		JSeparator separator = new JSeparator();
 		buttonPanel.add(separator);
 		
@@ -147,8 +153,9 @@ public class DriftEditingPanel extends JPanel {
 		runButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				logger.fine("triggered run btn");
-				boolean falg = DriftEditingPanel.this.fittingBox.isSelected();
-				DriftEditingPanel.this.controller.runDriftCorrection(falg);
+				boolean flag = DriftEditingPanel.this.fittingBox.isSelected();
+				boolean overwriteFlag = DriftEditingPanel.this.overwriteBox.isSelected();
+				DriftEditingPanel.this.controller.runDriftCorrection(flag, overwriteFlag);
 			}
 		});
 	}
@@ -301,6 +308,10 @@ public class DriftEditingPanel extends JPanel {
         		}
         	}
         });
+	}
+	
+	protected void setOverwriteModel(ButtonModel model) {
+		overwriteBox.setModel(model);
 	}
 	
 	protected void setPlotSelectionModel(DefaultListSelectionModel model) {

@@ -101,7 +101,7 @@ public class DriftCorrectionManager {
 		prevYDrift = null;
 	}
 	
-	protected void run(float[] xRawDrift, float[] yRawDrift, int[] ROI) {
+	protected void run(float[] xRawDrift, float[] yRawDrift, int[] ROI, boolean overwriteFlag) {
 		String saveDir = saveDirModel.getText();
 		
 		logger.info("DriftCorrection started running...");
@@ -162,7 +162,7 @@ public class DriftCorrectionManager {
 		int numThread = computeThreadSize();
 		
 		// create process pool
-		Process process = new DriftCorrectionProcess(interruptionFlag);
+		Process process = new DriftCorrectionProcess(interruptionFlag, overwriteFlag);
 		process.setFileHandler(fh);
 		List<Process> processPool = new ArrayList<Process>(numThread);
 		for (int i = 0; i < numThread; i++) {

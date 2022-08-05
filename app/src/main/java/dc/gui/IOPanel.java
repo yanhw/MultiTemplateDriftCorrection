@@ -13,7 +13,6 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -26,8 +25,10 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JLayer;
@@ -35,6 +36,7 @@ import javax.swing.JPanel;
 
 import dc.controller.Controller;
 import dc.model.TextModel;
+import dc.utils.Constants;
 
 @SuppressWarnings("serial")
 public class IOPanel extends JPanel {
@@ -45,6 +47,7 @@ public class IOPanel extends JPanel {
 	private JLabel outputFilename;
 	private JButton inputBtn;
 	private JButton outputBtn;
+	private JComboBox<String> typeList;
 	private JCheckBox overwriteBox;
 	private DnDLayerUI layerUI;
 	private JLayer<JPanel> myLayer;
@@ -63,11 +66,6 @@ public class IOPanel extends JPanel {
 		inputPanel.add(inputLabel);
 		inputFilename = new JLabel();
 		inputPanel.add(inputFilename);
-
-		overwriteBox = new JCheckBox("overwrite existing files");
-		overwriteBox.setMnemonic(KeyEvent.VK_O);
-		overwriteBox.setSelected(true);
-		overwriteBox.setEnabled(false);
 		
 		// output
 		JPanel outputPanel = new JPanel();
@@ -80,12 +78,21 @@ public class IOPanel extends JPanel {
 		outputFilename = new JLabel();
 		outputPanel.add(outputFilename);
 		
-		setLayout(new GridLayout(0, 1, 0, 0));
+		// options
+		JPanel optionPanel = new JPanel();
+//		optionPanel.setLayout(new GridLayout(1, 3, 0, 0));
+		optionPanel.add(new JLabel("choose input file type"));
+		typeList = new JComboBox<String>(Constants.INPUT_FORMAT);
+		optionPanel.add(typeList);
+		overwriteBox = new JCheckBox("overwrite existing files");
+		overwriteBox.setToolTipText("if selected, existing files in the speficied save directory might be overwrited");
+		optionPanel.add(overwriteBox);
+		add(overwriteBox);
 		
+		setLayout(new GridLayout(0, 1, 0, 0));
 		add(inputPanel);
 		add(outputPanel);
-		//TODO: overwrite warning
-//		add(overwriteBox);
+		add(optionPanel);
 		
 		layerUI = new DnDLayerUI();
 		myLayer = new JLayer<JPanel>(this, layerUI);
@@ -112,9 +119,18 @@ public class IOPanel extends JPanel {
 		logger.addHandler(fh);
 	}
 	
+	protected void setOverwriteModel(ButtonModel model) {
+		overwriteBox.setModel(model);
+	}
+	
 	protected void setFileNameModels(TextModel inputFileName, TextModel outputFileName) {
 		inputFileName.addPropertyChangeListener(new FileNameListener(this.inputFilename));
 		outputFileName.addPropertyChangeListener(new FileNameListener(this.outputFilename));
+	}
+	
+	private void setSrcDir(String folder) {
+		String filetype = (String) typeList.getSelectedItem();
+		controller.setSrcDir(folder, filetype);
 	}
 	
 	private class FileNameListener implements PropertyChangeListener {
@@ -149,9 +165,8 @@ public class IOPanel extends JPanel {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				
 				String file = fileChooser.getSelectedFile().getPath();
-				
 				// pass to controller for checking and generate output path
-				IOPanel.this.controller.setSrcDir(file);
+				IOPanel.this.setSrcDir(file);
 				
 			}	// end of APPROVAL_OPTION
 		}	// end of method
@@ -238,7 +253,7 @@ public class IOPanel extends JPanel {
 	                    	File file = (File) value;
 	                        String name = file.getPath();
 	                        if (file.isDirectory()) {
-	                        	IOPanel.this.controller.setSrcDir(name);
+	                        	IOPanel.this.setSrcDir(name);
 	                        }
                     	}
                     }

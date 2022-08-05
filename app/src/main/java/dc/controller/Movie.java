@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import javax.swing.BoundedRangeModel;
 
 import dc.model.*;
+import dc.utils.Constants;
 import dc.utils.FileSystem;
 
 /*
@@ -147,24 +148,35 @@ public class Movie {
 	///////////////////////////// IO state //////////////////////////////
 	/////////////////////////////////////////////////////////////////////
 	
-	protected void setSrcDir(String folder) {
-		List<Path> fileList = FileSystem.getFiles(Paths.get(folder), ".png");
+	protected void setSrcDir(String folder, String filetype) {
+		boolean flag = false;
+		for (int i = 0; i < Constants.INPUT_FORMAT.length; i++) {
+			if (Constants.INPUT_FORMAT[i].equals(filetype)) {
+				flag = true;
+			}
+		}
+		if (!flag) {
+			logger.severe("invalid filetype :" + filetype);
+			return;
+		}
+		filetype = "." + filetype;
+		List<Path> fileList = FileSystem.getFiles(Paths.get(folder), filetype);
 		if (fileList == null) {
 			logWarning("invalid inputDir :" + folder);
 			return;
 		}
 		if (fileList.isEmpty()) {
-			logWarning("no image files found in :" + folder);
+			logWarning("no image files of type " + filetype + " found in :" + folder);
 			return;
 		}
 		if (fileList.size() < 2) {
-			logWarning("input folder must have at least 2 images");
+			logWarning("input folder must have at least 2 images of type " + filetype);
 			return;
 		}
 		logger.fine("setting new folder and init the movie");
 		this.fileList.setFiles(fileList);
 		inputDir.setText(folder);
-
+		
 		// note: initialise variables here, not in constructor, because the movie can change
 		templateMatching.init(fileList);
 		driftManager.init(fileList.size());	
@@ -318,7 +330,7 @@ public class Movie {
 		return false;
 	}
 
-	protected void runDriftCorrection(boolean blurFlag) {
+	protected void runDriftCorrection(boolean blurFlag, boolean overwriteFlag) {
 		assert fileList.getSize() > 0;
 		// TODO: customise ROI for output images
 		String filename = fileList.getElementAt(0).toString();
@@ -329,9 +341,9 @@ public class Movie {
 		ROI[2] = 0;
 		ROI[3] = image[0].length;
 		if (blurFlag) {
-			driftCorrection.run(getXFittedDrift(), getYFittedDrift(), ROI);
+			driftCorrection.run(getXFittedDrift(), getYFittedDrift(), ROI, overwriteFlag);
 		} else {
-			driftCorrection.run(getXDrift(), getYDrift(), ROI);
+			driftCorrection.run(getXDrift(), getYDrift(), ROI, overwriteFlag);
 		}
 	}
 
