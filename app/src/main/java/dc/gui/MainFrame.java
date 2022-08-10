@@ -3,10 +3,9 @@ package dc.gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,9 +13,6 @@ import java.util.logging.Logger;
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -42,14 +38,10 @@ public class MainFrame extends JFrame {
 	private final StatusPanel statusPanel = new StatusPanel(0);
 	private final JSplitPane splitPane = new JSplitPane();
 	private final SettingPanel settingPanel = new SettingPanel();
-	private final JMenuBar menuBar = new JMenuBar();
-	private final JMenu helpMenu = new JMenu("Help");
-	private final JMenuItem howToItem = new JMenuItem("How to use");
 	private final RawImageViewer rawImageViewer = new RawImageViewer();
 	private final ImageViewer imageViewer = new ImageViewer();
-	private final JMenu projectMenu = new JMenu("Project");
-	private final JMenuItem advancedSettingItem = new JMenuItem("Advanced Setting...");
-	private final JMenuItem clearAllItem = new JMenuItem("Clear All");
+	private final DCMenuBar menuBar = new DCMenuBar();
+	
 
 	/**
 	 * Launch the application.
@@ -81,15 +73,6 @@ public class MainFrame extends JFrame {
 		
 		setJMenuBar(menuBar);
 		
-		menuBar.add(projectMenu);
-		
-		projectMenu.add(clearAllItem);
-		
-		projectMenu.add(advancedSettingItem);
-		
-		menuBar.add(helpMenu);
-		
-		helpMenu.add(howToItem);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -121,18 +104,8 @@ public class MainFrame extends JFrame {
 		addROIListener();
 		
 		settingPanel.setController(controller);
+		menuBar.setController(controller, rootPane);
 		controller.setMainFrame(this);
-		
-		clearAllItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int reply = JOptionPane.showOptionDialog(rootPane, "Clear current session? All unsaved data will be lost!",
-						"Clear Session", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
-						null, null, null);
-				if (reply == JOptionPane.OK_OPTION) {
-					controller.clearSession();
-				}
-			}
-		});
 		
 		this.setVisible(true);
 	}
@@ -193,6 +166,12 @@ public class MainFrame extends JFrame {
 		settingPanel.setRunningFlagModel(model);
 	}
 	
+	public void setDefaultParameters(AtomicInteger gaussianKernel, AtomicInteger gaussianInteration, AtomicInteger templateMatchingMethod,
+			AtomicInteger maxThreads, AtomicInteger maxDegree) {
+		menuBar.setDefaultParameters(gaussianKernel, gaussianInteration, templateMatchingMethod, maxThreads, maxDegree);
+		settingPanel.setMaxDegree(maxDegree);
+	}
+	
 	
 	// model setters between view components, these sync view
 	private void addRawFrameChangeListener() {
@@ -213,5 +192,6 @@ public class MainFrame extends JFrame {
 		settingPanel.setROIModel(rawImageViewer.getROI());
 		statusPanel.setROIModel(rawImageViewer.getROI());
 	}
+
 	
 }

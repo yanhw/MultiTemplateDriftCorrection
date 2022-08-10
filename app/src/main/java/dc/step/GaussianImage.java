@@ -34,6 +34,11 @@ public class GaussianImage extends SimpleProcessStep {
 		logger.addHandler(fh);
 	}
 	
+	public void init(int kernel, int iteration) {
+		this.kernel = kernel;
+		this.iteration = iteration;
+	}
+	
 	public ImageData run(ImageData myImage) {
 		
 		if (myImage == null) {
@@ -56,21 +61,9 @@ public class GaussianImage extends SimpleProcessStep {
 			GaussianBlur(input, output, new Size(kernel, kernel), 0);
 			input = output;
 		}
-		
 	}
 	
-	public String getName() {
-		return name + " kernel: " + kernel + " iteration: " + iteration;
-	}
-
-
-	@Override
-	public ProcessStep copy() {
-		return new GaussianImage(kernel, iteration);
-	}
-
-	// 
-	public void gaussian(double[][] image, int i, int j) {
+	public void gaussian(double[][] image, int kernel, int iteration) {
 		int tRow = image.length;
 		int tCol = image[0].length;
 		Mat input = new Mat(tRow, tCol, CV_32F);
@@ -81,12 +74,30 @@ public class GaussianImage extends SimpleProcessStep {
 			}
 		}
 		Mat output = new Mat(tRow, tCol, CV_32F);
-		gaussian(input, output, kernel, 1);
+		gaussian(input, output, kernel, iteration);
 		FloatRawIndexer sI = output.createIndexer();
 		for (int r = 0; r < tRow; r++) {
 			for (int c = 0; c < tCol; c++) {
 				image[r][c] = sI.get(r,c);
 			}
 		}
+	}
+	
+	public void gaussian(Mat input, Mat output) {
+		gaussian(input, output, kernel, iteration);
+	}
+	
+	public void gaussian(double[][] image) {
+		gaussian(image, kernel, iteration);
+	}
+	
+	public String getName() {
+		return name + " kernel: " + kernel + " iteration: " + iteration;
+	}
+
+
+	@Override
+	public ProcessStep copy() {
+		return new GaussianImage(kernel, iteration);
 	}
 }

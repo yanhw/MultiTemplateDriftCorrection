@@ -1,7 +1,5 @@
 package dc.controller;
 
-import static dc.utils.Constants.MAX_WORKER;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -21,6 +20,7 @@ import javax.swing.DefaultBoundedRangeModel;
 import dc.model.BooleanModel;
 import dc.model.FileListModel;
 import dc.model.TextModel;
+import dc.utils.Constants;
 import dc.utils.FileSystem;
 
 public class DriftCorrectionManager {
@@ -30,12 +30,12 @@ public class DriftCorrectionManager {
 	
 	private FileHandler fh;
 	private BooleanModel interruptionFlag;
-	
 	private List<Path> fileList;
 	private TextModel saveDirModel;
 	private FileListModel saveFileList;
 	private BoundedRangeModel progress;
 	private TextModel myWarning;
+	private ImageArrayReader imageReader;
 
 	private int[] prevXDrift;
 	private int[] prevYDrift;
@@ -46,16 +46,19 @@ public class DriftCorrectionManager {
 //	private int prevROI;
 	
 	private List<Integer> changedList;
+	private AtomicInteger maxThreads = new AtomicInteger(Constants.MAX_WORKER);
 	
 	public DriftCorrectionManager() {
 		saveFileList = new FileListModel();
 		interruptionFlag = new BooleanModel();
 		progress = new DefaultBoundedRangeModel(0,1,0,100);
+		imageReader = new ImageArrayReader("png");
 	}
 	
 	protected void setFileHandler(FileHandler fh) {
 		logger.addHandler(fh);
 		this.fh = fh;
+		imageReader.setFileHandler(fh);
 	}
 	
 	protected void setInterruptionFlag(BooleanModel interrupt) {
@@ -76,6 +79,10 @@ public class DriftCorrectionManager {
 	
 	protected FileListModel getSaveListModel() {
 		return saveFileList;
+	}
+	
+	protected void setDefaultParameters(AtomicInteger maxThreads2) {
+		this.maxThreads = maxThreads2;
 	}
 	
 	private void logWarning(String message) {
@@ -101,7 +108,7 @@ public class DriftCorrectionManager {
 		prevYDrift = null;
 	}
 	
-	protected void run(float[] xRawDrift, float[] yRawDrift, int[] ROI, boolean overwriteFlag) {
+	protected void run(float[] xRawDrift, float[] yRawDrift, boolean overwriteFlag) {
 		String saveDir = saveDirModel.getText();
 		
 		logger.info("DriftCorrection started running...");
@@ -117,6 +124,15 @@ public class DriftCorrectionManager {
 		}
 		
 		List<String> savingList = getSaveFileList(targetFolder, xRawDrift.length);
+		
+		// TODO: customise ROI for output images
+		String filename = fileList.get(0).toString();
+		double[][] image = imageReader.read(filename);
+		int[] ROI = new int[4];
+		ROI[0] = 0;
+		ROI[1] = image.length;
+		ROI[2] = 0;
+		ROI[3] = image[0].length;
 		
 		//  find padding
 		int[] xDrift = toInteger(xRawDrift);
@@ -297,15 +313,14 @@ public class DriftCorrectionManager {
 	// determine the number of threads
 	private int computeThreadSize() {
 		int size = Runtime.getRuntime().availableProcessors();
-		size = Math.min(size, MAX_WORKER);
+		size = Math.min(size, maxThreads.get());
 		return size;
 	}
 
-	public boolean isDone() {
+	protected boolean isDone() {
 		if (saveFileList.getSize() != 0) {
 			return true;
 		}
 		return false;
 	}
-	
 }

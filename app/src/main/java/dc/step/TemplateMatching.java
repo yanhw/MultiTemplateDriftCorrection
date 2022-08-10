@@ -5,8 +5,16 @@ import org.bytedeco.javacpp.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
+
+import dc.utils.Constants;
+
 import org.bytedeco.javacpp.indexer.FloatIndexer;
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_SQDIFF;
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_SQDIFF_NORMED;
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCORR;
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCORR_NORMED;
 import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCOEFF;
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCOEFF_NORMED;
 import static org.bytedeco.opencv.global.opencv_imgproc.matchTemplate;
 import static org.bytedeco.opencv.global.opencv_core.minMaxLoc;
 import static org.bytedeco.opencv.global.opencv_core.CV_32F;
@@ -22,6 +30,8 @@ public class TemplateMatching extends SimpleProcessStep {
 	private Mat template;
 	private List<Integer> rowLoc;
 	private List<Integer> colLoc;
+	private int numMethod = 6;
+	private int method = Constants.DEFAULT_TM_METHOD;
 	
 	public TemplateMatching(double[][] template) {
 		if (template == null) {
@@ -36,6 +46,14 @@ public class TemplateMatching extends SimpleProcessStep {
 	
 	public TemplateMatching(Mat template2) {
 		this.template = template2;
+	}
+	
+	public void init(int method) {
+		if (method < 0 || method >= numMethod) {
+			logger.warning("invalid TM method: " + method);
+			return;
+		}
+		this.method = method;
 	}
 	
 	@Override
@@ -71,15 +89,26 @@ public class TemplateMatching extends SimpleProcessStep {
 		Mat inputImage = input.getImage();
 		Size size = new Size(inputImage.cols()-template.cols()+1, inputImage.rows()-template.rows()+1);
 		Mat result = new Mat(size, CV_32F);
-		matchTemplate(inputImage, template, result, TM_CCOEFF);
+		matchTemplate(inputImage, template, result, method);
 
 		DoublePointer minVal= new DoublePointer();
 		DoublePointer maxVal= new DoublePointer();
 		Point min = new Point();
 		Point max = new Point();
 		minMaxLoc(result, minVal, maxVal, min, max, null);
-		rowLoc.add(max.y());
-		colLoc.add(max.x());
+		switch(method) {
+			case TM_SQDIFF:
+			case TM_SQDIFF_NORMED:
+				rowLoc.add(min.y());
+				colLoc.add(min.x());
+				break;
+			case TM_CCORR:
+			case TM_CCORR_NORMED:
+			case TM_CCOEFF:
+			case TM_CCOEFF_NORMED:
+				rowLoc.add(max.y());
+				colLoc.add(max.x());
+		}
 		
 		logger.info("proc frame: " + rowLoc.size() + ", drift:" + max.x() + " " + max.y());
 		// for debugging

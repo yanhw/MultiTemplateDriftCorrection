@@ -1,5 +1,6 @@
 package dc.gui;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -53,6 +54,8 @@ public class DriftEditingPanel extends JPanel {
 	private JCheckBox fittingBox;
 	private JCheckBox overwriteBox;
 	private JButton runButton;
+
+	private AtomicInteger maxDegree;
 	
 	/**
 	 * Create the panel.
@@ -258,7 +261,7 @@ public class DriftEditingPanel extends JPanel {
 					logger.info("input is not a number: " + text);
 					return false;
 				}
-				if (intValue > 0 && intValue <= DriftSectionModel.MAXFITTINGDEGREE) {
+				if (intValue > 0 && intValue <= maxDegree.intValue()) {
 					 return true;
 				}
 		        return false;
@@ -355,5 +358,9 @@ public class DriftEditingPanel extends JPanel {
 			}
 		}
 		
+	}
+	
+	public void setMaxDegree(AtomicInteger maxDegree2) {
+		this.maxDegree = maxDegree2;
 	}
 }

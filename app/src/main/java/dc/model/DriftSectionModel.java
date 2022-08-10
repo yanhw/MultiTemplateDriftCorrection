@@ -16,8 +16,7 @@ public class DriftSectionModel extends DefaultTableModel {
 	public static final int FIT = 4;	//TODO: fit option for individual section
 	
 	protected static final int DEFAULTFITTINGDEGREE = 5;
-	public static final int MAXFITTINGDEGREE = 25;
-
+	
 	
 	public DriftSectionModel() {
 		addColumn("index");
@@ -132,6 +131,14 @@ public class DriftSectionModel extends DefaultTableModel {
 			return true; 
 		}
 		return false;
+	}
+
+	public void setMaxDegree(int degree) {
+		for (int i=0; i < getRowCount(); i++) {
+			if ((int)getValueAt(i, DEGREE) > degree) {
+				setValueAt(degree, i, DEGREE);
+			}
+		}
 	}
 
 }

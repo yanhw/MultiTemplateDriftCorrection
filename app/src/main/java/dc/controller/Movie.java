@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +23,6 @@ import dc.utils.FileSystem;
 public class Movie {
 	private static final Logger logger = Logger.getLogger(Movie.class.getName());
 	
-	private ImageArrayReader imageReader;
 	private TemplateMatchingManager templateMatching;
 	private DriftManager driftManager;
 	private DriftCorrectionManager driftCorrection;
@@ -32,10 +32,10 @@ public class Movie {
 	private TextModel inputDir;
 	private TextModel saveDir;
 	private TextModel myWarning;
+	private AtomicInteger maxThreads;
 	
 	public Movie() {
 		logger.setLevel(Level.FINE);
-		imageReader = new ImageArrayReader("png");
 		templateMatching = new TemplateMatchingManager();
 		driftManager = new DriftManager();
 		driftCorrection = new DriftCorrectionManager();
@@ -61,7 +61,6 @@ public class Movie {
 	// getters and setters for GUI init
 	protected void setFileHandler(FileHandler fh) {
 		logger.addHandler(fh);
-		imageReader.setFileHandler(fh);
 		templateMatching.setFileHandler(fh);
 		driftManager.setFileHandler(fh);
 		driftCorrection.setFileHandler(fh);
@@ -76,6 +75,23 @@ public class Movie {
 		templateMatching.setWarningModel(myWarning);
 		driftManager.setWarningModel(myWarning);
 		driftCorrection.setWarningModel(myWarning);
+	}
+	
+	protected void setDefaultParameters(AtomicInteger gaussianKernel, AtomicInteger gaussianInteration, AtomicInteger templateMatchingMethod,
+			AtomicInteger maxThreads2, AtomicInteger maxDegree) {
+		this.maxThreads = maxThreads2;
+		templateMatching.setDefaultParameters(gaussianKernel, gaussianInteration, templateMatchingMethod, maxThreads2);
+		driftManager.setDefaultParameters(maxDegree);
+		driftCorrection.setDefaultParameters(maxThreads2);
+	}
+	
+	protected void setMaxWorkerThread(int number) {
+		if (number < 0) {
+			logWarning("Invalid input: " + number + "\n"
+					+ "Number of threads must be a positive integer!\n");
+			return;
+		}
+		maxThreads.set(number);
 	}
 	
 	protected MovieStateModel getMovieStateModel() {
@@ -220,7 +236,15 @@ public class Movie {
 	/////////////////////////////////////////////////////////////////////
 	////////////////////// template matching ////////////////////////////
 	/////////////////////////////////////////////////////////////////////
+	protected void setTMMethod(int method) {
+		templateMatching.setTMMethod(method);
+	}
 
+	protected void setGaussianOption(int size, int iteration) {
+		templateMatching.setGaussianOption(size, iteration);
+	}
+
+	
 	protected void setSegmentFrame(int frameNumber) {
 		templateMatching.setSegmentFrame(frameNumber);
 	}
@@ -230,9 +254,7 @@ public class Movie {
 	}
 	
 	protected boolean setTemplate(int frameNumber, int[] ROI) {
-		String filename = fileList.getElementAt(frameNumber).toString();
-		double[][] image = imageReader.read(filename);
-		Boolean res = templateMatching.setROI(frameNumber, ROI, image);
+		Boolean res = templateMatching.setROI(frameNumber, ROI);
 		return res; 
 	}
 	
@@ -278,6 +300,10 @@ public class Movie {
 	/////////////////////////////////////////////////////////////////////
 	////////////////////// drift editing ////////////////////////////////
 	/////////////////////////////////////////////////////////////////////
+	protected void setMaxFittingDegree(int degree) {
+		driftManager.setMaxDegree(degree);
+	}
+	
 	// setters in this section is for testing and for non GUI mode
 	protected float[] getXDrift() {
 		return driftManager.getXDrift();
@@ -332,18 +358,10 @@ public class Movie {
 
 	protected void runDriftCorrection(boolean blurFlag, boolean overwriteFlag) {
 		assert fileList.getSize() > 0;
-		// TODO: customise ROI for output images
-		String filename = fileList.getElementAt(0).toString();
-		double[][] image = imageReader.read(filename);
-		int[] ROI = new int[4];
-		ROI[0] = 0;
-		ROI[1] = image.length;
-		ROI[2] = 0;
-		ROI[3] = image[0].length;
 		if (blurFlag) {
-			driftCorrection.run(getXFittedDrift(), getYFittedDrift(), ROI, overwriteFlag);
+			driftCorrection.run(getXFittedDrift(), getYFittedDrift(), overwriteFlag);
 		} else {
-			driftCorrection.run(getXDrift(), getYDrift(), ROI, overwriteFlag);
+			driftCorrection.run(getXDrift(), getYDrift(), overwriteFlag);
 		}
 	}
 

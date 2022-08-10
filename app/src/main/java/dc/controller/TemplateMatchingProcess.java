@@ -14,6 +14,7 @@ public class TemplateMatchingProcess extends Process {
 	private FileHandler fh;
 //	private step.TemplateMatching templateMatchingStep;
 	private dc.step.TemplateMatching templateMatchingStep;
+	private GaussianImage gaussianStep;
 	
 	public TemplateMatchingProcess(boolean blur, BooleanModel interruptionFlag2) {
 		super(interruptionFlag2);
@@ -25,7 +26,8 @@ public class TemplateMatchingProcess extends Process {
 		addStep(new CheckDimension());
 		//gaussian blur
 		if (blur) {
-			addStep(new dc.step.GaussianImage(5, 3));
+			gaussianStep = new dc.step.GaussianImage();
+			addStep(gaussianStep);
 		}
 		//template matching
 		templateMatchingStep = new dc.step.TemplateMatching();
@@ -40,8 +42,13 @@ public class TemplateMatchingProcess extends Process {
 		this.fh = fh;
 	}
 	
-	public void setTemplate(double template[][]) {
+	public void initialise(double template[][], int gaussianKernel, 
+			int gaussianIteration, int templateMatchingMethod) {
 		templateMatchingStep.initialise(template);
+		templateMatchingStep.init(templateMatchingMethod);
+		if (blur) {
+			gaussianStep.init(gaussianKernel, gaussianIteration);
+		}
 	}
 	
 	public List<Integer> getXDrift() {

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -209,6 +210,10 @@ public class SettingPanel extends JPanel {
 		driftEditingPanel.setDriftSectionModel(sectionModel);
 	}
 	
+	public void setMaxDegree(AtomicInteger maxDegree) {
+		driftEditingPanel.setMaxDegree(maxDegree);
+	}
+	
 	protected void setRawFrameModel(BoundedRangeModel model) {
 		templateMatchingPanel.setRawFrameModel(model);
 	}
@@ -228,4 +233,5 @@ public class SettingPanel extends JPanel {
 		ioPanel.setOverwriteModel(model);
 		driftEditingPanel.setOverwriteModel(model);
 	}
+
 }

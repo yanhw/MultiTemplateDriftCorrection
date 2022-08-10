@@ -30,8 +30,7 @@ public class TemplateMatchingManagerTest {
 //		String outputFileName = "src/test/resources/test_image/rodImageTestOutput.png";
 		int[] ROI = {320,569,110,359};
 		
-		ImageArrayReader reader = new ImageArrayReader("png");
-		double[][] raw = reader.read(testFileName);
+
 //		double[][] result = reader.read(expectedResultFileName);
 //		System.out.println(result[0][0]);
 		List<Path> fileList = new LinkedList<Path>();
@@ -39,7 +38,7 @@ public class TemplateMatchingManagerTest {
 		fileList.add(Paths.get(testFileName));	// Template matching manager requires at least 2 images
 		myManager.init(fileList);
 		
-		boolean res = myManager.setROI(0, ROI, raw);
+		boolean res = myManager.setROI(0, ROI);
 		assertTrue("fail to set ROI", res);
 		
 //		MovieSegment segment = myManager.getSegment(0);

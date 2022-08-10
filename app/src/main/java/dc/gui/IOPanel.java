@@ -80,6 +80,7 @@ public class IOPanel extends JPanel {
 		
 		// options
 		JPanel optionPanel = new JPanel();
+//		optionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 //		optionPanel.setLayout(new GridLayout(1, 3, 0, 0));
 		optionPanel.add(new JLabel("choose input file type"));
 		typeList = new JComboBox<String>(Constants.INPUT_FORMAT);
@@ -87,7 +88,6 @@ public class IOPanel extends JPanel {
 		overwriteBox = new JCheckBox("overwrite existing files");
 		overwriteBox.setToolTipText("if selected, existing files in the speficied save directory might be overwrited");
 		optionPanel.add(overwriteBox);
-		add(overwriteBox);
 		
 		setLayout(new GridLayout(0, 1, 0, 0));
 		add(inputPanel);

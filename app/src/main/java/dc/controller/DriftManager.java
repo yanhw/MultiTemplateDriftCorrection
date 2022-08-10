@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -17,6 +18,7 @@ import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
 import dc.model.TextModel;
+import dc.utils.Constants;
 import dc.utils.FileSystem;
 
 /* 
@@ -34,6 +36,7 @@ public class DriftManager {
 	private DriftSectionModel sectionModel;
 	private boolean isDriftReady;
 	private TextModel myWarning;
+	private AtomicInteger maxDegree = new AtomicInteger(Constants.MAX_FITTING_DEGREE);
 	
 	public DriftManager() {
 		
@@ -61,6 +64,20 @@ public class DriftManager {
 	
 	protected DriftSectionModel getDriftSectionModel() {
 		return sectionModel;
+	}
+	
+	protected void setDefaultParameters(AtomicInteger maxDegree2) {
+		this.maxDegree = maxDegree2;
+	}
+	
+	public void setMaxDegree(int degree) {
+		if (degree < 0) {
+			logWarning("Invalid input: " + degree + "\n"
+					+ "Fitting degree must be a positive integer!\n");
+			return;
+		}
+		maxDegree.set(degree);
+		sectionModel.setMaxDegree(degree);
 	}
 	
 	private void logWarning(String message) {
@@ -332,7 +349,7 @@ public class DriftManager {
 	// fit a segment
 	private void fitDrift(int degree, int start, int end, int directionOption) {
 		logger.info("fitting drift for segment " + start + " to " + end + " with degree " + degree);
-		assert degree > 0 && degree <= DriftSectionModel.MAXFITTINGDEGREE;
+		assert degree > 0 && degree <= maxDegree.get();
 		assert start >= 0 && start < end && end < driftModel.getRowCount();
 		assert directionOption == FITX || directionOption == FITY || directionOption == FITBOTH;
 		
@@ -423,7 +440,5 @@ public class DriftManager {
 	public boolean isDriftReady() {
 		return isDriftReady;
 	}
-	
-	
 
 }

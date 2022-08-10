@@ -3,6 +3,7 @@ package dc.controller;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +19,7 @@ import dc.model.BooleanModel;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
 import dc.model.TextModel;
+import dc.utils.Constants;
 
 /*
  * This class receives request from gui, and passes it to Movie class. Thread management is handled here. Other classes in this package can be assumed to be
@@ -75,6 +77,14 @@ public class Controller {
 		mainFrame.setStatusModel(myStatus);
 		mainFrame.setWarningModel(myWarning);
 		mainFrame.setRunningFlagModel(runningFlag);
+		
+		AtomicInteger gaussianKernel = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_KERNEL);
+		AtomicInteger gaussianInteration = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_ITERATION);
+		AtomicInteger templateMatchingMethod = new AtomicInteger(Constants.DEFAULT_TM_METHOD);
+		AtomicInteger maxThreads = new AtomicInteger(Constants.MAX_WORKER);
+		AtomicInteger maxDegree = new AtomicInteger(Constants.MAX_FITTING_DEGREE);
+		myMovie.setDefaultParameters(gaussianKernel, gaussianInteration, templateMatchingMethod, maxThreads, maxDegree);
+		mainFrame.setDefaultParameters(gaussianKernel, gaussianInteration, templateMatchingMethod, maxThreads, maxDegree);
 	}
 	
 	public void clearSession() {
@@ -112,11 +122,39 @@ public class Controller {
 		
 	}
 	
-	public void setMaxNumThread() {
-		
+	public void setMaxWorkerThread(int number) {
+		myMovie.setMaxWorkerThread(number);
 	}
 	
-//	public void set
+	public void setGaussianKernel(int size, int iteration) {
+		if (isBusy) {
+			myStatus.setText("the program is busy, no change is made, please for current process to finish");
+			return;
+		}
+		block("changing setting for gaussian parameter...");
+		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+			@Override
+			public Void doInBackground() {	 		
+				myMovie.setGaussianOption(size, iteration);
+				return null;     
+			}
+			@Override
+			public void done() {
+				myStatus.setText("");
+				release();
+			}
+		};
+		worker.execute();
+	}
+	
+	public void setTMMethod(int method) {
+		myMovie.setTMMethod(method);
+	}
+	
+	public void setMaxFittingDegree(int degree) {
+		myMovie.setMaxFittingDegree(degree);
+	}
+
 	
 	/////////////////////////////////////////////////////////////////////
 	///////////////////////////// IO state //////////////////////////////

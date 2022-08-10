@@ -1,7 +1,5 @@
 package dc.controller;
 
-import static dc.utils.Constants.MAX_WORKER;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -22,6 +21,7 @@ import dc.model.BooleanModel;
 import dc.model.TemplateMatchingSegmentModel;
 import dc.model.TextModel;
 import dc.step.GaussianImage;
+import dc.utils.Constants;
 
 public class TemplateMatchingManager {
 	private static final Logger logger = Logger.getLogger(TemplateMatchingManager.class.getName());
@@ -40,14 +40,23 @@ public class TemplateMatchingManager {
 	private List<Path> fileList;
 	private TemplateMatchingSegmentModel model;
 	private GaussianImage gaussianFilter;
+	private ImageArrayReader imageReader;
+	
+	private AtomicInteger gaussianKernel = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_KERNEL);
+	private AtomicInteger gaussianIteration = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_ITERATION);
+	private AtomicInteger templateMatchingMethod = new AtomicInteger(Constants.DEFAULT_TM_METHOD);
+	private AtomicInteger maxThreads = new AtomicInteger(Constants.MAX_WORKER);
 	
 	protected float[] tempXDrift;
 	protected float[] tempYDrift;
 	//TODO monitor the changes and template match only changed sections
+
+	
 	
 	
 	public TemplateMatchingManager() {
-		this.gaussianFilter = new GaussianImage(5,3);
+		gaussianFilter = new GaussianImage(gaussianKernel.get(),gaussianIteration.get());
+		imageReader = new ImageArrayReader("png");
 		interruptionFlag = new BooleanModel();
 		progress = new DefaultBoundedRangeModel(0,1,0,100);
 	}
@@ -56,6 +65,7 @@ public class TemplateMatchingManager {
 		this.fh = fh;
 		logger.addHandler(fh);
 		gaussianFilter.setFileHandler(fh);
+		imageReader.setFileHandler(fh);
 	}
 
 	protected void setInterruptionFlag(BooleanModel interrupt) {
@@ -76,6 +86,50 @@ public class TemplateMatchingManager {
 	
 	protected TemplateMatchingSegmentModel getTableModel() {
 		return model;
+	}
+	
+	protected void setDefaultParameters(AtomicInteger gaussianKernel2, AtomicInteger gaussianInteration,
+			AtomicInteger templateMatchingMethod2, AtomicInteger maxThreads2) {
+		this.gaussianKernel = gaussianKernel2;
+		this.gaussianIteration = gaussianInteration;
+		this.templateMatchingMethod = templateMatchingMethod2;
+		this.maxThreads = maxThreads2;
+	}
+	
+	protected void setGaussianOption(int size, int iteration) {
+		if (size <= 0 || iteration <= 0 || size%2 == 0) {
+			logger.info(size + " " + iteration);
+			logWarning("Invalid input!\n"
+					+ "Number of iterations must be a positive integer!\n"
+					+ "Guassian kernel size must be an odd positive integer!");
+		}
+		gaussianFilter.init(size, iteration);
+		if (size != gaussianKernel.get() || iteration != gaussianIteration.get()) {
+			revalidateFilteredImages(size, iteration);
+		}
+		gaussianKernel.set(size);
+		gaussianIteration.set(iteration);	
+	}
+	
+	private void revalidateFilteredImages(int size, int iteration) {
+		for (int i = 0; i < model.getRowCount(); i++) {
+			if ((boolean) model.getValueAt(i, TemplateMatchingSegmentModel.HAS_TEMPLATE_IDX)) {
+				int frameNumber = (Integer)model.getValueAt(i, TemplateMatchingSegmentModel.KEY_IDX);
+				int[] ROI = {(Integer)model.getValueAt(i, TemplateMatchingSegmentModel.TOP),
+						(Integer)model.getValueAt(i, TemplateMatchingSegmentModel.BOTTOM),
+						(Integer)model.getValueAt(i, TemplateMatchingSegmentModel.LEFT),
+						(Integer)model.getValueAt(i, TemplateMatchingSegmentModel.RIGHT)};
+						setROI(frameNumber, ROI);
+			}
+		}
+	}
+
+	protected void setTMMethod(int method) {
+		if (method < 0 || method >= Constants.TM_METHOD_LIST.length) {
+			logger.warning("invalid method: " + method);
+			return;
+		}
+		templateMatchingMethod.set(method);
 	}
 	
 	private void logWarning(String message) {
@@ -120,18 +174,13 @@ public class TemplateMatchingManager {
 	 * is the only segment. (see getSegment method)
 	 * 
 	 */
-	protected boolean setROI(int frameNumber, int ROI[], double[][] image) {
+	protected boolean setROI(int frameNumber, int ROI[]) {
 		if (frameNumber < 0) {
 			logger.warning("invalid frameNumber: " + frameNumber);
 			return false;
 		}
 		if (frameNumber >= fileList.size()-1) {
 			logger.warning("invalid frameNumber: " + frameNumber);
-			return false;
-		}
-		
-		if (image == null) {
-			logger.info("null image");
 			return false;
 		}
 		if (ROI.length != 4) {
@@ -144,6 +193,14 @@ public class TemplateMatchingManager {
 		}
 		if (ROI[TOP] < 0 || ROI[LEFT] < 0) {
 			logger.warning("ROI is not valid: " + ROI);
+			return false;
+		}
+		
+		String filename = fileList.get(frameNumber).toString();
+		double[][] image = imageReader.read(filename);
+		
+		if (image == null) {
+			logger.info("null image");
 			return false;
 		}
 		if (image.length <= ROI[BOTTOM] || image[0].length <= ROI[RIGHT]) {
@@ -159,7 +216,7 @@ public class TemplateMatchingManager {
 				template[i][j] = image[i+ROI[TOP]][j+ROI[LEFT]];
 			}
 		}
-		gaussianFilter.gaussian(image, 5, 3);
+		gaussianFilter.gaussian(image);
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
 				blurredTemplate[i][j] = image[i+ROI[TOP]][j+ROI[LEFT]];
@@ -258,7 +315,7 @@ public class TemplateMatchingManager {
 			}
 			
 			for (int j = 0; j < numActiveThread; j++) {
-				((TemplateMatchingProcess)processPool.get(j)).setTemplate(templates.get(i));
+				((TemplateMatchingProcess)processPool.get(j)).initialise(templates.get(i), gaussianKernel.get(), gaussianIteration.get(), templateMatchingMethod.get());
 				// no saving involved, so not important
 				processPool.get(j).initialise(saveDir, procStartingIdxList[j]);
 			}
@@ -350,8 +407,8 @@ public class TemplateMatchingManager {
 	// determine the number of threads
 	private int computeThreadSize() {
 		int size = Runtime.getRuntime().availableProcessors();
-		size = Math.min(size, MAX_WORKER);
+		size = Math.min(size, maxThreads.get());
 		return size;
 	}
-	
+
 }
