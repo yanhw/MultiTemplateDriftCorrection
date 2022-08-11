@@ -126,15 +126,20 @@ public class SettingPanel extends JPanel {
 		public void stateChanged(ChangeEvent e) {
 			MovieStateModel source = (MovieStateModel) e.getSource();
 			int state = (int)source.getValue();
-			switch (state) {
-				case 0:
-				case 1:
-				case 2:
-					viewState = state;
-					break;
-				case 3:
-					viewState = 2;		// do not have view for model state3
+			// this implementation does not change viewState to higher state
+			if (viewState > state) {
+				viewState = state;
 			}
+			// alternative implementation that automatically change to highest state.
+//			switch (state) {
+//				case 0:
+//				case 1:
+//				case 2:
+//					viewState = state;
+//					break;
+//				case 3:
+//					viewState = 2;		// do not have view for model state3
+//			}
 			updateView();
 			setButtons();
 		}
