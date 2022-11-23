@@ -85,6 +85,13 @@ public class Movie {
 		driftCorrection.setDefaultParameters(maxThreads2);
 	}
 	
+	protected void resetDefaultParameters() {
+		logger.info("reseting parameters to default");
+		templateMatching.resetDefaultParameters();
+		driftManager.resetDefaultParameters();
+		// reset for driftCorrection is done through templateMatching, because they share maxThreads
+	}
+	
 	protected void setMaxWorkerThread(int number) {
 		if (number < 0) {
 			logWarning("Invalid input: " + number + "\n"

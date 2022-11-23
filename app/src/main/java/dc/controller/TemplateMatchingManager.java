@@ -25,33 +25,30 @@ import dc.utils.Constants;
 
 public class TemplateMatchingManager {
 	private static final Logger logger = Logger.getLogger(TemplateMatchingManager.class.getName());
-//	private static final int MAX_SEGMENT = 100;		// upper limit for number of key frames
 	
-	private static final int TOP = 0;
+	private static final int TOP = 0;				// ROI array index
 	private static final int BOTTOM = 1;
 	private static final int LEFT = 2;
 	private static final int RIGHT = 3;
 	
-	private FileHandler fh;
-	private BooleanModel interruptionFlag;
-	private BoundedRangeModel progress;
-	private TextModel myWarning;
+	private FileHandler fh;							// for logging
+	private BooleanModel interruptionFlag;			// flag for stoppableWorker to stop
+	private BoundedRangeModel progress;				// template matching progress
+	private TextModel myWarning;					// pop up window for GUI
 	
-	private List<Path> fileList;
-	private TemplateMatchingSegmentModel model;
-	private GaussianImage gaussianFilter;
-	private ImageArrayReader imageReader;
+	private List<Path> fileList;					// list of input images
+	private TemplateMatchingSegmentModel model;		// records movie segment info
+	private GaussianImage gaussianFilter;			// gaussian filter for ROI recording
+	private ImageArrayReader imageReader;			// image reader for ROI recording
 	
 	private AtomicInteger gaussianKernel = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_KERNEL);
 	private AtomicInteger gaussianIteration = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_ITERATION);
 	private AtomicInteger templateMatchingMethod = new AtomicInteger(Constants.DEFAULT_TM_METHOD);
 	private AtomicInteger maxThreads = new AtomicInteger(Constants.MAX_WORKER);
 	
-	protected float[] tempXDrift;
+	protected float[] tempXDrift;					// detected drift
 	protected float[] tempYDrift;
 	//TODO monitor the changes and template match only changed sections
-
-	
 	
 	
 	public TemplateMatchingManager() {
@@ -94,6 +91,13 @@ public class TemplateMatchingManager {
 		this.gaussianIteration = gaussianInteration;
 		this.templateMatchingMethod = templateMatchingMethod2;
 		this.maxThreads = maxThreads2;
+	}
+	
+	protected void resetDefaultParameters() {
+		this.gaussianKernel.set(Constants.DEFAULT_GAUSSIAN_KERNEL);
+		this.gaussianIteration.set(Constants.DEFAULT_GAUSSIAN_ITERATION);
+		this.templateMatchingMethod.set(Constants.DEFAULT_TM_METHOD);
+		this.maxThreads.set(Constants.MAX_WORKER);
 	}
 	
 	protected void setGaussianOption(int size, int iteration) {

@@ -1,4 +1,6 @@
-# drift correction tool
+# Multi-Template Drift Correction
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 
 This software is developed perform drift correction for image sequences. 
 
@@ -7,18 +9,29 @@ This software is developed perform drift correction for image sequences.
 * jpg/jpeg
 * bmp
 
+### highlights
+* full GUI
+* support multiple templates in one image sequence
+* support Guassian filter to reduce image noise
+* support smoothening to reduce noise in detected noise
+
+### build instruction
+
+This software is built with Gradle.
+
 ### how to use
 Drift correction can be 
-* Overview
-![Structure](./app/src/main/resources/images/Empty Input.png)
+ Overview
+!\[Structure\](./app/src/main/resources/images/Empty Input.png)
+
 1. Menu bar for more setting options
 2. Setting panel for user input. Use ">>" and "<<" buttons to navigate between different steps. ">>" option will becomes enabled once necessary requirements are met.
 3. Input image sequence is displayed here.
 4. Intermediate and final output images are displayed here.
 5. Status panel for useful information.
 
-* Set Input/Output Options
-![Structure](./app/src/main/resources/images/IO Option.png)
+Set Input/Output Options
+![alt text](./app/src/main/resources/images/IO Option.png)
 1. Select the location of input images. Alternatively, user can also drag and drop the folder to the setting panel. There must be at least two files
 2. 
 3. This should be chosen before setting input directory.
@@ -31,10 +44,6 @@ Drift correction can be
 * Drift Editing and Drift Correction
 ![Structure](./app/src/main/resources/images/Drift Editing.png)
 * Advanced Setting
-
-
-### instruction
-compile source code
 
 
 ### dependency

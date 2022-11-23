@@ -3,6 +3,8 @@ package dc.gui;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,6 +22,7 @@ import javax.swing.JRootPane;
 import javax.swing.JTextField;
 
 import dc.controller.Controller;
+import dc.model.BooleanModel;
 import dc.utils.Constants;
 
 @SuppressWarnings("serial")
@@ -35,6 +38,7 @@ public class DCMenuBar extends JMenuBar {
 	private final JMenuItem numThreadMenu = new JMenuItem("Maximun Number of Threads");
 	private final JMenuItem maxDegreeMenu = new JMenuItem("Maximum Fitting Degree");
 	private final JMenuItem clearAllItem = new JMenuItem("Clear All");
+	private final JMenuItem resetAllToDefault = new JMenuItem("Reset All to Default Value");
 	
 	private Controller controller;
 	private JRootPane rootPane;
@@ -53,6 +57,7 @@ public class DCMenuBar extends JMenuBar {
 		advancedSettingMenu.add(templateMatchingMenu);
 		advancedSettingMenu.add(numThreadMenu);
 		advancedSettingMenu.add(maxDegreeMenu);
+		advancedSettingMenu.add(resetAllToDefault);
 		
 		add(helpMenu);
 		helpMenu.add(howToItem);
@@ -190,6 +195,12 @@ public class DCMenuBar extends JMenuBar {
 				}
 			}
 		});
+		
+		resetAllToDefault.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DCMenuBar.this.controller.resetParameter();
+			}
+		});
 	}
 
 	protected void setDefaultParameters(AtomicInteger gaussianKernel2, AtomicInteger gaussianInteration2, AtomicInteger templateMatchingMethod2,
@@ -201,4 +212,26 @@ public class DCMenuBar extends JMenuBar {
 		this.maxDegree = maxDegree2;
 	}
 	
+	private void setEditingEnabled(boolean flag) {
+		clearAllItem.setEnabled(flag);
+		gaussianMenu.setEnabled(flag);
+		templateMatchingMenu.setEnabled(flag);
+		numThreadMenu.setEnabled(flag);
+		maxDegreeMenu.setEnabled(flag);
+		resetAllToDefault.setEnabled(flag);
+	}
+	
+	protected void setRunningFlagModel(BooleanModel model) {
+		model.addPropertyChangeListener(new RunningFlagChangeListener());
+	}
+	
+	private class RunningFlagChangeListener implements PropertyChangeListener {
+
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			boolean flag = (boolean) evt.getNewValue();
+			DCMenuBar.this.setEditingEnabled(!flag);
+		}
+
+	}
 }

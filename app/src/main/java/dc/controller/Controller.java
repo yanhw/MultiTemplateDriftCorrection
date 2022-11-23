@@ -119,7 +119,7 @@ public class Controller {
 	/////////////////////////////////////////////////////////////////////
 	
 	public void resetParameter() {
-		
+		myMovie.resetDefaultParameters();
 	}
 	
 	public void setMaxWorkerThread(int number) {

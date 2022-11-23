@@ -66,8 +66,12 @@ public class DriftManager {
 		return sectionModel;
 	}
 	
-	protected void setDefaultParameters(AtomicInteger maxDegree2) {
-		this.maxDegree = maxDegree2;
+	protected void setDefaultParameters(AtomicInteger maxDegree) {
+		this.maxDegree = maxDegree;
+	}
+	
+	protected void resetDefaultParameters() {
+		maxDegree.set(Constants.MAX_FITTING_DEGREE);
 	}
 	
 	public void setMaxDegree(int degree) {

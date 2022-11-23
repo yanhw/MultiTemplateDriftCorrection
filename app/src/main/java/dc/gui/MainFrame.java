@@ -163,6 +163,7 @@ public class MainFrame extends JFrame {
 	}
 	
 	public void setRunningFlagModel(BooleanModel model) {
+		menuBar.setRunningFlagModel(model);
 		settingPanel.setRunningFlagModel(model);
 	}
 	
