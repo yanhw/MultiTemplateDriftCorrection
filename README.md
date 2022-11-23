@@ -1,5 +1,5 @@
 # Multi-Template Drift Correction
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://https://github.com/yanhw/DriftCorrection/blob/main/README.md)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/yanhw/DriftCorrection/blob/main/LICENSE)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 
 This software is developed perform drift correction for image sequences. 
@@ -22,7 +22,7 @@ This software is built with Gradle.
 ### how to use
 
  Overview
-![overview](./blob/app/src/main/resources/images/Empty Input.png)
+![overview](./app/src/main/resources/images/Empty%20Input.png)
 
 1. Menu bar for more setting options
 2. Setting panel for user input. Use ">>" and "<<" buttons to navigate between different steps. ">>" option will becomes enabled once necessary requirements are met.
@@ -31,7 +31,7 @@ This software is built with Gradle.
 5. Status panel for useful information.
 
 Set Input/Output Options
-![IO step](./app/src/main/resources/images/IO Option.png)
+![IO step](./app/src/main/resources/images/IO%20Option.png)
 1. Select the location of input images. Alternatively, user can also drag and drop the folder to the setting panel. There must be at least two files
 2. 
 3. This should be chosen before setting input directory.
@@ -40,9 +40,9 @@ Set Input/Output Options
 6. Use this panel to adjust magnification level of the image
 7. Use the panel to navigate to different frames of the input image sequence
 * Template Matching
-![TM step](./app/src/main/resources/images/Template Matching.png)
+![TM step](./app/src/main/resources/images/Template%20Matching.png)
 * Drift Editing and Drift Correction
-![Drift Editing](./app/src/main/resources/images/Drift Editing.png)
+![Drift Editing](./app/src/main/resources/images/Drift%20Editing.png)
 * Advanced Setting
 
 
