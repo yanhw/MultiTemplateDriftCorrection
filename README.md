@@ -21,7 +21,7 @@ This software is developed perform drift correction for image sequences.
 This software is built with Gradle.
 
 ### dependency
-* JavCV
+* JavaCV
 * JFreeChart
 * apache commons
 * flatlaf
