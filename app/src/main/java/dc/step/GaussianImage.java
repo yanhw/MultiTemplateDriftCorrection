@@ -52,7 +52,7 @@ public class GaussianImage extends SimpleProcessStep {
 		}
 		Mat out = new Mat();
 		gaussian(inputImage, out, kernel, iteration);
-		
+		myImage.setImage(out);
 		return myImage;
 	}	//end of run()
 	

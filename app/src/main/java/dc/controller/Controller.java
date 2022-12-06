@@ -18,6 +18,7 @@ import dc.gui.MainFrame;
 import dc.model.BooleanModel;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
+import dc.model.DriftUpdateStateModel;
 import dc.model.TextModel;
 import dc.utils.Constants;
 
@@ -35,6 +36,9 @@ public class Controller {
 	
 	private boolean isBusy = false;							// sync lock
 	private BooleanModel interrupt = new BooleanModel();	// flag for stoppableWorker to stop
+	private DriftUpdateStateModel driftUpdateModel = new DriftUpdateStateModel();
+											// sync lock for drift plotting
+											// TODO: change to async version
 	
 	private Movie myMovie;					// data controller
 	private BooleanModel runningFlag;		// flag for buttons that trigger long process
@@ -77,6 +81,7 @@ public class Controller {
 		mainFrame.setStatusModel(myStatus);
 		mainFrame.setWarningModel(myWarning);
 		mainFrame.setRunningFlagModel(runningFlag);
+		mainFrame.setDriftUpdateModel(driftUpdateModel);
 		
 		AtomicInteger gaussianKernel = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_KERNEL);
 		AtomicInteger gaussianInteration = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_ITERATION);
@@ -328,13 +333,15 @@ public class Controller {
 	private void afterTemplateMatching() {
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 			@Override
-			public Void doInBackground() {	 		
+			public Void doInBackground() {	 
+//				driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
 				myMovie.afterTemplateMatching();
 				return null;     
 			}
 			@Override
 			public void done() {
-				myStatus.setText("ready to view drift");
+//				driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+//				myStatus.setText("checking update for drift plot");
 				release();
 			}
 		};
@@ -349,6 +356,7 @@ public class Controller {
 		SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
 			@Override
 			public Boolean doInBackground() {
+//				driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
 				Boolean res = myMovie.setDriftCsv(filename);
 				return res;     
 			}
@@ -370,7 +378,8 @@ public class Controller {
 					release();
 					return;
 				}
-				myStatus.setText("ready to view drift");
+//				driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+//				myStatus.setText("checking update for drift plot");
 				logger.info("finished reading csv");			
 				
 				release();
@@ -383,17 +392,19 @@ public class Controller {
 //	/////////////////////////////////////////////////////////////////////
 //	//////////////////////// edit drift /////////////////////////////////
 //	/////////////////////////////////////////////////////////////////////
-	
+	// note: designed for async update of plot, need to simplify if using sync version
 	private class DriftModelListener implements TableModelListener {
 
 		@Override
 		public void tableChanged(TableModelEvent e) {
+			driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
 //			DriftModel model = (DriftModel)e.getSource();
 			int col = e.getColumn();
 			int direction;
 			switch(col) {
 				case DriftModel.FITTED_DX:
 				case DriftModel.FITTED_DY:
+					driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
 					return;
 				case DriftModel.DX:
 				case DriftModel.WEIGHT_X:
@@ -410,6 +421,7 @@ public class Controller {
 			int end = e.getLastRow();
 			logger.info("drift table changed: " + start + " " + end + " " + direction);
 			fitDrift(start, end, direction);
+			driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
 		}
 		
 	}
@@ -418,7 +430,9 @@ public class Controller {
 
 		@Override
 		public void tableChanged(TableModelEvent e) {
+			driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
 			if (e.getType() == TableModelEvent.DELETE) {
+				driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
 				return;
 			}
 			DriftSectionModel model = (DriftSectionModel)e.getSource();
@@ -430,6 +444,7 @@ public class Controller {
 			int end = (int) model.getValueAt(endRow, DriftSectionModel.END);
 			logger.info("drift section table changed: " + start + " " + end + " " + direction);
 			fitDrift(start, end, direction);
+			driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
 		}
 		
 	}

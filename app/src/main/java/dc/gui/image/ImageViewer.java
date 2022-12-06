@@ -133,5 +133,10 @@ public class ImageViewer extends JPanel {
 		}
 		
 	}
+
+	public void updateDrift() {
+		xDriftPlot.updateDrift();
+		yDriftPlot.updateDrift();
+	}
 	
 }

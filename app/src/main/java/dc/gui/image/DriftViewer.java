@@ -22,6 +22,7 @@ import dc.model.DriftModel;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.LinkedList;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -31,18 +32,22 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 //import javax.swing.UIManager;
 
-
+// Note: changing from async implementation to sync and blocking to improve stability. 
+// TODO: async is probably better.
 //https://zetcode.com/java/jfreechart/
 @SuppressWarnings("serial")
 public class DriftViewer extends JPanel {
 	private static final Logger logger = Logger.getLogger(DriftViewer.class.getName());
 	private XYSeries rawDrift;
 	private XYSeries fittedDrift;
-	
 	private int rawIdx;
 	private int fittedIdx;
 	
 	private DefaultListSelectionModel selection;
+	
+	private boolean isPendingUpdate = false;
+	private LinkedList<Number> pendingDrift = new LinkedList<Number>();
+	private LinkedList<Number> pendingFittedDrift = new LinkedList<Number>();
 	
 	public DriftViewer(String direction) {
 		if (direction.equals("x")) {
@@ -104,63 +109,90 @@ public class DriftViewer extends JPanel {
 	}
 	
 	private class DriftModelListener implements TableModelListener {
-
+		// sync
 		@Override
 		public void tableChanged(TableModelEvent e) {
 			DriftModel model = (DriftModel)e.getSource();
+			int start = 0;
+			int end = model.getRowCount()-1;
 			int col = e.getColumn();
 			if (col == rawIdx || col == TableModelEvent.ALL_COLUMNS) {
-				switch (e.getType()) {
+				isPendingUpdate = true;
+				pendingDrift.clear();
 				
-					case TableModelEvent.INSERT:
-						int start = e.getFirstRow();
-						int end = e.getLastRow();
-						for (int i = start; i <= end; i++) {
-							rawDrift.add((double)i, (Number) model.getValueAt(i, rawIdx));
-						}
-						break;
-					case TableModelEvent.DELETE:
-						rawDrift.clear();
-						break;
-					case TableModelEvent.UPDATE:
-						int start1 = e.getFirstRow();
-						int end1 = e.getLastRow();
-						rawDrift.delete(start1, end1);
-						
-						for (int i = start1; i <= end1; i++) {
-//							rawDrift.remove((Number) i);
-							rawDrift.add((double)i, (Number) model.getValueAt(i, rawIdx));
-						}
-						break;
+				for (int i = start; i <= end; i++) {
+//					logger.info("add " + i + " " + model.getValueAt(i, fittedIdx));
+					pendingDrift.add((Number) model.getValueAt(i, rawIdx));
 				}
 			}
 			if (col == fittedIdx || col == TableModelEvent.ALL_COLUMNS) {
-				switch (e.getType()) {
-					case TableModelEvent.INSERT:
-						int start = e.getFirstRow();
-						int end = e.getLastRow();
-						for (int i = start; i <= end; i++) {
-//							logger.info("add " + i + " " + model.getValueAt(i, fittedIdx));
-							fittedDrift.add(i, (Number) model.getValueAt(i, fittedIdx));
-						}
-						break;
-					case TableModelEvent.DELETE:
-						fittedDrift.clear();
-						break;
-					case TableModelEvent.UPDATE:
-						int start1 = e.getFirstRow();
-						int end1 = e.getLastRow();
-						logger.info("delete " + start1 + " " + end1);
-						fittedDrift.delete(start1, end1);
-						for (int i = start1; i <= end1; i++) {
-//							logger.info("update " + i + " " + model.getValueAt(i, fittedIdx));
-//							fittedDrift.remove((Number) i);
-							fittedDrift.add(i, (Number) model.getValueAt(i, fittedIdx));
-						}
-						break;
+				isPendingUpdate = true;
+				pendingFittedDrift.clear();
+				for (int i = start; i <= end; i++) {
+					pendingFittedDrift.add((Number) model.getValueAt(i, fittedIdx));
 				}
 			}
 		}
+		
+		// async
+//		@Override
+//		public void tableChanged(TableModelEvent e) {
+//			DriftModel model = (DriftModel)e.getSource();
+//			int col = e.getColumn();
+//			if (col == rawIdx || col == TableModelEvent.ALL_COLUMNS) {
+//				switch (e.getType()) {
+//				
+//					case TableModelEvent.INSERT:
+//						int start = e.getFirstRow();
+//						int end = e.getLastRow();
+//						for (int i = start; i <= end; i++) {
+//							rawDrift.add((double)i, (Number) model.getValueAt(i, rawIdx));
+//						}
+//						break;
+//					case TableModelEvent.DELETE:
+//						rawDrift.clear();
+//						break;
+//					case TableModelEvent.UPDATE:
+//						int start1 = e.getFirstRow();
+//						int end1 = e.getLastRow();
+//						rawDrift.delete(start1, end1);
+//						
+//						for (int i = start1; i <= end1; i++) {
+////							rawDrift.remove((Number) i);
+//							rawDrift.add((double)i, (Number) model.getValueAt(i, rawIdx));
+//						}
+//						break;
+//				}
+//			}
+//			if (col == fittedIdx || col == TableModelEvent.ALL_COLUMNS) {
+//				switch (e.getType()) {
+//					case TableModelEvent.INSERT:
+//						int start = e.getFirstRow();
+//						int end = e.getLastRow();
+//						for (int i = start; i <= end; i++) {
+////							logger.info("add " + i + " " + model.getValueAt(i, fittedIdx));
+//							fittedDrift.add(i, (Number) model.getValueAt(i, fittedIdx));
+//						}
+//						break;
+//					case TableModelEvent.DELETE:
+//						fittedDrift.clear();
+//						break;
+//					case TableModelEvent.UPDATE:
+//						int start1 = e.getFirstRow();
+//						int end1 = e.getLastRow();
+//						logger.info("delete " + start1 + " " + end1);
+//						fittedDrift.delete(start1, end1);
+//						for (int i = start1; i <= end1; i++) {
+////							logger.info("update " + i + " " + model.getValueAt(i, fittedIdx));
+////							fittedDrift.remove((Number) i);
+//							fittedDrift.add(i, (Number) model.getValueAt(i, fittedIdx));
+//						}
+//						break;
+//				}
+//			}
+//		}
+		
+		
 		
 	}
 	
@@ -203,5 +235,24 @@ public class DriftViewer extends JPanel {
 	@Deprecated
 	protected XYSeries getFittedDrift() {
 		return fittedDrift;
+	}
+
+	protected void updateDrift() {
+		if (!isPendingUpdate) {
+			return;
+		}
+		if (pendingDrift.size() > 0) {
+			rawDrift.clear();
+			for (int i = 0; i < pendingDrift.size(); i++) {
+				rawDrift.add((double)i, (Number) pendingDrift.get(i));
+			}
+		}
+		if (pendingFittedDrift.size() > 0) {
+			fittedDrift.clear();
+			for (int i = 0; i < pendingFittedDrift.size(); i++) {
+				fittedDrift.add((double)i, (Number) pendingFittedDrift.get(i));
+			}
+		}
+		isPendingUpdate = false;
 	}
 }

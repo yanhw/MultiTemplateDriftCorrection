@@ -16,5 +16,5 @@ public final class Constants {
 	public static final int DEFAULT_GAUSSIAN_KERNEL = 5;
 	public static final int DEFAULT_GAUSSIAN_ITERATION = 3;
 	public static final int MAX_FITTING_DEGREE = 25;
-	public static final String URI = "https://github.com/yanhw/DriftCorrection";
+	public static final String URI = "https://github.com/yanhw/MultiTemplateDriftCorrection/wiki";
 }

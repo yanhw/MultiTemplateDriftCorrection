@@ -17,6 +17,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import dc.controller.Controller;
 import dc.gui.image.ImageViewer;
@@ -24,6 +26,7 @@ import dc.gui.image.RawImageViewer;
 import dc.model.BooleanModel;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
+import dc.model.DriftUpdateStateModel;
 import dc.model.FileListModel;
 import dc.model.MovieStateModel;
 import dc.model.TemplateMatchingSegmentModel;
@@ -194,5 +197,34 @@ public class MainFrame extends JFrame {
 		statusPanel.setROIModel(rawImageViewer.getROI());
 	}
 
-	
+	public void setDriftUpdateModel(DriftUpdateStateModel driftUpdateModel) {
+		driftUpdateModel.addChangeListener(new StateChangeListener());
+	}
+
+	private class StateChangeListener implements ChangeListener{
+		private BlockingPopupDialog myDialog;
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			DriftUpdateStateModel source = (DriftUpdateStateModel) e.getSource();
+			int state = (int)source.getValue();
+			logger.info("drift plot state change: " + state);
+			switch (state) {
+				case DriftUpdateStateModel.OK:
+					break;
+				case DriftUpdateStateModel.UPDATING:
+					myDialog = new BlockingPopupDialog("updating drift information, please wait...");
+					break;
+				case DriftUpdateStateModel.NEED_CHECK:
+					myDialog.updateText("checking update for drift plot, please wait...");
+					imageViewer.updateDrift();
+					myDialog.dispose();
+					revalidate();
+					repaint();
+					source.setValue(DriftUpdateStateModel.OK);
+			}
+				
+			
+		}
+		
+	}
 }
