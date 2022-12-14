@@ -92,11 +92,13 @@ public class DriftManager {
 	}
 	
 	// initialise variables here because the movie can change
+	// MUST init sectionModel before driftModel, see the sectionModel listener in Controller
 	protected void init(int numFrame) {
 		assert (numFrame >= 2);
 		this.isDriftReady = false;
-		driftModel.initData(numFrame);
 		sectionModel.initData(numFrame);
+		driftModel.initData(numFrame);
+		
 	}
 	
 	protected void reset() {

@@ -46,7 +46,7 @@ public class TemplateMatchingSegmentModel extends DefaultTableModel{
 	}
 	
 	public void init(int movieSize) {
-		System.out.println(getMovieSize());
+//		System.out.println(getMovieSize());
 		if (movieSize < 2) {
 			logger.info("invalid movie size: " + movieSize);
 			return;

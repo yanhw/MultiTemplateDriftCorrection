@@ -3,7 +3,7 @@ package dc.utils;
 import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCOEFF;
 
 public final class Constants {
-	public static final String CBIS_ROOT_DIR = "/gpfs0/scratch/utkur/";
+	public static final String CBIS_ROOT_DIR = "/oceanstor/scratch/utkur/hongwei/";
 	public static final String CBIS_HOME_DIR = "/gpfs0/home/";
 	public static final String[] INPUT_FORMAT = {"png", "jpeg", "jpg", "bmp"};
 	public static final String VERSION = "1.0.0";

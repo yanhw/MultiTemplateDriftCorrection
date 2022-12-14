@@ -156,7 +156,7 @@ public class IOPanel extends JPanel {
 				fileChooser.setSelectedFile(new File("G:\\DriftCorrection\\app\\src\\test\\resources\\"));
 			}
 			else {
-				fileChooser.setSelectedFile(new File("/oceanstor/scratch/utkur/hongwei/"));
+				fileChooser.setSelectedFile(new File(Constants.CBIS_ROOT_DIR));
 			}
 			fileChooser.setMultiSelectionEnabled(false);
 			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);

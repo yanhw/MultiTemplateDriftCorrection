@@ -38,7 +38,6 @@ public class Controller {
 	private BooleanModel interrupt = new BooleanModel();	// flag for stoppableWorker to stop
 	private DriftUpdateStateModel driftUpdateModel = new DriftUpdateStateModel();
 											// sync lock for drift plotting
-											// TODO: change to async version
 	
 	private Movie myMovie;					// data controller
 	private BooleanModel runningFlag;		// flag for buttons that trigger long process
@@ -97,7 +96,7 @@ public class Controller {
 		if (runningFlag.get()) {
 			interrupt.set(true);
 		}
-		
+		driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
 		myMovie.reset();
 		
 		interrupt.set(false);
@@ -116,6 +115,9 @@ public class Controller {
 	// should be called when a blocking thread is finished
 	private void release() {
 		isBusy = false;
+		if (driftUpdateModel.getValue() == DriftUpdateStateModel.UPDATING) {
+			driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+		}
 		logger.info("controller is released");
 	}
 	
@@ -295,6 +297,7 @@ public class Controller {
 		}
 		// release only in afterTemplateMatching
 		block("starting template matching...");
+		driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
 		runningFlag.set(true);
 		SwingWorker<Void, Void> stoppableWorker = new SwingWorker<Void, Void>() {
 			
@@ -353,6 +356,7 @@ public class Controller {
 			return;
 		}
 		block("reading drift from file: " + filename);
+		driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
 		SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
 			@Override
 			public Boolean doInBackground() {
@@ -392,19 +396,32 @@ public class Controller {
 //	/////////////////////////////////////////////////////////////////////
 //	//////////////////////// edit drift /////////////////////////////////
 //	/////////////////////////////////////////////////////////////////////
-	// note: designed for async update of plot, need to simplify if using sync version
+	
 	private class DriftModelListener implements TableModelListener {
 
 		@Override
 		public void tableChanged(TableModelEvent e) {
-			driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
+			// do nothing if rows are deleted
+			if (e.getType() == TableModelEvent.DELETE) {
+				return;
+			} 
+			boolean flag = false;
+			if (driftUpdateModel.getValue() == DriftUpdateStateModel.UPDATING) {
+				flag = true;
+			} else {
+				driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
+			}
+			
 //			DriftModel model = (DriftModel)e.getSource();
 			int col = e.getColumn();
 			int direction;
 			switch(col) {
 				case DriftModel.FITTED_DX:
 				case DriftModel.FITTED_DY:
-					driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+					if (!flag) {
+						driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+					}
+					
 					return;
 				case DriftModel.DX:
 				case DriftModel.WEIGHT_X:
@@ -420,8 +437,11 @@ public class Controller {
 			int start = e.getFirstRow();
 			int end = e.getLastRow();
 			logger.info("drift table changed: " + start + " " + end + " " + direction);
-			fitDrift(start, end, direction);
-			driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+			myMovie.fitDrift(start, end, direction);
+			if (!flag) {
+				driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+			}
+			
 		}
 		
 	}
@@ -430,45 +450,41 @@ public class Controller {
 
 		@Override
 		public void tableChanged(TableModelEvent e) {
-			driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
+			boolean flag = false;
+			if (driftUpdateModel.getValue() == DriftUpdateStateModel.UPDATING) {
+				flag = true;
+			} else {
+				driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
+			}
 			if (e.getType() == TableModelEvent.DELETE) {
-				driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+				if (!flag) {
+					driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+				}
 				return;
 			}
 			DriftSectionModel model = (DriftSectionModel)e.getSource();
 			int direction = DriftManager.FITBOTH;
-
 			int startRow = e.getFirstRow();
 			int endRow = e.getLastRow();
+			// when first row is added, this is from init(), don't call fitDrift because DriftModel is not ready
+			if (e.getType() == TableModelEvent.INSERT && endRow == 0) {
+				if (!flag) {
+					driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+				}
+				return;
+			}
+			
 			int start = (int) model.getValueAt(startRow, DriftSectionModel.START);
 			int end = (int) model.getValueAt(endRow, DriftSectionModel.END);
 			logger.info("drift section table changed: " + start + " " + end + " " + direction);
-			fitDrift(start, end, direction);
-			driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+			myMovie.fitDrift(start, end, direction);
+			if (!flag) {
+				driftUpdateModel.setValue(DriftUpdateStateModel.NEED_CHECK);
+			}
 		}
 		
 	}
 	
-	// allowing to run when controller is "blocked"
-	private void fitDrift(int start, int end, int direction) {
-		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-			@Override
-			public Void doInBackground() {
-//				logger.info("fitDrift worker running");
-//				if (myMovie.isDriftReady()) {
-//					return null;
-//				}
-				myMovie.fitDrift(start, end, direction);
-//				logger.info("fitDrift worker finishing");
-				return null;     
-			}
-			@Override
-			public void done() {
-				myStatus.setText("");
-			}
-		};
-		worker.execute();
-	}
 //	
 //	public void removeDrift(int frameNumber) {
 //		if (isBusy) {
@@ -501,17 +517,23 @@ public class Controller {
 //	}
 	
 	public void addCuttingPoint(int frameNumber) {
+		driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
 		if (isBusy) {
 			return;
 		}
+		block("adding cutting point...");
 		myMovie.addCuttingPoint(frameNumber);
+		release();
 	}
 	
 	public void removeCuttingPoint(int sectionIndex) {
+		driftUpdateModel.setValue(DriftUpdateStateModel.UPDATING);
 		if (isBusy) {
 			return;
 		}
+		block("removing cutting point...");
 		myMovie.removeCuttingPoint(sectionIndex);
+		release();
 	}
 
 

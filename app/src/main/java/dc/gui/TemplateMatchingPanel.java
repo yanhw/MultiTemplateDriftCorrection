@@ -44,6 +44,7 @@ import dc.controller.Controller;
 import dc.gui.image.ROIModel;
 import dc.model.BooleanModel;
 import dc.model.TemplateMatchingSegmentModel;
+import dc.utils.Constants;
 
 @SuppressWarnings("serial")
 public class TemplateMatchingPanel extends JPanel {
@@ -204,7 +205,7 @@ public class TemplateMatchingPanel extends JPanel {
 					fileChooser.setSelectedFile(new File("G:\\DriftCorrection\\app\\src\\test\\resources\\"));
 				}
 				else {
-					fileChooser.setSelectedFile(new File("/gpfs0/scratch/utkur/"));
+					fileChooser.setSelectedFile(new File(Constants.CBIS_ROOT_DIR));
 				}
 				fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				fileChooser.setMultiSelectionEnabled(false);
