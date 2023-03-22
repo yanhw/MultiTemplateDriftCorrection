@@ -165,7 +165,6 @@ public class DriftManager {
 		    	}
 		    	tempX[idx] = Float.parseFloat(tokenizer.nextToken());
 		    	tempY[idx] = Float.parseFloat(tokenizer.nextToken());
-		    	//TODO: follow target index
 		    	idx++;
 		    }
 			logger.info("last line recorded: " + idx);
@@ -288,7 +287,6 @@ public class DriftManager {
 	    	logWarning(message);
 			return;
 		}
-		//TODO: when sectionIndex == 0, set to 1?
 		if (sectionIndex <= 0) {
 			logger.info("invalid sectionIndex: " + sectionIndex);
 			return;
@@ -347,13 +345,14 @@ public class DriftManager {
 				continue;
 			}
 			int degree = ((Number) sectionModel.getValueAt(i, DriftSectionModel.DEGREE)).intValue();
-			fitDrift(degree, startFrame, endFrame, directionOption);
+			boolean fitFlag = ((Boolean)sectionModel.getValueAt(i, DriftSectionModel.FIT));
+			fitDrift(degree, startFrame, endFrame, directionOption, fitFlag);
 		}
 	}
 	
 	
 	// fit a segment
-	private void fitDrift(int degree, int start, int end, int directionOption) {
+	private void fitDrift(int degree, int start, int end, int directionOption, boolean fitFlag) {
 		logger.info("fitting drift for segment " + start + " to " + end + " with degree " + degree);
 		assert degree > 0 && degree <= maxDegree.get();
 		assert start >= 0 && start < end && end < driftModel.getRowCount();
@@ -364,7 +363,7 @@ public class DriftManager {
 		if (directionOption == FITX || directionOption == FITBOTH) {
 			float[] xDrift = getXDrift();
 			double[] xWeight = getXWeight();
-			fitted = fitDrift(degree, start, end, xDrift, xWeight);
+			fitted = fitDrift(degree, start, end, xDrift, xWeight, fitFlag);
 			diff = xDrift[start] - fitted[0];		
 			for (int i = start; i <= end; i++) {
 				fitted[i-start] -= diff;
@@ -374,7 +373,7 @@ public class DriftManager {
 		if (directionOption == FITY || directionOption == FITBOTH) {
 			float[] yDrift = getYDrift();
 			double[] yWeight = getYWeight();
-			fitted = fitDrift(degree, start, end, yDrift, yWeight);
+			fitted = fitDrift(degree, start, end, yDrift, yWeight, fitFlag);
 			diff = yDrift[start] - fitted[0];
 			for (int i = start; i <= end; i++) {
 				fitted[i-start] -= diff;
@@ -384,17 +383,23 @@ public class DriftManager {
 	}
 	
 	// fit x or y
-	private double[] fitDrift(int degree, int start, int end, float rawDrift[], double[] weights) {
+	private double[] fitDrift(int degree, int start, int end, float rawDrift[], double[] weights, boolean fitFlag) {
+		double[] fitted = new double[end-start+1];
+		if (!fitFlag) {
+			for (int i = start; i <= end; i++) {
+				fitted[i-start] = rawDrift[i];
+			}
+			return fitted;
+		}
 		Collection<WeightedObservedPoint> points = new ArrayList<>();
 		for (int i = start; i <= end; i++) {
 //			logger.info("" + weights[i]);
 			points.add(new WeightedObservedPoint(weights[i], i, rawDrift[i]));
 		}
-	
+		
 		PolynomialCurveFitter fitter = PolynomialCurveFitter.create(degree);
 		double[] coeff = fitter.fit(points);
-		PolynomialFunction function = new PolynomialFunction(coeff);
-		double[] fitted = new double[end-start+1];
+		PolynomialFunction function = new PolynomialFunction(coeff);	
 		for (int i = start; i <= end; i++) {
 			fitted[i-start] = function.value(i);
 		}

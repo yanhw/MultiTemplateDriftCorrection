@@ -125,7 +125,6 @@ public class DriftCorrectionManager {
 		
 		List<String> savingList = getSaveFileList(targetFolder, xRawDrift.length);
 		
-		// TODO: customise ROI for output images
 		String filename = fileList.get(0).toString();
 		double[][] image = imageReader.read(filename);
 		int[] ROI = new int[4];

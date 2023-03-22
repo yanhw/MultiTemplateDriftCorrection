@@ -241,7 +241,6 @@ public class DriftEditingPanel extends JPanel {
 	
 	protected void setDriftSectionModel(DriftSectionModel sectionModel) {
 		driftSectionTable.setModel(sectionModel);
-		driftSectionTable.removeColumn(driftSectionTable.getColumn("fit"));
 		driftSectionTable.getTableHeader().setReorderingAllowed(false);
 		
 		final InputVerifier iv = new InputVerifier() {

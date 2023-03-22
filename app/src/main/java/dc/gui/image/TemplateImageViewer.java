@@ -67,7 +67,7 @@ public class TemplateImageViewer extends JPanel {
 	}
 	
 	private class SegmentModelListener implements TableModelListener {
-
+		//TODO this is triggered multiple times for setROI(), need to be more selective
 		@Override
 		public void tableChanged(TableModelEvent e) {
 			if (sections.getRowCount() != slider.getFrameNumber()) {

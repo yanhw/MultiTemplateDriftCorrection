@@ -33,7 +33,6 @@ import javax.swing.event.TableModelListener;
 //import javax.swing.UIManager;
 
 // Note: changing from async implementation to sync and blocking to improve stability. 
-// TODO: async is probably better.
 //https://zetcode.com/java/jfreechart/
 @SuppressWarnings("serial")
 public class DriftViewer extends JPanel {

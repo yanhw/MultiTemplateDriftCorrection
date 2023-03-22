@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -20,6 +21,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
 import javax.swing.JTextField;
+import javax.swing.ToolTipManager;
 
 import dc.controller.Controller;
 import dc.model.BooleanModel;
@@ -31,6 +33,7 @@ public class DCMenuBar extends JMenuBar {
 	
 	private final JMenu helpMenu = new JMenu("Help");
 	private final JMenuItem howToItem = new JMenuItem("How to use");
+	private final JCheckBoxMenuItem tooltipItem = new JCheckBoxMenuItem("Show tooltip text");
 	private final JMenu projectMenu = new JMenu("Project");
 	private final JMenu advancedSettingMenu = new JMenu("Advanced Setting");
 	private final JMenuItem gaussianMenu = new JMenuItem("Gaussian Option");
@@ -61,6 +64,14 @@ public class DCMenuBar extends JMenuBar {
 		
 		add(helpMenu);
 		helpMenu.add(howToItem);
+		helpMenu.add(tooltipItem);
+		tooltipItem.setSelected(true);
+		tooltipItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ToolTipManager.sharedInstance().setEnabled(tooltipItem.isSelected());
+			}
+		});
 	}
 
 	protected void setController(Controller controller, JRootPane rootPane) {
@@ -234,4 +245,5 @@ public class DCMenuBar extends JMenuBar {
 		}
 
 	}
+	
 }

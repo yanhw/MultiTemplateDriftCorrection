@@ -262,6 +262,7 @@ public class Controller {
 					e.printStackTrace();
 				} catch (ExecutionException e) {
 					logger.severe("execution exception! failed to set ROI");
+					logger.severe(e.getCause().getMessage());
 					e.printStackTrace();
 				}
 				if (!res) {

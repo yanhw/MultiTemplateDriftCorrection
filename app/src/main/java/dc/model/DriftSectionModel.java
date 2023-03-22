@@ -126,8 +126,7 @@ public class DriftSectionModel extends DefaultTableModel {
 	
 	@Override
 	public boolean isCellEditable(int row, int column) {
-		// only degree can be edited
-		if (column == DEGREE) {
+		if (column == DEGREE || column == FIT) {
 			return true; 
 		}
 		return false;
