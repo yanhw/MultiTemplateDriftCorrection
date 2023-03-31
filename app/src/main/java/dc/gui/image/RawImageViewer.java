@@ -23,6 +23,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import dc.model.FileListModel;
+import dc.model.TextModel;
 
 @SuppressWarnings("serial")
 public class RawImageViewer extends JPanel implements ChangeListener  {
@@ -34,6 +35,7 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
     private Slider movieSlider;
     private ZoomSlider zoomSlider;
 	private ImagePanel imagePanel;
+	private TextModel statusModel;
 	
 	
 	/**
@@ -189,13 +191,21 @@ public class RawImageViewer extends JPanel implements ChangeListener  {
     		imagePanel.updateImage(null);
     		return;
     	}
-    	if (!imagePanel.updateImage(imgList.getElementAt(frameNumber).toString()));
-    	// TODO give feedback for bad image
+    	if (!imagePanel.updateImage(imgList.getElementAt(frameNumber).toString())) {
+    		if (statusModel != null) {
+    			statusModel.setText("failed to open image " + imgList.getElementAt(frameNumber).toString());
+    		}
+    	}
     }
     
     protected void updateZoomLevel(double zoomLevel) {
     	imagePanel.setZoomLevel(zoomLevel);
     	imagePanel.revalidate();
     }
+
+
+	public void setStatusModel(TextModel model) {
+		this.statusModel = model;
+	}
     
 }

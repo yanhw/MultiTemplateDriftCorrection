@@ -37,6 +37,8 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -49,16 +51,28 @@ import dc.utils.Constants;
 @SuppressWarnings("serial")
 public class TemplateMatchingPanel extends JPanel {
 	private static final Logger logger = Logger.getLogger(TemplateMatchingPanel.class.getName());
+	private static final String SET_TEMPLATE_TEXT = "set selected region as template";
+	private static final String CANNOT_SET_TEMPLATE_TEXT = "need to select template by dragging on input image";
+	private static final String REMOVE_TEMPLATE_TEXT = "remove template from the selected segment";
+	private static final String CANNOT_REMOVE_TEMPLATE_TEXT = "no template in the selected segment";
+	private static final String SET_SECTION_TEXT = "set the currently displayed frame as the start of a segment. Each segment uses a different template for template matching";
+	private static final String CANNOT_SET_SECTION_TEXT = "the currently displayed frame is already the first frame of a segment";
+	private static final String REMOVE_SECTION_TEXT = "Remove the selected row as a segment. The removed segment will be merged with previous segment";
+	private static final String CANNOT_REMOVE_SECTION_TEXT = "the first segment cannot be removed";
+	private static final String RUN_TEXT = "click to run template matching";
+	private static final String CANCEL_TEXT = "click to cancel template matching";
+	private static final String CANNOT_RUN_TEXT = "need to set template for all segments before running";
+	
 	private Controller controller;
 	
-	private JTable table;
-	private JButton setTemplateButton;
-	private JButton removeTemplateButton;
-	private JButton setSectionButton;
-	private JButton removeSectionButton;
-	private JCheckBox blurCheckBox;
-	private JButton runButton;
-	private JButton loadDriftButton;
+	private final JTable table = new JTable();
+	private final JButton setTemplateButton = new JButton("Set Template");
+	private final JButton removeTemplateButton = new JButton("Remove Template");
+	private final JButton setSectionButton = new JButton("Set Segment");
+	private final JButton removeSectionButton = new JButton("Remove Segment");
+	private final JCheckBox blurCheckBox = new JCheckBox("Blur Image");
+	private final JButton runButton = new JButton("Run");
+	private final JButton loadDriftButton = new JButton("Load Drift");
 	private DnDLayerUI layerUI;
 	private JLayer<JPanel> myLayer;
 	
@@ -67,8 +81,10 @@ public class TemplateMatchingPanel extends JPanel {
 	private boolean hasROI = false;
 	private int[] ROI = {0,0,0,0};
 	
-	private boolean runningFlag = false;
-	private boolean enableFlag = false;
+	private int selectedRow = 0;			// the selected row in table
+	
+	private boolean runningFlag = false;	// if template matching is already running
+	private boolean enableFlag = false;		// if running condition for template matching is met
 	
 	/**
 	 * Create the panel.
@@ -82,41 +98,37 @@ public class TemplateMatchingPanel extends JPanel {
 		scrollPane.setMaximumSize(new Dimension(400, 250));
 		add(scrollPane);
 		
-		table = new JTable();
 		scrollPane.setViewportView(table);
 		
 		JPanel panel = new JPanel();
 		add(panel, BorderLayout.EAST);
 		panel.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		setTemplateButton = new JButton("Set Template");
-		setTemplateButton.setToolTipText("set selected region as template");
+
+		setTemplateButton.setToolTipText(CANNOT_SET_TEMPLATE_TEXT);
+		setTemplateButton.setEnabled(false);
 		panel.add(setTemplateButton);
-		
-		removeTemplateButton = new JButton("Remove Template");
+
+		removeTemplateButton.setEnabled(false);
+		removeTemplateButton.setToolTipText(CANNOT_REMOVE_TEMPLATE_TEXT);
 		panel.add(removeTemplateButton);
 		
-		setSectionButton = new JButton("Set Section");
-		setSectionButton.setToolTipText("Set the current frame as the start of a section. Each section uses a different template for template matching");
+		setSectionButton.setEnabled(false);
+		setSectionButton.setToolTipText(CANNOT_SET_SECTION_TEXT);
 		panel.add(setSectionButton);
 		
-		removeSectionButton = new JButton("Remove Section");
-		removeSectionButton.setToolTipText("Remove the selected row as a section. The removed section will be merged with previous section");
+		removeSectionButton.setEnabled(false);
+		removeSectionButton.setToolTipText(CANNOT_REMOVE_SECTION_TEXT);
 		panel.add(removeSectionButton);
+
+		panel.add(new JSeparator());
 		
-		JSeparator separator = new JSeparator();
-		panel.add(separator);
-		
-		blurCheckBox = new JCheckBox("Blur Image");
 		blurCheckBox.setToolTipText("use Guassian blur for template matching");
 		panel.add(blurCheckBox);
 		
-		runButton = new JButton("Run");
 		runButton.setEnabled(false);
-		runButton.setToolTipText("Must set template for all sections first!");
+		runButton.setToolTipText(CANNOT_RUN_TEXT);
 		panel.add(runButton);
 		
-		loadDriftButton = new JButton("Load Drift");
 		loadDriftButton.setToolTipText("Load drift infomation from existing csv file. Click to choose file or drag a file here");
 		panel.add(loadDriftButton);
 		
@@ -155,6 +167,7 @@ public class TemplateMatchingPanel extends JPanel {
 		table.getTableHeader().setReorderingAllowed(false);
 		setHandlers();
 		model.addTableModelListener(new DriftTableListener());
+		select.addListSelectionListener(new DriftTableSelectionListener());
 	}
 	
 	private void setHandlers() {
@@ -224,6 +237,100 @@ public class TemplateMatchingPanel extends JPanel {
 		DropTarget dt = new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, new CsvDropTargetListener(), true);
 	}
 	
+	protected void setRawFrameModel(BoundedRangeModel model) {
+		model.addChangeListener(new RawImageListener());
+	}
+	
+	protected void setROIModel(ROIModel model) {
+		model.addPropertyChangeListener(new ROIChangeListener());
+	}
+	
+	public void setRunningFlagModel(BooleanModel model) {
+		model.addPropertyChangeListener(new RunningFlagChangeListener());
+	}
+	
+	private void setSetTemplateBtn() {
+		if (hasROI) {
+			setTemplateButton.setToolTipText(SET_TEMPLATE_TEXT);
+			setTemplateButton.setEnabled(true);
+		} else {
+			setTemplateButton.setToolTipText(CANNOT_SET_TEMPLATE_TEXT);
+			setTemplateButton.setEnabled(false);
+		}
+	}
+	
+
+	private void setRemoveTemplateBtn() {
+		TemplateMatchingSegmentModel model = (TemplateMatchingSegmentModel) table.getModel();
+		// must check the size of model first because the model might be changing
+		if (model.getRowCount() <= selectedRow || (boolean) model.getValueAt(selectedRow, TemplateMatchingSegmentModel.HAS_TEMPLATE_IDX)) {
+			removeTemplateButton.setEnabled(true);
+			removeTemplateButton.setToolTipText(REMOVE_TEMPLATE_TEXT);
+		} else {
+			removeTemplateButton.setEnabled(false);
+			removeTemplateButton.setToolTipText(CANNOT_REMOVE_TEMPLATE_TEXT);
+		}
+	}
+	
+	private void setAddSectionBtn() {
+		boolean flag = true;
+		TemplateMatchingSegmentModel model = (TemplateMatchingSegmentModel) table.getModel();
+		for (int i = 0; i< model.getRowCount(); i++) {
+			if ((int) model.getValueAt(i, TemplateMatchingSegmentModel.START_IDX) == currentFrame) {
+				flag = false;
+				break;
+			}
+		}
+		
+		if (flag) {
+			setSectionButton.setEnabled(true);
+			setSectionButton.setToolTipText(SET_SECTION_TEXT);
+		} else {
+			setSectionButton.setEnabled(false);
+			setSectionButton.setToolTipText(CANNOT_SET_SECTION_TEXT);
+		}
+	}
+
+	private void setRemoveSectionBtn() {
+		if (selectedRow == 0 || selectedRow == -1) {
+			removeSectionButton.setEnabled(false);
+			removeSectionButton.setToolTipText(CANNOT_REMOVE_SECTION_TEXT);
+		} else {
+			removeSectionButton.setEnabled(true);
+			removeSectionButton.setToolTipText(REMOVE_SECTION_TEXT);
+		}
+	}
+	
+	private void setRunBtn() {
+		if (enableFlag) {
+			runButton.setEnabled(true);
+			if (!runningFlag) {
+				runButton.setText("RUN");
+				runButton.setToolTipText(RUN_TEXT);
+			} else {
+				runButton.setText("STOP");
+				runButton.setToolTipText(CANCEL_TEXT);
+			}
+		} else {
+			runButton.setEnabled(false);
+			runButton.setText("RUN");
+			runButton.setToolTipText(CANNOT_RUN_TEXT);
+		}
+	}
+	
+	private class DriftTableSelectionListener implements ListSelectionListener {
+
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			if (e.getValueIsAdjusting()) {
+				return;
+			}
+			int selected = TemplateMatchingPanel.this.table.getSelectedRow();
+			TemplateMatchingPanel.this.selectedRow = selected;
+			TemplateMatchingPanel.this.setRemoveTemplateBtn();
+			TemplateMatchingPanel.this.setRemoveSectionBtn();
+		}
+	}
 	
 	private class DriftTableListener implements TableModelListener {
 
@@ -232,20 +339,21 @@ public class TemplateMatchingPanel extends JPanel {
 			TemplateMatchingSegmentModel model = (TemplateMatchingSegmentModel) table.getModel();
 			for (int i = 0; i< model.getRowCount(); i++) {
 				if (!(boolean) model.getValueAt(i, TemplateMatchingSegmentModel.HAS_TEMPLATE_IDX)) {
-					enableFlag = false;
+					TemplateMatchingPanel.this.enableFlag = false;
 					TemplateMatchingPanel.this.setRunBtn();
+					TemplateMatchingPanel.this.setRemoveTemplateBtn();
+					TemplateMatchingPanel.this.setRemoveSectionBtn();
+					TemplateMatchingPanel.this.setAddSectionBtn();
 					return;
 				}
 			}
-			enableFlag = true;
+			TemplateMatchingPanel.this.enableFlag = true;
 			TemplateMatchingPanel.this.setRunBtn();
+			TemplateMatchingPanel.this.setRemoveTemplateBtn();
+			TemplateMatchingPanel.this.setRemoveSectionBtn();
+			TemplateMatchingPanel.this.setAddSectionBtn();
 		}
 		
-	}
-	
-
-	protected void setRawFrameModel(BoundedRangeModel model) {
-		model.addChangeListener(new RawImageListener());
 	}
 	
 	private class RawImageListener implements ChangeListener {
@@ -254,14 +362,12 @@ public class TemplateMatchingPanel extends JPanel {
 		public void stateChanged(ChangeEvent e) {
 			BoundedRangeModel source = (BoundedRangeModel)e.getSource();
 	        int frameNumber = (int)source.getValue();
-	        currentFrame = frameNumber;
+	        TemplateMatchingPanel.this.currentFrame = frameNumber;
+	        TemplateMatchingPanel.this.setAddSectionBtn();
 		}
 		
 	}
 	
-	public void setROIModel(ROIModel model) {
-		model.addPropertyChangeListener(new ROIChangeListener());
-	}
 	
 	private class ROIChangeListener implements PropertyChangeListener {
 
@@ -276,13 +382,10 @@ public class TemplateMatchingPanel extends JPanel {
 				case ROIModel.FLAG:
 					boolean flag = (boolean) evt.getNewValue();
 					TemplateMatchingPanel.this.hasROI = flag;
+					TemplateMatchingPanel.this.setSetTemplateBtn();
 			}
 		}
 		
-	}
-	
-	public void setRunningFlagModel(BooleanModel model) {
-		model.addPropertyChangeListener(new RunningFlagChangeListener());
 	}
 
 	private class RunningFlagChangeListener implements PropertyChangeListener {
@@ -294,24 +397,6 @@ public class TemplateMatchingPanel extends JPanel {
 			TemplateMatchingPanel.this.setRunBtn();
 		}
 
-	}
-	
-	
-	private void setRunBtn() {
-		if (enableFlag) {
-			runButton.setEnabled(true);
-			if (!runningFlag) {
-				runButton.setText("RUN");
-				runButton.setToolTipText("click to run template matching");
-			} else {
-				runButton.setText("STOP");
-				runButton.setToolTipText("click to cancel template matching");
-			}
-		} else {
-			runButton.setEnabled(false);
-			runButton.setText("RUN");
-			runButton.setToolTipText("need to set template for all segments before running");
-		}
 	}
 
 
@@ -391,4 +476,5 @@ public class TemplateMatchingPanel extends JPanel {
 		}
 		
 	}
+
 }

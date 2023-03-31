@@ -163,22 +163,23 @@ public class SettingPanel extends JPanel {
 		assert viewState <= state.getValue();
 		assert viewState >= 0;
 		// not using switch because switch conditions must be constant
+		logger.info("state: " + state.getValue() + ", viewState: " + viewState);
 		if (viewState == MovieStateModel.INIT) {
 			prevButton.setToolTipText("There is no previous step.");
 			if (state.getValue() > viewState) {
-				nextButton.setToolTipText("must set movie and save locations before continue");
-			} else {
 				nextButton.setToolTipText("ready to set templates");
+			} else {
+				nextButton.setToolTipText("set movie and save locations before continue");
 			}		
 		} else if (viewState == MovieStateModel.TEMPLATE_MATCHING) {
-			prevButton.setToolTipText("Go back to movie setting.");
+			prevButton.setToolTipText("go back to movie setting");
 			if (state.getValue() > viewState) {
-				nextButton.setToolTipText("must perform template matching before continue");
-			} else {
 				nextButton.setToolTipText("ready to view drift");
+			} else {
+				nextButton.setToolTipText("perform template matching or load drift file before continue");
 			}
 		} else if (viewState >= MovieStateModel.DRIFT_EDIT) {
-			prevButton.setToolTipText("Go back to template matching.");
+			prevButton.setToolTipText("go back to template matching");
 			nextButton.setToolTipText("This is the last step.");
 		} else {
 			logger.severe("unknown state: " + viewState);

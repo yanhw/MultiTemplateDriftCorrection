@@ -162,6 +162,7 @@ public class MainFrame extends JFrame {
 	}
 	
 	public void setStatusModel(TextModel model) {
+		rawImageViewer.setStatusModel(model);
 		statusPanel.setTextModel(model);
 	}
 	
@@ -196,7 +197,7 @@ public class MainFrame extends JFrame {
 		settingPanel.setROIModel(rawImageViewer.getROI());
 		statusPanel.setROIModel(rawImageViewer.getROI());
 	}
-
+	
 	public void setDriftUpdateModel(DriftUpdateStateModel driftUpdateModel) {
 		driftUpdateModel.addChangeListener(new StateChangeListener());
 	}

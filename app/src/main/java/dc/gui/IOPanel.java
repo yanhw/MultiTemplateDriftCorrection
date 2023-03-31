@@ -1,7 +1,8 @@
 package dc.gui;
 
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -33,6 +34,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JLayer;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import dc.controller.Controller;
 import dc.model.TextModel;
@@ -41,58 +43,89 @@ import dc.utils.Constants;
 @SuppressWarnings("serial")
 public class IOPanel extends JPanel {
 	private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
+	private static final String NO_FOLDER_TEXT = "no folder is chosen";
+	private static final int FOLDER_FIELD_HEIGHT = 25;
+	private static final int FOLDER_FIELD_WIDTH = 450;
+	
 	private Controller controller;
-	private JFileChooser fileChooser;
-	private JLabel inputFilename;
-	private JLabel outputFilename;
-	private JButton inputBtn;
-	private JButton outputBtn;
-	private JComboBox<String> typeList;
-	private JCheckBox overwriteBox;
+	private final JFileChooser fileChooser = new JFileChooser();
+	private final JTextField inputFilename = new JTextField(NO_FOLDER_TEXT);
+	private final JTextField outputFilename = new JTextField(NO_FOLDER_TEXT);
+	private final JButton inputBtn = new JButton("Browse");
+	private final JButton outputBtn = new JButton("Browse");
+	private final JComboBox<String> typeList = new JComboBox<String>(Constants.INPUT_FORMAT);
+	private final JCheckBox overwriteBox;
 	private DnDLayerUI layerUI;
 	private JLayer<JPanel> myLayer;
 	
 	public IOPanel() {
 		logger.setLevel(Level.FINE);
-		fileChooser = new JFileChooser();
-
+		setLayout(new GridBagLayout());
+		
 		// input
-		JPanel inputPanel = new JPanel();
-		inputPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-		inputBtn = new JButton("choose directory");
-		inputBtn.setToolTipText("choose the image sequence or drag folder here");
-		inputPanel.add(inputBtn);
-		JLabel inputLabel = new JLabel("image directory:", JLabel.LEFT);
-		inputPanel.add(inputLabel);
-		inputFilename = new JLabel();
-		inputPanel.add(inputFilename);
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.LINE_START;
+		JLabel inputLabel = new JLabel("choose input image folder:", JLabel.LEFT);
+		add(inputLabel, c);
+		
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 0;
+		inputFilename.setEnabled(false);
+		inputFilename.setMinimumSize(new Dimension(FOLDER_FIELD_WIDTH,FOLDER_FIELD_HEIGHT));
+		inputFilename.setPreferredSize(new Dimension(FOLDER_FIELD_WIDTH,FOLDER_FIELD_HEIGHT));
+		add(inputFilename, c);
+
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = 0;
+		inputBtn.setToolTipText("browse the input image sequence folder or drag folder here");
+		add(inputBtn, c);
+		
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.LINE_START;
+		JLabel filetypeLabel = new JLabel("choose input file type");
+		add(filetypeLabel, c);
+		
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.LINE_START;
+		add(typeList, c);
 		
 		// output
-		JPanel outputPanel = new JPanel();
-		outputPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-		outputBtn = new JButton("choose directory");
-		outputBtn.setToolTipText("choose the saving location");
-		outputPanel.add(outputBtn);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 2;
+		c.anchor = GridBagConstraints.LINE_START;
 		JLabel outputLabel = new JLabel("output directory:", JLabel.LEFT);
-		outputPanel.add(outputLabel);
-		outputFilename = new JLabel();
-		outputPanel.add(outputFilename);
+		add(outputLabel, c);
 		
-		// options
-		JPanel optionPanel = new JPanel();
-//		optionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-//		optionPanel.setLayout(new GridLayout(1, 3, 0, 0));
-		optionPanel.add(new JLabel("choose input file type"));
-		typeList = new JComboBox<String>(Constants.INPUT_FORMAT);
-		optionPanel.add(typeList);
-		overwriteBox = new JCheckBox("overwrite existing files");
-		overwriteBox.setToolTipText("if selected, existing files in the speficied save directory might be overwrited");
-		optionPanel.add(overwriteBox);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 2;
+		outputFilename.setMinimumSize(new Dimension(FOLDER_FIELD_WIDTH,FOLDER_FIELD_HEIGHT));
+		outputFilename.setPreferredSize(new Dimension(FOLDER_FIELD_WIDTH,FOLDER_FIELD_HEIGHT));
+		outputFilename.setEnabled(false);
+		add(outputFilename, c);
 		
-		setLayout(new GridLayout(0, 1, 0, 0));
-		add(inputPanel);
-		add(outputPanel);
-		add(optionPanel);
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = 2;
+		outputBtn.setToolTipText("choose the saving location");
+		add(outputBtn, c);
+		
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 3;
+		c.anchor = GridBagConstraints.LINE_START;
+		overwriteBox = new JCheckBox("overwrite existing files in output folder");
+		overwriteBox.setToolTipText("if selected, existing files in the speficied save folder might be overwritten");
+		add(overwriteBox, c);
 		
 		layerUI = new DnDLayerUI();
 		myLayer = new JLayer<JPanel>(this, layerUI);
@@ -134,16 +167,20 @@ public class IOPanel extends JPanel {
 	}
 	
 	private class FileNameListener implements PropertyChangeListener {
-		private JLabel label;
+		private JTextField label;
 		
-		public FileNameListener(JLabel label) {
+		public FileNameListener(JTextField label) {
 			this.label = label;
 		}
 
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			String text = (String) evt.getNewValue();
-			label.setText(text);
+			if (text.length()==0) {
+				label.setText(NO_FOLDER_TEXT);
+			} else {
+				label.setText(text);
+			}		
 		}
 	}
 	

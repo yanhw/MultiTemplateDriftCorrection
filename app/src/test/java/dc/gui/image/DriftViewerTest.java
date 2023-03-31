@@ -4,7 +4,7 @@ package dc.gui.image;
 
 import static org.junit.Assert.assertEquals;
 
-import javax.swing.DefaultListSelectionModel;
+//import javax.swing.DefaultListSelectionModel;
 
 import org.jfree.data.xy.XYSeries;
 import org.junit.Before;
@@ -18,7 +18,7 @@ public class DriftViewerTest {
 	
 	private DriftViewer myViewer;
 	private DriftModel myModel;
-	private DefaultListSelectionModel mySelection;
+//	private DefaultListSelectionModel mySelection;
 	private XYSeries rawDrift;
 	private XYSeries fittedDrift;
 	private String direction = "x";
@@ -30,7 +30,7 @@ public class DriftViewerTest {
 		myViewer = new DriftViewer(direction);
 		myModel = new DriftModel();
 		myViewer.setDriftModelListener(myModel);
-		mySelection = myViewer.getSelectionModel();
+//		mySelection = myViewer.getSelectionModel();
 		rawDrift = myViewer.getRawDrift();
 		fittedDrift = myViewer.getFittedDrift();
 	}
@@ -98,11 +98,7 @@ public class DriftViewerTest {
 		checkConsistency();
 	}
 	
-	//TODO
-	public void testSelection() {
-		mySelection.getLeadSelectionIndex();
-	}
-	
+
 	private void checkConsistency() {
 		int movieSize = myModel.getRowCount();
 		int plotSize = rawDrift.getItemCount();

@@ -132,8 +132,9 @@ public class DriftCorrectedImageViewer extends JPanel implements ChangeListener 
 		if (imgList == null || imgList.getSize() == 0) {
 			return;
 		}
-		if (!imagePanel.updateImage(imgList.getElementAt(frameNumber).toString()));
-		// TODO give feedback for bad image
+		if (!imagePanel.updateImage(imgList.getElementAt(frameNumber).toString())) {
+			
+		}
 	}
 	
 	protected void updateZoomLevel(double zoomLevel) {
