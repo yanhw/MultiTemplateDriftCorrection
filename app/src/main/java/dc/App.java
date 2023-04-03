@@ -13,9 +13,11 @@ import static dc.utils.Constants.VERSION;
 import static dc.utils.Constants.VERSION_CHECK_FILE;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.*;
 
@@ -25,8 +27,10 @@ import dc.gui.MainFrame;
 public class App {
 	
 	private static final Logger logger = Logger.getLogger(App.class.getName());
+	public static final String PROP_FILE = "DriftCorrection.settings";
+	public static final Properties prop = new Properties();
 	
-	public App() {
+	public App() {	
 		// check environment
 		String currDir = System.getProperty("user.dir");
 		
@@ -62,6 +66,8 @@ public class App {
 		logger.info("running at: " + currDir);
 		logger.info("number of processors: " + Runtime.getRuntime().availableProcessors());
 		
+		setProperties();
+		
 		// set look and feel
 		try {
 		    UIManager.setLookAndFeel( new FlatLightLaf() );
@@ -73,6 +79,18 @@ public class App {
 		controller.setFileHandler(fh);
 		MainFrame mf = new MainFrame();
 		mf.initialise(controller, fh);
+	}
+	
+	private void setProperties() {
+		try {
+			prop.load(new FileInputStream(PROP_FILE));
+		} catch (FileNotFoundException e) {
+			logger.info("property file not found");
+//			e.printStackTrace();
+		} catch (IOException e) {
+			logger.info("failed to read property file");
+//			e.printStackTrace();
+		}
 	}
 	
 	private String readLatestVersion() {

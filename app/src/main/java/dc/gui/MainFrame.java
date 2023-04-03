@@ -3,8 +3,14 @@ package dc.gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -20,6 +26,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import dc.App;
 import dc.controller.Controller;
 import dc.gui.image.ImageViewer;
 import dc.gui.image.RawImageViewer;
@@ -36,6 +43,15 @@ import dc.model.TextModel;
 public class MainFrame extends JFrame {
 	
 	private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
+	
+	private static final String PROP_WINDOW_WIDTH = "window width";
+	private static final String PROP_WINDOW_HEIGHT = "window height";
+	private static final String PROP_X_LOC = "window x";
+	private static final String PROP_Y_LOC = "window y";
+	private static final int DEFAULT_HEIGHT = 1000;
+	private static final int DEFAULT_WIDTH = 1200;
+	private static final int DEFAULT_X = 100;
+	private static final int DEFAULT_Y = 100;
 	
 	private JPanel contentPane;
 	private final StatusPanel statusPanel = new StatusPanel(0);
@@ -66,13 +82,16 @@ public class MainFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public MainFrame() {
-		int preferedWidth = 1200;
-		int preferedHeight = 1000;
+		int preferedWidth = Integer.parseInt(App.prop.getProperty(PROP_WINDOW_WIDTH, ""+DEFAULT_WIDTH));
+		int preferedHeight = Integer.parseInt(App.prop.getProperty(PROP_WINDOW_HEIGHT, ""+DEFAULT_HEIGHT));
 		setPreferredSize(new Dimension(preferedWidth, preferedHeight));
 		setSize(new Dimension(preferedWidth, preferedHeight));
 		setTitle("Drift Correction");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, preferedWidth, preferedHeight);
+		
+		int window_x = Integer.parseInt(App.prop.getProperty(PROP_X_LOC, ""+DEFAULT_X));
+		int window_y = Integer.parseInt(App.prop.getProperty(PROP_Y_LOC, ""+DEFAULT_Y));
+		setBounds(window_x, window_y, preferedWidth, preferedHeight);
 		
 		setJMenuBar(menuBar);
 		
@@ -92,6 +111,8 @@ public class MainFrame extends JFrame {
 		splitPane.setResizeWeight(0.5);
 		
 		contentPane.add(settingPanel, BorderLayout.NORTH);
+		addComponentListener(new FrameDisplayListener());		
+		addWindowListener(new CloseBtnListener());
 	}
 	
 	public void initialise(Controller controller, FileHandler fh) {
@@ -222,10 +243,51 @@ public class MainFrame extends JFrame {
 					revalidate();
 					repaint();
 					source.setValue(DriftUpdateStateModel.OK);
-			}
-				
-			
+			}	
+		}
+	}
+	
+	private class FrameDisplayListener implements ComponentListener {
+
+		@Override
+		public void componentResized(ComponentEvent e) {
+			int height = MainFrame.this.getHeight();
+			int width = MainFrame.this.getWidth();
+			App.prop.setProperty(PROP_WINDOW_HEIGHT, ""+height);
+			App.prop.setProperty(PROP_WINDOW_WIDTH, ""+width);
+		}
+
+		@Override
+		public void componentMoved(ComponentEvent e) {
+			int x = MainFrame.this.getX();
+			int y = MainFrame.this.getY();
+			App.prop.setProperty(PROP_X_LOC, ""+x);
+			App.prop.setProperty(PROP_Y_LOC, ""+y);
+		}
+
+		@Override
+		public void componentShown(ComponentEvent e) {
+		}
+
+		@Override
+		public void componentHidden(ComponentEvent e) {
 		}
 		
+	}
+	
+	private class CloseBtnListener extends WindowAdapter {
+		@Override
+		public void windowClosing(WindowEvent e){
+			FileOutputStream out;
+			try {
+				out = new FileOutputStream(App.PROP_FILE);
+				App.prop.store(out, "---No Comment---");
+				out.close();
+			} catch (IOException e1) {
+				logger.info("failed to save property file");
+			}
+			
+			e.getWindow().dispose();
+		}
 	}
 }

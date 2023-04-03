@@ -17,3 +17,4 @@ app/src/test/resources/test_movie
 *.temp-*
 
 app/.settings
+*.settings

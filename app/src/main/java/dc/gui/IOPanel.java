@@ -36,6 +36,7 @@ import javax.swing.JLayer;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import dc.App;
 import dc.controller.Controller;
 import dc.model.TextModel;
 import dc.utils.Constants;
@@ -46,6 +47,11 @@ public class IOPanel extends JPanel {
 	private static final String NO_FOLDER_TEXT = "no folder is chosen";
 	private static final int FOLDER_FIELD_HEIGHT = 25;
 	private static final int FOLDER_FIELD_WIDTH = 450;
+	
+	private static final String PROP_TYPE_IDX = "input type index";
+	private static final String PROP_INPUT_FOLDER = "last input folder";
+	private static final String WINDOWS_FOLDER = "G:\\DriftCorrection\\app\\src\\test\\resources\\";
+	public static final String CBIS_ROOT_DIR = "/oceanstor/scratch/utkur/hongwei/";
 	
 	private Controller controller;
 	private final JFileChooser fileChooser = new JFileChooser();
@@ -95,6 +101,9 @@ public class IOPanel extends JPanel {
 		c.gridx = 1;
 		c.gridy = 1;
 		c.anchor = GridBagConstraints.LINE_START;
+		int selectedIdx = Integer.parseInt(App.prop.getProperty(PROP_TYPE_IDX, "0"));
+		typeList.setSelectedIndex(selectedIdx);
+		typeList.addActionListener(new TypeListListener());
 		add(typeList, c);
 		
 		// output
@@ -187,13 +196,9 @@ public class IOPanel extends JPanel {
 	private class InputBtnListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent evt) {
-			// TODO: temp solution, need to change before formal version
-			Path path = Paths.get("G:\\DriftCorrection\\app\\src\\test\\resources\\");
-			if (Files.exists(path)) {
-				fileChooser.setSelectedFile(new File("G:\\DriftCorrection\\app\\src\\test\\resources\\"));
-			}
-			else {
-				fileChooser.setSelectedFile(new File(Constants.CBIS_ROOT_DIR));
+			Path path = setDefaultPath();
+			if (path != null) {
+				fileChooser.setSelectedFile(path.toFile());
 			}
 			fileChooser.setMultiSelectionEnabled(false);
 			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -202,11 +207,32 @@ public class IOPanel extends JPanel {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				
 				String file = fileChooser.getSelectedFile().getPath();
+				App.prop.setProperty(PROP_INPUT_FOLDER, file);
 				// pass to controller for checking and generate output path
 				IOPanel.this.setSrcDir(file);
 				
 			}	// end of APPROVAL_OPTION
 		}	// end of method
+		
+		// customised for our internal system.
+		// for other users, this will default to the same folder as the application
+		// try folder used last time, if not found
+		// try testing folder, if not found
+		// try CBIS home folder, if not found
+		// use current folder
+		private Path setDefaultPath() {
+			Path path =  Paths.get(App.prop.getProperty(PROP_INPUT_FOLDER, WINDOWS_FOLDER));
+			if (Files.exists(path)) {
+				return path;
+			}
+			path = Paths.get(CBIS_ROOT_DIR);
+			if (Files.exists(path)) {
+				App.prop.setProperty(PROP_INPUT_FOLDER, CBIS_ROOT_DIR);
+				return path;
+			}
+			
+			return null;
+		}
 	}	// end of class
 	
 	private class OutputBtnListener implements ActionListener {
@@ -227,6 +253,16 @@ public class IOPanel extends JPanel {
 			}	// end of APPROVAL_OPTION
 		}	// end of method
 	}	// end of class
+	
+	private class TypeListListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			int idx = IOPanel.this.typeList.getSelectedIndex();
+			App.prop.setProperty(PROP_TYPE_IDX, ""+idx);
+		}
+		
+	}
 	
 	private class InputDropTargetListener implements DropTargetListener {
 		

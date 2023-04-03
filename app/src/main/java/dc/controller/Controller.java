@@ -1,6 +1,8 @@
 package dc.controller;
 
 
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCOEFF;
+
 import java.io.File;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,7 +22,6 @@ import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
 import dc.model.DriftUpdateStateModel;
 import dc.model.TextModel;
-import dc.utils.Constants;
 
 /*
  * This class receives request from gui, and passes it to Movie class. Thread management is handled here. Other classes in this package can be assumed to be
@@ -33,6 +34,12 @@ import dc.utils.Constants;
  */
 public class Controller {
 	private static final Logger logger = Logger.getLogger(Controller.class.getName());
+	
+	public static final int DEFAULT_TM_METHOD = TM_CCOEFF;
+	public static final int DEFAULT_GAUSSIAN_KERNEL = 5;
+	public static final int DEFAULT_GAUSSIAN_ITERATION = 3;
+	public static final int MAX_FITTING_DEGREE = 25;
+	public static final int MAX_WORKER = 5;	// maximum number of worker to create. Placed a limit here to avoid exahusting server resource
 	
 	private boolean isBusy = false;							// sync lock
 	private BooleanModel interrupt = new BooleanModel();	// flag for stoppableWorker to stop
@@ -82,11 +89,11 @@ public class Controller {
 		mainFrame.setRunningFlagModel(runningFlag);
 		mainFrame.setDriftUpdateModel(driftUpdateModel);
 		
-		AtomicInteger gaussianKernel = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_KERNEL);
-		AtomicInteger gaussianInteration = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_ITERATION);
-		AtomicInteger templateMatchingMethod = new AtomicInteger(Constants.DEFAULT_TM_METHOD);
-		AtomicInteger maxThreads = new AtomicInteger(Constants.MAX_WORKER);
-		AtomicInteger maxDegree = new AtomicInteger(Constants.MAX_FITTING_DEGREE);
+		AtomicInteger gaussianKernel = new AtomicInteger(DEFAULT_GAUSSIAN_KERNEL);
+		AtomicInteger gaussianInteration = new AtomicInteger(DEFAULT_GAUSSIAN_ITERATION);
+		AtomicInteger templateMatchingMethod = new AtomicInteger(DEFAULT_TM_METHOD);
+		AtomicInteger maxThreads = new AtomicInteger(MAX_WORKER);
+		AtomicInteger maxDegree = new AtomicInteger(MAX_FITTING_DEGREE);
 		myMovie.setDefaultParameters(gaussianKernel, gaussianInteration, templateMatchingMethod, maxThreads, maxDegree);
 		mainFrame.setDefaultParameters(gaussianKernel, gaussianInteration, templateMatchingMethod, maxThreads, maxDegree);
 	}
@@ -124,12 +131,20 @@ public class Controller {
 	/////////////////////////////////////////////////////////////////////
 	/////////////////////// set advanced parameter //////////////////////
 	/////////////////////////////////////////////////////////////////////
-	
+	// these methods need to run on EDT for prop to update in DCMenuBar
 	public void resetParameter() {
+		if (isBusy) {
+			myStatus.setText("the program is busy, no change is made, please for current process to finish");
+			return;
+		}
 		myMovie.resetDefaultParameters();
 	}
 	
 	public void setMaxWorkerThread(int number) {
+		if (isBusy) {
+			myStatus.setText("the program is busy, no change is made, please for current process to finish");
+			return;
+		}
 		myMovie.setMaxWorkerThread(number);
 	}
 	
@@ -138,27 +153,22 @@ public class Controller {
 			myStatus.setText("the program is busy, no change is made, please for current process to finish");
 			return;
 		}
-		block("changing setting for gaussian parameter...");
-		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-			@Override
-			public Void doInBackground() {	 		
-				myMovie.setGaussianOption(size, iteration);
-				return null;     
-			}
-			@Override
-			public void done() {
-				myStatus.setText("");
-				release();
-			}
-		};
-		worker.execute();
+		myMovie.setGaussianOption(size, iteration);
 	}
 	
 	public void setTMMethod(int method) {
+		if (isBusy) {
+			myStatus.setText("the program is busy, no change is made, please for current process to finish");
+			return;
+		}
 		myMovie.setTMMethod(method);
 	}
 	
 	public void setMaxFittingDegree(int degree) {
+		if (isBusy) {
+			myStatus.setText("the program is busy, no change is made, please for current process to finish");
+			return;
+		}
 		myMovie.setMaxFittingDegree(degree);
 	}
 
