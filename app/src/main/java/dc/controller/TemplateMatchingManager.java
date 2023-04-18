@@ -41,10 +41,10 @@ public class TemplateMatchingManager {
 	private GaussianImage gaussianFilter;			// gaussian filter for ROI recording
 	private ImageArrayReader imageReader;			// image reader for ROI recording
 	
-	private AtomicInteger gaussianKernel = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_KERNEL);
-	private AtomicInteger gaussianIteration = new AtomicInteger(Constants.DEFAULT_GAUSSIAN_ITERATION);
-	private AtomicInteger templateMatchingMethod = new AtomicInteger(Constants.DEFAULT_TM_METHOD);
-	private AtomicInteger maxThreads = new AtomicInteger(Constants.MAX_WORKER);
+	private AtomicInteger gaussianKernel = new AtomicInteger(Controller.DEFAULT_GAUSSIAN_KERNEL);
+	private AtomicInteger gaussianIteration = new AtomicInteger(Controller.DEFAULT_GAUSSIAN_ITERATION);
+	private AtomicInteger templateMatchingMethod = new AtomicInteger(Controller.DEFAULT_TM_METHOD);
+	private AtomicInteger maxThreads = new AtomicInteger(Controller.MAX_WORKER);
 	
 	protected float[] tempXDrift;					// detected drift
 	protected float[] tempYDrift;
@@ -94,10 +94,10 @@ public class TemplateMatchingManager {
 	}
 	
 	protected void resetDefaultParameters() {
-		this.gaussianKernel.set(Constants.DEFAULT_GAUSSIAN_KERNEL);
-		this.gaussianIteration.set(Constants.DEFAULT_GAUSSIAN_ITERATION);
-		this.templateMatchingMethod.set(Constants.DEFAULT_TM_METHOD);
-		this.maxThreads.set(Constants.MAX_WORKER);
+		this.gaussianKernel.set(Controller.DEFAULT_GAUSSIAN_KERNEL);
+		this.gaussianIteration.set(Controller.DEFAULT_GAUSSIAN_ITERATION);
+		this.templateMatchingMethod.set(Controller.DEFAULT_TM_METHOD);
+		this.maxThreads.set(Controller.MAX_WORKER);
 	}
 	
 	protected void setGaussianOption(int size, int iteration) {

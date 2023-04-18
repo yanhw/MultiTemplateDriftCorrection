@@ -125,7 +125,7 @@ public class IOPanel extends JPanel {
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = 2;
-		outputBtn.setToolTipText("choose the saving location");
+		outputBtn.setToolTipText("Choose the saving location. Files and folders will be created here");
 		add(outputBtn, c);
 		
 		c = new GridBagConstraints();

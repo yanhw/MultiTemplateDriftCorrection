@@ -20,13 +20,13 @@ import javax.swing.DefaultBoundedRangeModel;
 import dc.model.BooleanModel;
 import dc.model.FileListModel;
 import dc.model.TextModel;
-import dc.utils.Constants;
 import dc.utils.FileSystem;
 
 public class DriftCorrectionManager {
 	private static final Logger logger = Logger.getLogger(DriftCorrectionManager.class.getName());
 	private static final String saveFolderName = "drift_corrected_img";
 	private static final String padString = "000000";		// saved image file names are padded to 6 digits
+	
 	
 	private FileHandler fh;
 	private BooleanModel interruptionFlag;
@@ -46,7 +46,7 @@ public class DriftCorrectionManager {
 //	private int prevROI;
 	
 	private List<Integer> changedList;
-	private AtomicInteger maxThreads = new AtomicInteger(Constants.MAX_WORKER);
+	private AtomicInteger maxThreads = new AtomicInteger(Controller.MAX_WORKER);
 	
 	public DriftCorrectionManager() {
 		saveFileList = new FileListModel();

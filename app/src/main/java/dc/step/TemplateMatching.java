@@ -1,26 +1,27 @@
 package dc.step;
 
+import static org.bytedeco.opencv.global.opencv_core.CV_32F;
+import static org.bytedeco.opencv.global.opencv_core.minMaxLoc;
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCOEFF;
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCOEFF_NORMED;
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCORR;
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCORR_NORMED;
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_SQDIFF;
+import static org.bytedeco.opencv.global.opencv_imgproc.TM_SQDIFF_NORMED;
+import static org.bytedeco.opencv.global.opencv_imgproc.matchTemplate;
+
 import java.util.ArrayList;
-import org.bytedeco.javacpp.*;
+import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+
+import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
 
-import dc.utils.Constants;
-
-import org.bytedeco.javacpp.indexer.FloatIndexer;
-import static org.bytedeco.opencv.global.opencv_imgproc.TM_SQDIFF;
-import static org.bytedeco.opencv.global.opencv_imgproc.TM_SQDIFF_NORMED;
-import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCORR;
-import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCORR_NORMED;
-import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCOEFF;
-import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCOEFF_NORMED;
-import static org.bytedeco.opencv.global.opencv_imgproc.matchTemplate;
-import static org.bytedeco.opencv.global.opencv_core.minMaxLoc;
-import static org.bytedeco.opencv.global.opencv_core.CV_32F;
-import java.util.List;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
+import dc.controller.Controller;
 
 public class TemplateMatching extends SimpleProcessStep {
 	
@@ -31,7 +32,7 @@ public class TemplateMatching extends SimpleProcessStep {
 	private List<Integer> rowLoc;
 	private List<Integer> colLoc;
 	private int numMethod = 6;
-	private int method = Constants.DEFAULT_TM_METHOD;
+	private int method = Controller.DEFAULT_TM_METHOD;
 	
 	public TemplateMatching(double[][] template) {
 		if (template == null) {

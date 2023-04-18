@@ -18,7 +18,6 @@ import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import dc.model.DriftModel;
 import dc.model.DriftSectionModel;
 import dc.model.TextModel;
-import dc.utils.Constants;
 import dc.utils.FileSystem;
 
 /* 
@@ -36,7 +35,7 @@ public class DriftManager {
 	private DriftSectionModel sectionModel;
 	private boolean isDriftReady;
 	private TextModel myWarning;
-	private AtomicInteger maxDegree = new AtomicInteger(Constants.MAX_FITTING_DEGREE);
+	private AtomicInteger maxDegree = new AtomicInteger(Controller.MAX_FITTING_DEGREE);
 	
 	public DriftManager() {
 		
@@ -71,7 +70,7 @@ public class DriftManager {
 	}
 	
 	protected void resetDefaultParameters() {
-		maxDegree.set(Constants.MAX_FITTING_DEGREE);
+		maxDegree.set(Controller.MAX_FITTING_DEGREE);
 	}
 	
 	public void setMaxDegree(int degree) {

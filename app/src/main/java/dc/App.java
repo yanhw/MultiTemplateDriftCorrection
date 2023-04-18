@@ -13,10 +13,13 @@ import static dc.utils.Constants.VERSION;
 import static dc.utils.Constants.VERSION_CHECK_FILE;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.*;
@@ -29,6 +32,7 @@ public class App {
 	private static final Logger logger = Logger.getLogger(App.class.getName());
 	public static final String PROP_FILE = "DriftCorrection.settings";
 	public static final Properties prop = new Properties();
+	public static final String userHome = setHomeDir();
 	
 	public App() {	
 		// check environment
@@ -37,16 +41,12 @@ public class App {
 		FileHandler fh = null;  
 		
 		try {  
-
 			// This block configure the logger with handler and formatter  
 			fh = new FileHandler(currDir + "/DriftCorrection.log");  
 			logger.addHandler(fh);
 			SimpleFormatter formatter = new SimpleFormatter();  
 			fh.setFormatter(formatter);  
-
-			// the following statement is used to log any messages  
 			logger.info("---------------New session----------------");  
-
 		} catch (SecurityException e) {  
 			e.printStackTrace();  
 		} catch (IOException e) {  
@@ -81,9 +81,30 @@ public class App {
 		mf.initialise(controller, fh);
 	}
 	
+	private static String setHomeDir() {
+		String home = System.getProperty("user.home");
+		String systemName = System.getProperty("os.name");
+		String softwareDir = home;
+		if (systemName.startsWith("Windows")) {
+			softwareDir = home + File.separator + "AppData" + File.separator + "Local" + File.separator + "DriftCorrection";
+		}
+		if (Files.isDirectory(Paths.get(softwareDir))) {
+			return softwareDir;
+		} else {
+			try {
+				Files.createDirectory(Paths.get(softwareDir));
+				return softwareDir;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return home;
+	}
+	
 	private void setProperties() {
+//		System.getProperties().list(System.out);
 		try {
-			prop.load(new FileInputStream(PROP_FILE));
+			prop.load(new FileInputStream(userHome+File.separator+PROP_FILE));
 		} catch (FileNotFoundException e) {
 			logger.info("property file not found");
 //			e.printStackTrace();

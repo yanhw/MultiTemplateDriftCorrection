@@ -9,6 +9,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -280,7 +281,7 @@ public class MainFrame extends JFrame {
 		public void windowClosing(WindowEvent e){
 			FileOutputStream out;
 			try {
-				out = new FileOutputStream(App.PROP_FILE);
+				out = new FileOutputStream(App.userHome + File.separator +  App.PROP_FILE);
 				App.prop.store(out, "---No Comment---");
 				out.close();
 			} catch (IOException e1) {

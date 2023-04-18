@@ -41,7 +41,7 @@ public class Controller {
 	public static final int MAX_FITTING_DEGREE = 25;
 	public static final int MAX_WORKER = 5;	// maximum number of worker to create. Placed a limit here to avoid exahusting server resource
 	
-	private boolean isBusy = false;							// sync lock
+	private boolean isBusy = false;							// sync lock for quick process
 	private BooleanModel interrupt = new BooleanModel();	// flag for stoppableWorker to stop
 	private DriftUpdateStateModel driftUpdateModel = new DriftUpdateStateModel();
 											// sync lock for drift plotting
@@ -134,7 +134,7 @@ public class Controller {
 	// these methods need to run on EDT for prop to update in DCMenuBar
 	public void resetParameter() {
 		if (isBusy) {
-			myStatus.setText("the program is busy, no change is made, please for current process to finish");
+			myStatus.setText("the program is busy, no change is made, please wait for current process to finish");
 			return;
 		}
 		myMovie.resetDefaultParameters();
@@ -142,7 +142,7 @@ public class Controller {
 	
 	public void setMaxWorkerThread(int number) {
 		if (isBusy) {
-			myStatus.setText("the program is busy, no change is made, please for current process to finish");
+			myStatus.setText("the program is busy, no change is made, please wait for current process to finish");
 			return;
 		}
 		myMovie.setMaxWorkerThread(number);
@@ -150,7 +150,7 @@ public class Controller {
 	
 	public void setGaussianKernel(int size, int iteration) {
 		if (isBusy) {
-			myStatus.setText("the program is busy, no change is made, please for current process to finish");
+			myStatus.setText("the program is busy, no change is made, please wait for current process to finish");
 			return;
 		}
 		myMovie.setGaussianOption(size, iteration);
@@ -158,7 +158,7 @@ public class Controller {
 	
 	public void setTMMethod(int method) {
 		if (isBusy) {
-			myStatus.setText("the program is busy, no change is made, please for current process to finish");
+			myStatus.setText("the program is busy, no change is made, please wait for current process to finish");
 			return;
 		}
 		myMovie.setTMMethod(method);
@@ -166,7 +166,7 @@ public class Controller {
 	
 	public void setMaxFittingDegree(int degree) {
 		if (isBusy) {
-			myStatus.setText("the program is busy, no change is made, please for current process to finish");
+			myStatus.setText("the program is busy, no change is made, please wait for current process to finish");
 			return;
 		}
 		myMovie.setMaxFittingDegree(degree);

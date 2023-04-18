@@ -71,12 +71,12 @@ launch4j {
 //    icon = "${projectDir}/icon.ico"
     jdkPreference = 'jdkOnly'
     initialHeapSize = 128
-    jreMinVersion = '1.8.0'
-    jreMaxVersion = '1.8.9'
+//    jreMinVersion = '1.8.0'
+//    jreMaxVersion = '1.8.9'
     maxHeapSize = 512
     stayAlive = false
     bundledJre64Bit = true
-//    bundledJrePath = '../hello-windows/jre8'
+    bundledJrePath = '../hello-windows/jre8'
 }
 
 
